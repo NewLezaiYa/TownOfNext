@@ -13,7 +13,7 @@ public sealed class Mayor : RoleBase
             CustomRoleTypes.Crewmate,
             20500,
             SetupOptionItem,
-            "my|ÊÐéL|ÊÅ³¤",
+            "my|å¸‚é•¿",
             "#204d42"
         );
     public Mayor(PlayerControl player)
@@ -73,7 +73,7 @@ public sealed class Mayor : RoleBase
     }
     public override (byte? votedForId, int? numVotes, bool doVote) ModifyVote(byte voterId, byte sourceVotedForId, bool isIntentional)
     {
-        // ¼È¶¨‚Ž
+        // æ—¢å®šå€¤
         var (votedForId, numVotes, doVote) = base.ModifyVote(voterId, sourceVotedForId, isIntentional);
         if (voterId == Player.PlayerId)
         {

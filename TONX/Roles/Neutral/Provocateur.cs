@@ -15,14 +15,13 @@ public sealed class Provocateur : RoleBase, IAdditionalWinner
             typeof(Provocateur),
             player => new Provocateur(player),
             CustomRoles.Provocateur,
-         () => RoleTypes.Impostor,
+            () => RoleTypes.Impostor,
             CustomRoleTypes.Neutral,
             75_1_2_0900,
             null,
-            "prov|×Ô±¬¿¨³µ|×Ô±¬",
+            "prov|è‡ªçˆ†å¡è½¦",
             "#74ba43",
-           true
-
+            true
         );
     public Provocateur(PlayerControl player)
     : base(

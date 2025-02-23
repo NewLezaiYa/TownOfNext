@@ -15,14 +15,13 @@ public sealed class Innocent : RoleBase
             typeof(Innocent),
             player => new Innocent(player),
             CustomRoles.Innocent,
-         () =>  RoleTypes.Impostor ,
+            () => RoleTypes.Impostor ,
             CustomRoleTypes.Neutral,
             75_1_2_0800,
             null,
-            "inno|Ô©×ï|Ô­×ï",
+            "inno|å†¤ç½ªå¸ˆ|å†¤ç½ª",
             "#8f815e",
-           true
-           
+            true
         );
     public Innocent(PlayerControl player)
     : base(

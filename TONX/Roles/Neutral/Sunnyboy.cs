@@ -19,13 +19,12 @@ public sealed class Sunnyboy : RoleBase, IAdditionalWinner
             CustomRoleTypes.Neutral,
             75_1_2_1000,
             null,
-            "sb|����|���⿪��",
+            "sb|阳光开朗大男孩|大男孩",
             "#ff9902"
-            #if RELEASE
-,
+#if RELEASE
+            ,
             Hidden: true // For Debug
 #endif
-
         );
     public Sunnyboy(PlayerControl player)
     : base(
