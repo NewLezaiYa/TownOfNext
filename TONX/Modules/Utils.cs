@@ -639,24 +639,23 @@ public static class Utils
         }
 
         var sb = new StringBuilder().AppendFormat("<line-height={0}>", ActiveSettingsLineHeight);
+        var sbs = new List<string>();
         sb.AppendFormat("<size={0}>", ActiveSettingsSize);
         sb.Append("<size=100%>").Append(GetString("Settings")).Append('\n').Append("</size>");
-        foreach (var opt in OptionItem.AllOptions.Where(x => x.Id is >= 2000000 and < 3000000 && !x.IsHiddenOn(Options.CurrentGameMode) && x.Parent == null))
+        foreach (var opt in OptionItem.AllOptions.Where(x => x.Id is >= 2000000 and < 5000000 && !x.IsHiddenOn(Options.CurrentGameMode) && x.Parent == null))
         {
             if (opt.IsHeader) sb.Append('\n');
-            if (opt.IsText) sb.Append($"   {opt.GetName()}\n");
+            if (opt.IsText)
+            {
+                sbs.Add(sb.ToString());
+                sb = new StringBuilder().AppendFormat("<line-height={0}>", ActiveSettingsLineHeight);;
+                sb.AppendFormat("<size={0}>", ActiveSettingsSize);
+                sb.Append($"   {opt.GetName()}\n");
+            }
             else sb.Append($"{opt.GetName()}: {opt.GetString()}\n");
             if (opt.GetBool()) OptionShower.ShowChildren(opt, ref sb, Color.white, 1);
         }
-        foreach (var opt in OptionItem.AllOptions.Where(x => x.Id is >= 3000000 and < 5000000 && !x.IsHiddenOn(Options.CurrentGameMode) && x.Parent == null))
-        {
-            if (opt.IsHeader) sb.Append('\n');
-            if (opt.IsText) sb.Append($"   {opt.GetName()}\n");
-            else sb.Append($"{opt.GetName()}: {opt.GetString()}\n");
-            if (opt.GetBool()) OptionShower.ShowChildren(opt, ref sb, Color.white, 1);
-        }
-
-        SendMessage(sb.ToString().TrimStart('\n'), PlayerId);
+        for (var i = 0; i < sbs.Count; i++) SendMessage(sbs[i].ToString(), PlayerId);
     }
     public static void CopyCurrentSettings()
     {
