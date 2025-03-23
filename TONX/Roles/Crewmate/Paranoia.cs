@@ -65,8 +65,15 @@ public sealed class Paranoia : RoleBase
         if (SkillLimit >= 1)
         {
             var user = physics.myPlayer;
-            user?.NoCheckStartMeeting(user?.Data);
-            SkillLimit--;
+            //ホスト視点、vent処理中に会議を呼ぶとベントの矢印が残るので遅延させる
+            _ = new LateTask(() => 
+            {
+                user?.NoCheckStartMeeting(user?.Data);
+                SkillLimit--;
+            }, 0.1f, "ParanoiaPortableButton");
+
+            //ポータブルボタン時はベントから追い出す必要はない
+            return true;
         }
         else
         {
@@ -81,9 +88,5 @@ public sealed class Paranoia : RoleBase
             oldSkillLimit = SkillLimit;
             msgToSend.Add((Translator.GetString("SkillUsedLeft") + SkillLimit.ToString(), Player.PlayerId, "<color=#aaaaff>" + Translator.GetString("DefaultSystemMessageTitle") + "</color>"));
         }
-    }
-    public override void AfterMeetingTasks()
-    {
-        Player.RpcResetAbilityCooldown();
     }
 }

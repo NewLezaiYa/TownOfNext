@@ -54,7 +54,7 @@ public abstract class RoleBase : IDisposable
         CanBeMadmate = canBeMadmate ?? Player.Is(CustomRoleTypes.Crewmate);
         HasAbility = hasAbility ?? roleInfo.BaseRoleType.Invoke() is
             RoleTypes.Shapeshifter or
-             RoleTypes.Phantom or
+            RoleTypes.Phantom or
             RoleTypes.Engineer or
             RoleTypes.Scientist or
             RoleTypes.Tracker or
@@ -297,6 +297,14 @@ public abstract class RoleBase : IDisposable
     /// 每次会议结束后调用的函数
     /// </summary>
     public virtual void AfterMeetingTasks()
+    { }
+
+    /// <summary>
+    /// 在玩家出生时调用的函数
+    /// 运行后总是调用SyncSettings()和RpcResetAbilityCooldown()
+    /// </summary>
+    /// <param name="initialState">是否是游戏开局出生</param>
+    public virtual void OnSpawn(bool initialState = false)
     { }
 
     /// <summary>

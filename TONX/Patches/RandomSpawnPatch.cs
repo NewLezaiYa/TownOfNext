@@ -136,15 +136,14 @@ class RandomSpawn
         return decupleVanillaSpawnPositions.Contains(decuplePosition);
     }
     private static readonly HashSet<(int x, int y)> decupleVanillaSpawnPositions = new()
-
- {
-             (-7, 85),  // 宿舎前通路
-                (-7, -10),  // エンジン
-                (-70, -115),  // キッチン
-                (335, -15),  // 貨物
-                (200, 105),  // アーカイブ
-                (155, 0),  // メインホール
-            };
+    {
+        (-7, 85),  // 宿舎前通路
+        (-7, -10),  // エンジン
+        (-70, -115),  // キッチン
+        (335, -15),  // 貨物
+        (200, 105),  // アーカイブ
+        (155, 0),  // メインホール
+    };
 
 [HarmonyPatch(typeof(SpawnInMinigame), nameof(SpawnInMinigame.SpawnAt))]
 public static class SpawnInMinigameSpawnAtPatch
@@ -186,11 +185,9 @@ public static class SpawnInMinigameSpawnAtPatch
         Logger.Info($"Spawn: {player.GetRealName()}", "RandomSpawn");
         if (AmongUsClient.Instance.AmHost)
         {
-            if (player.Is(CustomRoles.Penguin))
-            {
-                var penguin = player.GetRoleClass() as Penguin;
-                penguin?.OnSpawnAirship();
-            }
+            //初期スポーンとリスポーンを判定
+            player.GetRoleClass().OnSpawn(Main.isFirstTurn);
+            player.SyncSettings();
             player.RpcResetAbilityCooldown();
             if (Options.FixFirstKillCooldown.GetBool() && !MeetingStates.MeetingCalled) player.SetKillCooldown(Main.AllPlayerKillCooldown[player.PlayerId]);
             if (IsRandomSpawn())
