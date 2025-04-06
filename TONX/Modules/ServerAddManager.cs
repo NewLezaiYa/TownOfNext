@@ -36,17 +36,17 @@ public static class ServerAddManager
         regionInfos.Where(x => !serverManager.AvailableRegions.Contains(x)).Do(serverManager.AddOrUpdateRegion);
         serverManager.SetRegion(defaultRegion);
 
-        SetServerName(defaultRegion.Name);
+        SetServerName(defaultRegion);
     }
-    public static void SetServerName(string serverName = "")
+    public static void SetServerName(IRegionInfo server = null)
     {
-        if (serverName == "") serverName = ServerManager.Instance.CurrentRegion.Name;
+        server ??= ServerManager.Instance.CurrentRegion;
+        string serverName = server.Name;
         var name = serverName switch
         {
             "Modded Asia (MAS)" => "MAS",
             "Modded NA (MNA)" => "MNA",
             "Modded EU (MEU)" => "MEU",
-            "North America" => "NA",
             "<color=#00FF00>新猫服</color><color=#ffff00>[宁波]</color>" => "猫服[宁波]",
             "<color=#9900CC>新猫服</color><color=#ffff00>[北京]</color>" => "猫服[北京]",
             "<color=#00ffff>方块</color><color=#FF44FF>宿迁私服</color>" => "方块[宿迁]",
@@ -56,17 +56,6 @@ public static class ServerAddManager
             "Niko233(EU)" => "Niko[EU]",
             "Niko233(CN)" => "Niko[CN]",
             _ => serverName,
-        };
-
-        if ((TranslationController.Instance?.currentLanguage?.languageID ?? SupportedLangs.SChinese) is SupportedLangs.SChinese or SupportedLangs.TChinese)
-        {
-            name = name switch
-            {
-                "Asia" => "亚服",
-                "Europe" => "欧服",
-                "North America" => "北美服",
-                _ => name,
-            };
         };
 
         Color32 color = serverName switch
@@ -88,7 +77,9 @@ public static class ServerAddManager
             _ => new(255, 255, 255, 255),
         };
 
-        PingTrackerUpdatePatch.ServerName = Utils.ColorString(color, name);
+        if (server.TranslateName != StringNames.NoTranslation)
+            name = Translator.GetString(ServerManager.DefaultRegions.FirstOrDefault(x => x.Name == name).TranslateName);
+        PingTrackerUpdatePatch.ServerName = Utils.ColorString(color, $"{name} <size=60%>Server</size>");
     }
 
     public static IRegionInfo CreateHttp(string ip, string name, ushort port, bool ishttps)

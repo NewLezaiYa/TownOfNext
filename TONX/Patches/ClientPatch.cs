@@ -35,40 +35,31 @@ internal class MakePublicPatch
         return true;
     }
 }
-[HarmonyPatch(typeof(MMOnlineManager), nameof(MMOnlineManager.Start))]
-class MMOnlineManagerStartPatch
+[HarmonyPatch(typeof(FindGameButton), nameof(FindGameButton.OnClick))]
+class FindGameButtonOnClickPatch
 {
-    public static void Postfix(MMOnlineManager __instance)
+    public static bool Prefix(FindGameButton __instance)
     {
-        if (!(ModUpdater.hasUpdate || ModUpdater.isBroken || !VersionChecker.IsSupported || !Main.IsPublicAvailableOnThisVersion)) return;
-        var obj = GameObject.Find("FindGameButton");
-        if (obj)
+        if (!(ModUpdater.hasUpdate || ModUpdater.isBroken || !VersionChecker.IsSupported || !Main.IsPublicAvailableOnThisVersion)) return true;
+        string message = "";
+        if (ModUpdater.hasUpdate)
         {
-            obj?.SetActive(false);
-            var parentObj = obj.transform.parent.gameObject;
-            var textObj = Object.Instantiate(obj.transform.FindChild("Text_TMP").GetComponent<TMPro.TextMeshPro>());
-            textObj.transform.position = new Vector3(0.5f, -0.4f, 0f);
-            textObj.name = "CanNotJoinPublic";
-            textObj.DestroyTranslator();
-            string message = "";
-            if (ModUpdater.hasUpdate)
-            {
-                message = GetString("CanNotJoinPublicRoomNoLatest");
-            }
-            else if (ModUpdater.isBroken)
-            {
-                message = GetString("ModBrokenMessage");
-            }
-            else if (!VersionChecker.IsSupported)
-            {
-                message = GetString("UnsupportedVersion");
-            }
-            else if (!Main.IsPublicAvailableOnThisVersion)
-            {
-                message = GetString("PublicNotAvailableOnThisVersion");
-            }
-            textObj.text = $"<size=2>{Utils.ColorString(Color.red, message)}</size>";
+            message = GetString("CanNotJoinPublicRoomNoLatest");
         }
+        else if (ModUpdater.isBroken)
+        {
+            message = GetString("ModBrokenMessage");
+        }
+        else if (!VersionChecker.IsSupported)
+        {
+            message = GetString("UnsupportedVersion");
+        }
+        else if (!Main.IsPublicAvailableOnThisVersion)
+        {
+            message = GetString("PublicNotAvailableOnThisVersion");
+        }
+        DisconnectPopup.Instance.ShowCustom(message);
+        return false;
     }
 }
 [HarmonyPatch(typeof(SplashManager), nameof(SplashManager.Update))]
@@ -337,6 +328,20 @@ class InnerNetClientPatch
         if (err != SendErrors.None)
         {
             Logger.Info($"SendOrDisconnectPatch: SendMessage Error={err}", "InnerNetClient");
+        }
+    }
+}
+[HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.Connect))]
+public static class InnerNetClientConnectPatch
+{
+    public static IRegionInfo CurrentFindGameListFilteredClientRegion;
+    public static int CurrentFindGameListFilteredClientGameId;
+    public static void Postfix(InnerNetClient __instance)
+    {
+        if (FindAGameManager.Instance.isActiveAndEnabled)
+        {
+            CurrentFindGameListFilteredClientRegion = ServerManager.Instance.CurrentRegion;
+            CurrentFindGameListFilteredClientGameId = __instance.GameId;
         }
     }
 }

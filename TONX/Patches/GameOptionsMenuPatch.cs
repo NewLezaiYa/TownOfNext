@@ -74,6 +74,7 @@ namespace TONX
                 activeSprite.color = selectedSprite.color = inactiveSprite.color = buttonColor;
                 settingsButton.OnClick.AddListener((Action)(() =>
                 {
+                    ControllerManager.Instance.OpenOverlayMenu(settingsTab.name, GameSettingMenu.Instance.BackButton);
                     __instance.ChangeTab((int)tab+3, false);  // バニラタブを閉じる
                     settingsTab.gameObject.SetActive(true);
                     __instance.MenuDescriptionText.text = GetString($"MenuDescriptionText.{tab}");
@@ -137,7 +138,7 @@ namespace TONX
             var tabImage = Object.Instantiate(__instance.GameSettingsTab.MapPicker.MapButtonOrigin, Vector3.zero, Quaternion.identity, tonxTab.transform);
             tabImage.SetImage(image, GameOptionsMenu.MASK_LAYER);
             tabImage.transform.localPosition = new(7.1f, -0.6f, -10f);
-            Object.Destroy(tabImage.Button.ClickSound);
+            Object.Destroy(tabImage.Button.GetComponentInChildren<BoxCollider2D>());
             tabImage.Button.activeSprites.transform.GetChild(0).gameObject.SetActive(false);
             tabImage.Button.activeSprites.GetComponent<SpriteRenderer>().sprite = tabImage.Button.inactiveSprites.GetComponent<SpriteRenderer>().sprite = null;
             return tabImage;
@@ -161,15 +162,8 @@ namespace TONX
 
         // 初めてロール設定を表示したときに発生する例外(バニラバグ)の影響を回避するためPrefix
         [HarmonyPatch(nameof(GameSettingMenu.ChangeTab)), HarmonyPrefix]
-        public static bool ChangeTabPrefix(GameSettingMenu __instance, int tabNum, bool previewOnly)
+        public static bool ChangeTabPrefix(bool previewOnly)
         {
-            // 用于应对按下快捷键会触发预设按钮的bug
-            if (previewOnly && tabNum == 0)
-            {
-                if (!__instance.GamePresetsButton.beingHeldDown) return false;
-            }
-
-            // 用于应对CloseOverlayMenu失败的bug
             if (!previewOnly)
             {
                 foreach (var tab in tonxSettingsTab)

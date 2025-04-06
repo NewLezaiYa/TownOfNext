@@ -258,7 +258,7 @@ class IntroCutscenePatch
             {
                 Main.AllPlayerControls.Do(pc =>
                 {
-                    pc.GetRoleClass().OnSpawn(true);
+                    pc.GetRoleClass()?.OnSpawn(true);
                     pc.SyncSettings();
                     pc.RpcResetAbilityCooldown();
                 });
@@ -293,6 +293,14 @@ class IntroCutscenePatch
                         break;
                     case 1:
                         map = new RandomSpawn.MiraHQSpawnMap();
+                        Main.AllPlayerControls.Do(map.RandomTeleport);
+                        break;
+                    case 2:
+                        map = new RandomSpawn.PolusSpawnMap();
+                        Main.AllPlayerControls.Do(map.RandomTeleport);
+                        break;
+                    case 5:
+                        map = new RandomSpawn.FungleSpawnMap();
                         Main.AllPlayerControls.Do(map.RandomTeleport);
                         break;
                 }
