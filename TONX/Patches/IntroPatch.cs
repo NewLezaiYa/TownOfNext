@@ -162,6 +162,17 @@ class IntroCutscenePatch
             PlayerControl.LocalPlayer.Data.Role.IntroSound = GetIntroSound(RoleTypes.Impostor);
         }
 
+        if (Options.CurrentGameMode == CustomGameMode.SoloKombat)
+        {
+            var color = ColorUtility.TryParseHtmlString("#f55252", out var c) ? c : new(255, 255, 255, 255);
+            __instance.TeamTitle.text = Utils.GetRoleName(role);
+            __instance.TeamTitle.color = Utils.GetRoleColor(role);
+            __instance.ImpostorText.gameObject.SetActive(true);
+            __instance.ImpostorText.text = GetString("ModeSoloKombat");
+            __instance.BackgroundBar.material.color = color;
+            PlayerControl.LocalPlayer.Data.Role.IntroSound = DestroyableSingleton<HnSImpostorScreamSfx>.Instance.HnSOtherImpostorTransformSfx;
+        }
+
         if (Input.GetKey(KeyCode.RightShift))
         {
             __instance.TeamTitle.text = "明天就跑路啦";
@@ -262,7 +273,7 @@ class IntroCutscenePatch
                     pc.SyncSettings();
                     pc.RpcResetAbilityCooldown();
                 });
-                if (Options.FixFirstKillCooldown.GetBool())
+                if (Options.FixFirstKillCooldown.GetBool() && Options.CurrentGameMode != CustomGameMode.SoloKombat)
                     _ = new LateTask(() =>
                     {
                         if (GameStates.IsInTask)

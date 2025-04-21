@@ -17,7 +17,7 @@ class HudManagerInitializePatch
     [GameModuleInitializer]
     public static void CreateRoleInfoButton()
     {
-        if (!GameStates.IsModHost) return;
+        if (!GameStates.IsModHost || Options.CurrentGameMode == CustomGameMode.SoloKombat) return;
         var template = HudManager.Instance.MapButton;
         RoleInfoButton = UnityEngine.Object.Instantiate(template, template.transform.parent);
         RoleInfoButton.OnClick.AddListener((Action)(() =>
@@ -110,6 +110,7 @@ class HudManagerPatch
                         else __instance.AbilityButton.SetInfiniteUses();
                     }
                 }
+                else if (player.GetCustomRole() == CustomRoles.KB_Normal) __instance.KillButton.OverrideText(GetString("DemonButtonText"));
 
                 //バウンティハンターのターゲットテキスト
                 if (LowerInfoText == null)

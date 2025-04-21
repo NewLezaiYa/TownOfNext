@@ -487,6 +487,7 @@ public static class Utils
         var States = PlayerState.GetByPlayerId(p.PlayerId);
         if (p.Role.IsImpostor)
             hasTasks = false; //タスクはCustomRoleを元に判定する
+        if (p.GetCustomRole() == CustomRoles.KB_Normal) return false;
         // 死んでいて，死人のタスク免除が有効なら確定でfalse
         if (p.IsDead && Options.GhostIgnoreTasks.GetBool())
         {
@@ -550,7 +551,7 @@ public static class Utils
         seen ??= seer;
         var comms = IsActive(SystemTypes.Comms) || Concealer.IsHidding;
         bool enabled = seer == seen
-                    || (Main.VisibleTasksCount && !seer.IsAlive() && Options.GhostCanSeeOtherTasks.GetBool());
+            || (Main.VisibleTasksCount && !seer.IsAlive() && Options.GhostCanSeeOtherTasks.GetBool()) || seen.GetCustomRole() == CustomRoles.KB_Normal;
         string text = GetProgressText(seen.PlayerId, comms);
 
         //seer側による変更
@@ -563,16 +564,19 @@ public static class Utils
         var ProgressText = new StringBuilder();
         var State = PlayerState.GetByPlayerId(playerId);
         var role = State.MainRole;
-        var roleClass = CustomRoleManager.GetByPlayerId(playerId);
-        ProgressText.Append(GetTaskProgressText(playerId, comms));
-        if (roleClass != null)
+        if (GetPlayerById(playerId).GetCustomRole() == CustomRoles.KB_Normal) ProgressText.Append(SoloKombatManager.GetDisplayScore(playerId));
+        else
         {
-            ProgressText.Append(roleClass.GetProgressText(comms));
+            var roleClass = CustomRoleManager.GetByPlayerId(playerId);
+            ProgressText.Append(GetTaskProgressText(playerId, comms));
+            if (roleClass != null)
+            {
+                ProgressText.Append(roleClass.GetProgressText(comms));
+            }
+
+            //SubRoles
+            ProgressText.Append(TicketsStealer.GetProgressText(playerId, comms));
         }
-
-        //SubRoles
-        ProgressText.Append(TicketsStealer.GetProgressText(playerId, comms));
-
         return ProgressText.ToString();
     }
     public static string GetTaskProgressText(byte playerId, bool comms = false)
@@ -648,13 +652,14 @@ public static class Utils
             if (opt.IsText)
             {
                 sbs.Add(sb);
-                sb = new StringBuilder().AppendFormat("<line-height={0}>", ActiveSettingsLineHeight);;
+                sb = new StringBuilder().AppendFormat("<line-height={0}>", ActiveSettingsLineHeight);
                 sb.AppendFormat("<size={0}>", ActiveSettingsSize);
                 sb.Append($"   {opt.GetName()}\n");
             }
             else sb.Append($"{opt.GetName()}: {opt.GetString()}\n");
             if (opt.GetBool()) OptionShower.ShowChildren(opt, ref sb, Color.white, 1);
         }
+        sbs.Add(sb);
         for (var i = 0; i < sbs.Count; i++) SendMessage(sbs[i].ToString(), PlayerId);
     }
     public static void CopyCurrentSettings()
@@ -695,7 +700,7 @@ public static class Utils
         }
 
         var titlesb = $"{GetString("Roles")}\n<color=#ff5b70>{GetRoleName(CustomRoles.GM)}</color>:{Options.EnableGM.GetString()}";
-        var customRoleTypes = new List<CustomRoleTypes> {CustomRoleTypes.Impostor, CustomRoleTypes.Crewmate, CustomRoleTypes.Neutral, CustomRoleTypes.Addon};
+        var customRoleTypes = new List<CustomRoleTypes> { CustomRoleTypes.Impostor, CustomRoleTypes.Crewmate, CustomRoleTypes.Neutral, CustomRoleTypes.Addon };
         var sbs = Enumerable.Range(0, 4).Select(_ => new StringBuilder()).ToList();
 
         foreach (CustomRoles role in CustomRolesHelper.AllStandardRoles.Concat(CustomRolesHelper.AllAddOns))
@@ -980,6 +985,10 @@ public static class Utils
                 //seerに関わらず発動するSuffix
                 SelfSuffix.Append(CustomRoleManager.GetSuffixOthers(seer, isForMeeting: isForMeeting));
 
+                //KB自身名字后缀
+                if (Options.CurrentGameMode == CustomGameMode.SoloKombat && seer.GetCustomRole() == CustomRoles.KB_Normal)
+                    SelfSuffix.Append(SoloKombatManager.GetDisplayHealth(seer));
+
                 //RealNameを取得 なければ現在の名前をRealNamesに書き込む
                 string SeerRealName = seer.GetRealName(isForMeeting);
 
@@ -997,7 +1006,12 @@ public static class Utils
                 if (NameNotifyManager.GetNameNotify(seer, out var name))
                     SelfName = name;
 
-                SelfName = SelfRoleName + "\r\n" + SelfName;
+                if (Options.CurrentGameMode == CustomGameMode.SoloKombat && seer.GetCustomRole() == CustomRoles.KB_Normal)
+                {
+                    SoloKombatManager.GetNameNotify(seer, ref SelfName);
+                    SelfName = $"<size={fontSize}>{text}</size>\r\n{SelfName}";
+                }
+                else SelfName = SelfRoleName + "\r\n" + SelfName;
                 SelfName += SelfSuffix.ToString() == "" ? "" : "\r\n " + SelfSuffix.ToString();
                 if (!isForMeeting) SelfName += "\r\n";
 
@@ -1060,11 +1074,19 @@ public static class Utils
                     TargetSuffix.Append(seerRole?.GetSuffix(seer, target, isForMeeting: isForMeeting));
                     //seerに関わらず発動するSuffix
                     TargetSuffix.Append(CustomRoleManager.GetSuffixOthers(seer, target, isForMeeting: isForMeeting));
+
+                    //KB目标玩家名字后缀
+                    if (Options.CurrentGameMode == CustomGameMode.SoloKombat && target.GetCustomRole() == CustomRoles.KB_Normal)
+                        TargetSuffix.Append(SoloKombatManager.GetDisplayHealth(target));
+
                     // 空でなければ先頭に改行を挿入
                     if (TargetSuffix.Length > 0)
                     {
                         TargetSuffix.Insert(0, "\r\n");
                     }
+
+                    if (Options.CurrentGameMode == CustomGameMode.SoloKombat && target.GetCustomRole() == CustomRoles.KB_Normal)
+                        TargetRoleText = $"<size={fontSize}>{GetProgressText(seer, target)}</size>\r\n";
 
                     //RealNameを取得 なければ現在の名前をRealNamesに書き込む
                     string TargetPlayerName = target.GetRealName(isForMeeting);
@@ -1221,7 +1243,7 @@ public static class Utils
         {
             builder.Append(Main.AllPlayerNames[id]);
             builder.Append(": ").Append(GetProgressText(id).RemoveColorTags());
-            builder.Append(' ').Append(GetVitalText(id));
+            if (Options.CurrentGameMode != CustomGameMode.SoloKombat) builder.Append(' ').Append(GetVitalText(id));
             builder.Append(' ').Append(GetTrueRoleName(id, false).RemoveColorTags());
             builder.Append(' ').Append(GetSubRolesText(id).RemoveColorTags());
             ChatSummary[id] = builder.ToString();
@@ -1237,7 +1259,7 @@ public static class Utils
             builder.AppendFormat("<pos={0}em>", pos).Append(GetProgressText(id)).Append("</pos>");
             // "(00/00) " = 4em
             pos += 4f;
-            builder.AppendFormat("<pos={0}em>", pos).Append(GetVitalText(id)).Append("</pos>");
+            if (Options.CurrentGameMode != CustomGameMode.SoloKombat) builder.AppendFormat("<pos={0}em>", pos).Append(GetVitalText(id)).Append("</pos>");
             // "Lover's Suicide " = 8em
             // "回線切断 " = 4.5em
             pos += DestroyableSingleton<TranslationController>.Instance.currentLanguage.languageID == SupportedLangs.English ? 8f : 4.5f;

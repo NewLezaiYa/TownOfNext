@@ -203,6 +203,7 @@ public static class SpawnInMinigameSpawnAtPatch
     }
     public static bool IsRandomSpawn()
     {
+        if (Options.CurrentGameMode == CustomGameMode.SoloKombat) return true;
         if (!Options.EnableRandomSpawn.GetBool()) return false;
         switch (Main.NormalOptions.MapId)
         {

@@ -1,6 +1,8 @@
 using AmongUs.GameOptions;
+using BepInEx.Unity.IL2CPP.Utils.Collections;
 using HarmonyLib;
 using Hazel;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TONX.Roles.Core;
@@ -30,6 +32,18 @@ class GameEndChecker
 
         //ゲーム終了判定
         predicate.CheckForEndGame(out reason);
+
+        // SoloKombat
+        if (Options.CurrentGameMode == CustomGameMode.SoloKombat)
+        {
+            if (CustomWinnerHolder.WinnerIds.Count > 0 || CustomWinnerHolder.WinnerTeam != CustomWinner.Default)
+            {
+                ShipStatus.Instance.enabled = false;
+                StartEndGame(reason);
+                predicate = null;
+            }
+            return false;
+        }
 
         //ゲーム終了時
         if (CustomWinnerHolder.WinnerTeam != CustomWinner.Default)
@@ -119,11 +133,13 @@ class GameEndChecker
     }
     public static void StartEndGame(GameOverReason reason)
     {
-        var sender = new CustomRpcSender("EndGameSender", SendOption.Reliable, true);
-        sender.StartMessage(-1); // 5: GameData
-        MessageWriter writer = sender.stream;
+        AmongUsClient.Instance.StartCoroutine(CoEndGame(AmongUsClient.Instance, reason).WrapToIl2Cpp());
+    }
+    private static IEnumerator CoEndGame(AmongUsClient self, GameOverReason reason)
+    {
+        // サーバー側のパケットサイズ制限によりCustomRpcSenderが利用できないため，遅延を挟むことで順番の整合性を保つ．
 
-        //ゴーストロール化
+        // バニラ画面でのアウトロを正しくするためのゴーストロール化
         List<byte> ReviveRequiredPlayerIds = new();
         var winner = CustomWinnerHolder.WinnerTeam;
         foreach (var pc in Main.AllPlayerControls)
@@ -133,8 +149,7 @@ class GameEndChecker
                 SetGhostRole(ToGhostImpostor: true);
                 continue;
             }
-            bool canWin = CustomWinnerHolder.WinnerIds.Contains(pc.PlayerId) ||
-                    CustomWinnerHolder.WinnerRoles.Contains(pc.GetCustomRole());
+            bool canWin = CustomWinnerHolder.WinnerIds.Contains(pc.PlayerId) || CustomWinnerHolder.WinnerRoles.Contains(pc.GetCustomRole());
             bool isCrewmateWin = reason.Equals(GameOverReason.CrewmatesByVote) || reason.Equals(GameOverReason.CrewmatesByTask);
             SetGhostRole(ToGhostImpostor: canWin ^ isCrewmateWin);
 
@@ -145,18 +160,12 @@ class GameEndChecker
                 if (ToGhostImpostor)
                 {
                     Logger.Info($"{pc.GetNameWithRole()}: ImpostorGhostに変更", "ResetRoleAndEndGame");
-                    sender.StartRpc(pc.NetId, RpcCalls.SetRole)
-                        .Write((ushort)RoleTypes.ImpostorGhost)
-                        .EndRpc();
-                    pc.SetRole(RoleTypes.ImpostorGhost);
+                    pc.RpcSetRole(RoleTypes.ImpostorGhost);
                 }
                 else
                 {
                     Logger.Info($"{pc.GetNameWithRole()}: CrewmateGhostに変更", "ResetRoleAndEndGame");
-                    sender.StartRpc(pc.NetId, RpcCalls.SetRole)
-                        .Write((ushort)RoleTypes.CrewmateGhost)
-                        .EndRpc();
-                    pc.SetRole(RoleTypes.Crewmate);
+                    pc.RpcSetRole(RoleTypes.CrewmateGhost);
                 }
                 pc.Data.IsDead = isDead;
             }
@@ -164,9 +173,12 @@ class GameEndChecker
         }
 
         // CustomWinnerHolderの情報の同期
-        sender.StartRpc(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.EndGame);
-        CustomWinnerHolder.WriteTo(sender.stream);
-        sender.EndRpc();
+        var winnerWriter = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.EndGame, SendOption.Reliable);
+        CustomWinnerHolder.WriteTo(winnerWriter);
+        AmongUsClient.Instance.FinishRpcImmediately(winnerWriter);
+
+        // 蘇生を確実にゴーストロール設定の後に届けるための遅延
+        yield return new WaitForSeconds(EndGameDelay);
 
         if (ReviveRequiredPlayerIds.Count > 0)
         {
@@ -182,13 +194,16 @@ class GameEndChecker
                 AmongUsClient.Instance.SendAllStreamedObjects();
             }
             // ゲーム終了を確実に最後に届けるための遅延
+            yield return new WaitForSeconds(EndGameDelay);
         }
 
         // ゲーム終了
         GameManager.Instance.RpcEndGame(reason, false);
     }
+    private const float EndGameDelay = 0.2f;
 
     public static void SetPredicateToNormal() => predicate = new NormalGameEndPredicate();
+    public static void SetPredicateToSoloKombat() => predicate = new SoloKombatGameEndPredicate();
 
     // ===== ゲーム終了条件 =====
     // 通常ゲーム用
@@ -276,6 +291,33 @@ class GameEndChecker
                 CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Crewmate);
             }
             else return false; //胜利条件未达成
+
+            return true;
+        }
+    }
+
+    // 个人竞技模式用
+    class SoloKombatGameEndPredicate : GameEndPredicate
+    {
+        public override bool CheckForEndGame(out GameOverReason reason)
+        {
+            reason = GameOverReason.ImpostorsByKill;
+            if (CustomWinnerHolder.WinnerIds.Count > 0) return false;
+            if (CheckGameEndByLivingPlayers(out reason)) return true;
+            return false;
+        }
+
+        public bool CheckGameEndByLivingPlayers(out GameOverReason reason)
+        {
+            reason = GameOverReason.ImpostorsByKill;
+
+            if (SoloKombatManager.RoundTime > 0) return false;
+
+            var list = Main.AllPlayerControls.Where(x => !x.Is(CustomRoles.GM) && SoloKombatManager.GetRankOfScore(x.PlayerId) == 1);
+            var winner = list.FirstOrDefault();
+            if (winner != null) CustomWinnerHolder.WinnerIds = new() { winner.PlayerId };
+            else CustomWinnerHolder.ResetAndSetWinner(CustomWinner.None);
+            Main.DoBlockNameChange = true;
 
             return true;
         }

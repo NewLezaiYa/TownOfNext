@@ -71,7 +71,7 @@ namespace TONX
             }
             if ((int)category < 3551) return;
             __instance.taskTabButton.SelectButton(false);
-            CreateCustomOptions(__instance, (int)__instance.currentTab == 3558);
+            CreateCustomOptions(__instance, (int)category == 3558);
         }
 
         private static void CreateCustomOptions(LobbyViewSettingsPane __instance, bool isRolesOverview)
@@ -191,7 +191,7 @@ namespace TONX
                         {
                             if (option.Name == categoryHeader.name)
                             {
-                                UpdateCategoryHeader(categoryHeader, ref offset);
+                                UpdateCategoryHeader(categoryHeader, option, ref offset);
                                 continue;
                             }
                         }
@@ -204,11 +204,11 @@ namespace TONX
             __instance.scrollBar.ContentYBounds.max = (-offset) - 1.5f;
         }
 
-        private static void UpdateCategoryHeader(CategoryHeaderMasked categoryHeader, ref float offset)
+        private static void UpdateCategoryHeader(CategoryHeaderMasked categoryHeader, OptionItem item, ref float offset)
         {
             var enabled = true;
             // 检测是否隐藏设置
-            enabled = (!Options.HideGameSettings.GetBool() || AmongUsClient.Instance.AmHost) && GameStates.IsModHost;
+            enabled = (!Options.HideGameSettings.GetBool() || AmongUsClient.Instance.AmHost) && GameStates.IsModHost && !item.IsHiddenOn(Options.CurrentGameMode);
             categoryHeader.gameObject.SetActive(enabled);
             if (enabled)
             {

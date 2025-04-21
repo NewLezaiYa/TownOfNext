@@ -108,6 +108,19 @@ class SetEverythingUpPatch
         var AdditionalWinnerText = new StringBuilder(32);
         string CustomWinnerColor = Utils.GetRoleColorCode(CustomRoles.Crewmate);
 
+        if (Options.CurrentGameMode == CustomGameMode.SoloKombat)
+        {
+            var NoOneWin = CustomWinnerHolder.WinnerTeam == CustomWinner.None;
+            var winnerId = CustomWinnerHolder.WinnerIds.FirstOrDefault();
+            __instance.WinText.text = NoOneWin ? "" : Main.AllPlayerNames[winnerId] + GetString("Win");
+            __instance.WinText.fontSize -= NoOneWin ? 0f : 5f;
+            __instance.WinText.color = Main.PlayerColors[winnerId];
+            __instance.BackgroundBar.material.color = new Color32(245, 82, 82, 255);
+            WinnerText.text = $"<color=#f55252>{GetString("ModeSoloKombat")}</color>";
+            WinnerText.color = Color.red;
+            goto EndOfText;
+        }
+
         var winnerRole = (CustomRoles)CustomWinnerHolder.WinnerTeam;
         if (winnerRole >= 0)
         {
@@ -173,6 +186,7 @@ class SetEverythingUpPatch
         }
         LastWinsText = WinnerText.text.RemoveHtmlTags();
 
+    EndOfText:
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
