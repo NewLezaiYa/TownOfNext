@@ -131,7 +131,8 @@ internal class SelectRolesPatch
             Dictionary<byte, CustomRpcSender> senders = new();
             foreach (var pc in Main.AllPlayerControls)
             {
-                senders[pc.PlayerId] = new CustomRpcSender($"{pc.name}'s SetRole Sender", SendOption.Reliable, false).StartMessage(pc.GetClientId());
+                senders[pc.PlayerId] = new CustomRpcSender($"{pc.name}'s SetRole Sender", SendOption.Reliable, false);
+                if (pc.PlayerId != 0) senders[pc.PlayerId].StartMessage(pc.GetClientId());
             }
             RpcSetRoleReplacer.StartReplace(senders);
 
@@ -159,11 +160,8 @@ internal class SelectRolesPatch
                 }
 
                 // 注册反职业
-                foreach (var kv in RoleResult.Where(x => x.Value.GetRoleInfo().IsDesyncImpostor))
+                foreach (var kv in RoleResult.Where(x => x.Value.GetRoleInfo().IsDesyncImpostor || x.Value == CustomRoles.CrewPostor))
                     AssignDesyncRole(kv.Value, kv.Key, senders, BaseRole: kv.Value.GetRoleInfo().BaseRoleType.Invoke());
-
-                foreach (var cp in RoleResult.Where(x => x.Value == CustomRoles.CrewPostor))
-                    AssignDesyncRole(cp.Value, cp.Key, senders, BaseRole: RoleTypes.Crewmate, hostBaseRole: RoleTypes.Impostor);
             }
 
         }
@@ -185,8 +183,7 @@ internal class SelectRolesPatch
             foreach (var sd in RpcSetRoleReplacer.StoragedData)
             {
                 var kp = RoleResult.Where(x => x.Key.PlayerId == sd.Item1.PlayerId).FirstOrDefault();
-                if (kp.Value == CustomRoles.KB_Normal) continue;
-                if (kp.Value.GetRoleInfo().IsDesyncImpostor || kp.Value == CustomRoles.CrewPostor)
+                if (kp.Value == CustomRoles.KB_Normal || kp.Value.GetRoleInfo().IsDesyncImpostor || kp.Value == CustomRoles.CrewPostor)
                 {
                     Logger.Warn($"反向原版职业 => {sd.Item1.GetRealName()}: {sd.Item2}", "Override Role Select");
                     continue;
@@ -330,7 +327,7 @@ internal class SelectRolesPatch
             else
             {
                 var assignRole = seer.PlayerId == player.PlayerId ? BaseRole : RoleTypes.Scientist;
-                senders[player.PlayerId].RpcSetRole(player, assignRole, seer.GetClientId());
+                senders[seer.PlayerId].RpcSetRole(player, assignRole, seer.GetClientId());
             }
         }
         player.Data.IsDead = true;
@@ -403,13 +400,15 @@ internal class SelectRolesPatch
                 {
                     foreach (var seer in Main.AllPlayerControls)
                     {
+                        if (seer.PlayerId == 0) continue;
                         var assignRole = DesyncImpostorList.Contains(seer.PlayerId) ? RoleTypes.Scientist : role;
-                        senders[player.PlayerId].RpcSetRole(player, assignRole, seer.GetClientId());
+                        senders[seer.PlayerId].RpcSetRole(player, assignRole, seer.GetClientId());
                     }
                 }
                 else
                 {
-                    senders[player.PlayerId].RpcSetRole(player, role);
+                    // ブロードキャストで送信
+                    senders[0].RpcSetRole(player, role);
                 }
             }
             doReplace = false;
