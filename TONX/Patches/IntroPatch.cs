@@ -12,7 +12,18 @@ namespace TONX;
 [HarmonyPatch(typeof(IntroCutscene))]
 class IntroCutscenePatch
 {
-    [HarmonyPatch(nameof(IntroCutscene.ShowRole)), HarmonyPostfix]
+    [HarmonyPatch(nameof(IntroCutscene.CoBegin)), HarmonyPostfix]
+    public static void CoBegin_Postfix(IntroCutscene __instance, ref Il2CppSystem.Collections.IEnumerator __result)
+    {
+        // 因为不能直接给ShowRole打补丁，所以要在CoBegin期间打补丁
+        var patcher = new CoroutinPatcher(__result);
+        // ShowRole是状态机类，所以要在运行之前打补丁
+        // 原本是Postfix，但是Prefix的时间比较合适
+        patcher.AddPrefix(typeof(IntroCutscene._ShowRole_d__41), () => ShowRole_Postfix(__instance));
+        __result = patcher.EnumerateWithPatch();
+    }
+    // 虽然Patch无法生效，但保险起见还是将其注释掉
+    // [HarmonyPatch(nameof(IntroCutscene.ShowRole)), HarmonyPostfix]
     public static void ShowRole_Postfix(IntroCutscene __instance)
     {
         if (!GameStates.IsModHost) return;

@@ -714,8 +714,14 @@ class EnterVentPatch
         Main.LastEnteredVentLocation.Remove(pc.PlayerId);
         Main.LastEnteredVentLocation.Add(pc.PlayerId, pc.GetTruePosition());
     }
+    public static void Prefix(Vent __instance, [HarmonyArgument(0)] PlayerControl pc)
+    {
+        // 因为不能直接给CoEnterVent打补丁，所以将补丁置于EnterVent期间
+        CoEnterVentPatch.Prefix(pc.MyPhysics, __instance.Id);
+    }
 }
-[HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.CoEnterVent))]
+// 虽然Patch无法生效，但保险起见还是将其注释掉
+// [HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.CoEnterVent))]
 class CoEnterVentPatch
 {
     public static bool Prefix(PlayerPhysics __instance, [HarmonyArgument(0)] int id)
@@ -727,8 +733,8 @@ class CoEnterVentPatch
         var user = __instance.myPlayer;
 
         if ((!user.GetRoleClass()?.OnEnterVent(__instance, id) ?? false) ||
-            (user.Data.Role.Role != RoleTypes.Engineer && //エンジニアでなく
-            !user.CanUseImpostorVentButton()) //インポスターベントも使えない
+            (user.Data.Role.Role != RoleTypes.Engineer && // 非工程师
+            !user.CanUseImpostorVentButton()) // 无法使用内鬼跳管按钮
         )
         {
             _ = new LateTask(() =>
@@ -736,8 +742,7 @@ class CoEnterVentPatch
                 if (!GameStates.IsMeeting)
                 {
                     __instance.RpcBootFromVent(id);
-                    if (__instance.myPlayer.walkingToVent == true)
-                        __instance.myPlayer.walkingToVent = false;
+                    __instance.myPlayer.walkingToVent = false;
                 }
             }, 0.5f, "Cancel Vent");
         }
