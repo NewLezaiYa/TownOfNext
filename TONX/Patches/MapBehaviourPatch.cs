@@ -12,12 +12,12 @@ public class MapBehaviourPatch
     private static Dictionary<PlayerControl, Vector3> preMeetingPostions = new Dictionary<PlayerControl, Vector3>();
     private static bool ShouldShowRealTime => !PlayerControl.LocalPlayer.IsAlive() || PlayerControl.LocalPlayer.Is(Roles.Core.CustomRoles.GM) || Main.GodMode.Value;
     [HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.ShowNormalMap)), HarmonyPostfix]
-    public static void ShowNormalMapPostfix(MapBehaviour __instance)
+    public static void ShowNormalMap_Postfix(MapBehaviour __instance)
     {
         InitializeCustomHerePoints(__instance);
     }
     [HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.ShowSabotageMap)), HarmonyPostfix]
-    public static void ShowSabotageMapPostfix(MapBehaviour __instance)
+    public static void ShowSabotageMap_Postfix(MapBehaviour __instance)
     {
         InitializeCustomHerePoints(__instance);
     }
@@ -46,7 +46,7 @@ public class MapBehaviourPatch
     }
 
     [HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.FixedUpdate)), HarmonyPostfix]
-    public static void FixedUpdatePostfix(MapBehaviour __instance)
+    public static void FixedUpdate_Postfix(MapBehaviour __instance)
     {
         if (!ShouldShowRealTime) return;
         foreach (var kvp in herePoints)
@@ -58,8 +58,7 @@ public class MapBehaviourPatch
             if (pc == null || __instance.countOverlay.gameObject.active) continue;
             herePoint.gameObject.SetActive(true);
 
-            // Thanks to https://github.com/scp222thj/MalumMenu/blob/main/src/Cheats/MinimapHandler.cs
-
+            // 参考: https://github.com/scp222thj/MalumMenu/blob/main/src/Cheats/MinimapHandler.cs
             // 设置图标颜色
             herePoint.material.SetColor(PlayerMaterial.BodyColor, pc.Data.Color);
             herePoint.material.SetColor(PlayerMaterial.BackColor, pc.Data.ShadowColor);
@@ -75,7 +74,7 @@ public class MapBehaviourPatch
     }
 
     [HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.Close)), HarmonyPostfix]
-    public static void ClosePostfix(MapBehaviour __instance)
+    public static void Close_Postfix(MapBehaviour __instance)
     {
         if (!ShouldShowRealTime) return;
         foreach (var kvp in herePoints)
@@ -87,7 +86,7 @@ public class MapBehaviourPatch
     }
 
     [HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.SetPreMeetingPosition)), HarmonyPrefix]
-    public static void SetPreMeetingPositionPrefix()
+    public static void SetPreMeetingPosition_Prefix()
     {
         preMeetingPostions.Clear();
         foreach (var pc in PlayerControl.AllPlayerControls)

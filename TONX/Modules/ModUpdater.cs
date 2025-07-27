@@ -27,10 +27,8 @@ public class ModUpdater
         "file:///D:/Desktop/TONX/info.json",
         "file:///D:/Desktop/info.json",
 #else
-        "https://raw.githubusercontent.com/KARPED1EM/TownOfNext/TONX/info.json",
-        "https://cdn.jsdelivr.net/gh/KARPED1EM/TownOfNext/info.json",
-        "https://tonx-1301425958.cos.ap-shanghai.myqcloud.com/info.json",
-        "https://gitee.com/leeverz/TownOfNext/raw/TONX/info.json",
+        "https://raw.githubusercontent.com/TownOfNext/TownOfNext/TONX/info.json",
+        "https://cdn.jsdelivr.net/gh/TownOfNext/TownOfNext/info.json",
 #endif
     };
     private static IReadOnlyList<string> GetInfoFileUrlList()
@@ -58,8 +56,8 @@ public class ModUpdater
     public static string announcement_zh = "";
     public static string announcement_en = "";
     public static string downloadUrl_github = "";
-    public static string downloadUrl_gitee = "";
-    public static string downloadUrl_cos = "";
+    // public static string downloadUrl_gitee = "";
+    // public static string downloadUrl_cos = "";
 
     private static int retried = 0;
     private static bool firstLaunch = true;
@@ -112,8 +110,8 @@ public class ModUpdater
             Logger.Info("Force Update: " + forceUpdate, "CheckRelease");
             Logger.Info("File MD5: " + md5, "CheckRelease");
             Logger.Info("Github Url: " + downloadUrl_github, "CheckRelease");
-            Logger.Info("Gitee Url: " + downloadUrl_gitee, "CheckRelease");
-            Logger.Info("COS Url: " + downloadUrl_cos, "CheckRelease");
+            // Logger.Info("Gitee Url: " + downloadUrl_gitee, "CheckRelease");
+            // Logger.Info("COS Url: " + downloadUrl_cos, "CheckRelease");
             Logger.Info("Announcement (English): " + announcement_en, "CheckRelease");
             Logger.Info("Announcement (SChinese): " + announcement_zh, "CheckRelease");
 
@@ -191,8 +189,8 @@ public class ModUpdater
 
             JObject downloadUrl = data["url"].Cast<JObject>();
             downloadUrl_github = downloadUrl["github"]?.ToString();
-            downloadUrl_gitee = downloadUrl["gitee"]?.ToString().Replace("{{version}}", $"v{latestVersion}");
-            downloadUrl_cos = downloadUrl["cos"]?.ToString();
+            // downloadUrl_gitee = downloadUrl["gitee"]?.ToString().Replace("{{version}}", $"v{latestVersion}");
+            // downloadUrl_cos = downloadUrl["cos"]?.ToString();
 
             hasUpdate = Main.version < latestVersion;
             forceUpdate = Main.version < minimumVersion || creation > Main.PluginCreation;
@@ -210,9 +208,9 @@ public class ModUpdater
         {
             CustomPopup.Show(GetString("updatePopupTitle"), GetString("updateChoseSource"), new()
             {
-                (GetString("updateSource.Cos"), () => StartUpdate(downloadUrl_cos)),
+                // (GetString("updateSource.Cos"), () => StartUpdate(downloadUrl_cos)),
                 (GetString("updateSource.Github"), () => StartUpdate(downloadUrl_github)),
-                (GetString("updateSource.Gitee"), () => StartUpdate(downloadUrl_gitee)),
+                // (GetString("updateSource.Gitee"), () => StartUpdate(downloadUrl_gitee)),
                 (GetString(StringNames.Cancel), SetUpdateButtonStatus)
             });
             return;
