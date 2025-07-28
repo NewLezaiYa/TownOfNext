@@ -12,7 +12,7 @@
   },
 
   "url": {
-    "github": "https://github.com/KARPED1EM/TownOfNext/releases/latest/download/TONX.dll",
+    "github": "https://github.com/TownOfNext/TownOfNext/releases/latest/download/TONX.dll",
     "gitee": "https://gitee.com/leeverz/TownOfNext/releases/download/{{version}}/TONX.dll",
     "cos": "null"
   }
