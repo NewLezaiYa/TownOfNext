@@ -21,9 +21,9 @@ namespace TONX;
 
 static class ExtendedPlayerControl
 {
-    public static void SetRole(this PlayerControl player, RoleTypes role)
+    public static void SetRole(this PlayerControl player, RoleTypes role, bool canOverrideRole)
     {
-        AmongUsClient.Instance.StartCoroutine(player.CoSetRole(role, false));
+        AmongUsClient.Instance.StartCoroutine(player.CoSetRole(role, canOverrideRole));
     }
     public static void RpcSetCustomRole(this PlayerControl player, CustomRoles role)
     {
@@ -35,7 +35,7 @@ static class ExtendedPlayerControl
             player.GetRoleClass()?.Dispose();
             PlayerState.GetByPlayerId(player.PlayerId).SetMainRole(role);
         }
-        else //500:NoSubRole 501~:SubRole
+        else // 500:NoSubRole 501~:SubRole
         {
             PlayerState.GetByPlayerId(player.PlayerId).SetSubRole(role);
         }
@@ -54,6 +54,26 @@ static class ExtendedPlayerControl
         writer.Write(PlayerId);
         writer.WritePacked((int)role);
         AmongUsClient.Instance.FinishRpcImmediately(writer);
+    }
+    public static void ChangeRole(this PlayerControl player, CustomRoles newRole)
+    {
+        if (!AmongUsClient.Instance.AmHost) return;
+        if (player == null || player.Is(newRole)) return;
+
+        RoleTypes NewRoleType = newRole.GetRoleTypes();
+        bool NewIsDesync = newRole.GetRoleInfo()?.IsDesyncImpostor ?? newRole is CustomRoles.KB_Normal;
+        foreach (var seer in Main.AllPlayerControls)
+        {
+            if (seer.PlayerId == 0) player.SetRole(NewIsDesync ? RoleTypes.Crewmate : NewRoleType, true); // 确定房主视角职业显示
+            else if (seer.PlayerId == player.PlayerId) player.RpcSetRoleDesync(NewRoleType, player.GetClientId());
+            else player.RpcSetRoleDesync(NewIsDesync || (seer.GetCustomRole().GetRoleInfo()?.IsDesyncImpostor ?? seer.GetCustomRole() is CustomRoles.KB_Normal) ?
+                RoleTypes.Scientist : NewRoleType, seer.GetClientId());
+        }
+        Logger.Info($"注册模组职业：{player?.Data?.PlayerName} => {newRole}", "ChangeRole");
+
+        player.RpcSetCustomRole(newRole);
+        player.ResetKillCooldown();
+        player.GetPlayerTaskState().hasTasks = Utils.HasTasks(player.Data, false);
     }
 
     public static void RpcExile(this PlayerControl player)
@@ -165,11 +185,12 @@ static class ExtendedPlayerControl
         if (player == null) return;
         if (AmongUsClient.Instance.ClientId == clientId)
         {
-            player.SetRole(role);
+            player.SetRole(role, true);
             return;
         }
         MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(player.NetId, (byte)RpcCalls.SetRole, SendOption.Reliable, clientId);
         writer.Write((ushort)role);
+        writer.Write(true);
         AmongUsClient.Instance.FinishRpcImmediately(writer);
     }
 
