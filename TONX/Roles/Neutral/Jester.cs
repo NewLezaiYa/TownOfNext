@@ -1,7 +1,4 @@
 using AmongUs.GameOptions;
-using System;
-using System.Collections.Generic;
-using TONX.Roles.Core;
 
 namespace TONX.Roles.Neutral;
 public sealed class Jester : RoleBase
@@ -38,7 +35,7 @@ public sealed class Jester : RoleBase
         if (!AmongUsClient.Instance.AmHost || Player.PlayerId != exiled.PlayerId) return null;
 
         DecidedWinner = true;
-        WinDescriptionText.Add(Translator.GetString("ExiledJester"));
+        WinDescriptionText.Add(GetString("ExiledJester"));
         return () =>
         {
             CustomWinnerHolder.SetWinnerOrAdditonalWinner(CustomWinner.Jester);

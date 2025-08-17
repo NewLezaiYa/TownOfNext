@@ -1,6 +1,4 @@
 ﻿using AmongUs.GameOptions;
-using System.Collections.Generic;
-using TONX.Roles.Core;
 
 namespace TONX.Roles.Crewmate;
 public sealed class Paranoia : RoleBase
@@ -52,7 +50,7 @@ public sealed class Paranoia : RoleBase
     }
     public override bool GetAbilityButtonText(out string text)
     {
-        text = Translator.GetString("ParanoiaVetnButtonText");
+        text = GetString("ParanoiaVetnButtonText");
         return true;
     }
     public override bool GetAbilityButtonSprite(out string buttonName)
@@ -75,7 +73,7 @@ public sealed class Paranoia : RoleBase
             //ポータブルボタン時はベントから追い出す必要はない
             return true;
         }
-        Player.Notify(Translator.GetString("SkillMaxUsage"));
+        Player.Notify(GetString("SkillMaxUsage"));
         return false;
     }
     public override void NotifyOnMeetingStart(ref List<(string, byte, string)> msgToSend)
@@ -83,7 +81,7 @@ public sealed class Paranoia : RoleBase
         if (SkillLimit != oldSkillLimit)
         {
             oldSkillLimit = SkillLimit;
-            msgToSend.Add((Translator.GetString("SkillUsedLeft") + SkillLimit.ToString(), Player.PlayerId, "<color=#aaaaff>" + Translator.GetString("DefaultSystemMessageTitle") + "</color>"));
+            msgToSend.Add((GetString("SkillUsedLeft") + SkillLimit.ToString(), Player.PlayerId, "<color=#aaaaff>" + GetString("DefaultSystemMessageTitle") + "</color>"));
         }
     }
     public override int OverrideAbilityButtonUsesRemaining() => SkillLimit;

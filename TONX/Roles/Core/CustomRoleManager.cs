@@ -1,10 +1,6 @@
 using AmongUs.GameOptions;
-using HarmonyLib;
 using Hazel;
 using Il2CppSystem.Text;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using TONX.Attributes;
 using TONX.Modules;
 using TONX.Roles.AddOns.Common;
@@ -111,7 +107,7 @@ public static class CustomRoleManager
             {
                 attemptTarget.RpcSetCustomRole(CustomRoles.Madmate);
                 Logger.Info($"注册附加职业：{attemptTarget.GetNameWithRole()} => {CustomRoles.Madmate}", "AssignCustomSubRoles");
-                attemptTarget.ShowPopUp(Translator.GetString("BecomeMadmateCuzMadmateMode"));
+                attemptTarget.ShowPopUp(GetString("BecomeMadmateCuzMadmateMode"));
                 attemptKiller.SetKillCooldownV2(target: attemptTarget, forceAnime: true);
                 return false;
             }
@@ -651,9 +647,9 @@ public enum CustomRoles
     Succubus,
     PlagueDoctor,
     SchrodingerCat,
-
+    
     //SoloKombat
-    KB_Normal,
+    KB_Normal = 400,
     
     //GM
     GM,
@@ -689,7 +685,8 @@ public enum CustomRoleTypes
     Crewmate,
     Impostor,
     Neutral,
-    Addon
+    Addon,
+    GameMode
 }
 public enum HasTask
 {

@@ -1,10 +1,6 @@
-using HarmonyLib;
 using Hazel;
-using System.Linq;
 using TONX.Modules;
-using TONX.Roles.Core;
 using UnityEngine;
-using static TONX.Translator;
 
 namespace TONX;
 
@@ -65,13 +61,13 @@ internal class ControllerManagerUpdatePatch
         if (GetKeysDown(KeyCode.F5, KeyCode.T))
         {
             Logger.Info("加载自定义翻译文件", "KeyCommand");
-            Translator.LoadLangs();
+            LoadLangs();
             Logger.SendInGame("Reloaded Custom Translation File");
         }
         if (GetKeysDown(KeyCode.F5, KeyCode.X))
         {
             Logger.Info("导出自定义翻译文件", "KeyCommand");
-            Translator.ExportCustomTranslation();
+            ExportCustomTranslation();
             Logger.SendInGame("Exported Custom Translation File");
         }
         //日志文件转储
@@ -88,7 +84,7 @@ internal class ControllerManagerUpdatePatch
         //打开游戏目录
         if (GetKeysDown(KeyCode.F10))
         {
-            Utils.OpenDirectory(System.Environment.CurrentDirectory);
+            Utils.OpenDirectory(Environment.CurrentDirectory);
         }
 
         //-- 下面是主机专用的命令--//

@@ -1,9 +1,6 @@
 ﻿using AmongUs.GameOptions;
 using Hazel;
-using System.Collections.Generic;
-using TONX.Roles.Core;
 using UnityEngine;
-using static TONX.Translator;
 
 namespace TONX.Roles.Crewmate;
 public sealed class Mortician : RoleBase

@@ -13,6 +13,7 @@
 		<Configurations>Debug;Release</Configurations>
 		<BaseOutputPath>..\Export</BaseOutputPath>
 		<NoWarn>MSB3246, CA2211, IDE0044, IDE0028, IDE0300</NoWarn>
+		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -36,4 +37,12 @@
 	<Target Name="Copy" AfterTargets="Build" Condition="'$(AmongUs)' != ''">
 		<Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs)/BepInEx/plugins/" Condition="'$(Configuration)' == 'Debug'" />
 	</Target>
+
+    <Target Name="UpdateMD5" AfterTargets="Build" Condition="'$(EnableMD5Update)' == 'true'">
+        <PropertyGroup>
+            <OutputDll>$(OutputPath)$(AssemblyName).dll</OutputDll>
+            <InfoJsonPath>$([System.IO.Path]::GetFullPath('$(ProjectDir)..\info.json'))</InfoJsonPath>
+        </PropertyGroup>
+        <Exec Command="PowerShell -Command &quot;$dllPath = '$(OutputDll)';$jsonPath = '$(InfoJsonPath)';$md5 = (Get-FileHash -Path $dllPath -Algorithm MD5).Hash.ToLower();$json = Get-Content $jsonPath -Raw | ConvertFrom-Json;$json.md5 = $md5;$json | ConvertTo-Json -Depth 10 | Set-Content $jsonPath;&quot;" Condition="Exists('$(OutputDll)') AND Exists('$(InfoJsonPath)')" />
+    </Target>
 </Project>

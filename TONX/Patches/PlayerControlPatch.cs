@@ -1,19 +1,13 @@
 using AmongUs.GameOptions;
-using HarmonyLib;
-using Hazel;
-using LibCpp2IL;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using TONX.Modules;
 using TONX.Roles.AddOns.Crewmate;
-using TONX.Roles.Core;
 using TONX.Roles.Core.Interfaces;
+using TONX.Roles.GameMode;
 using TONX.Roles.Impostor;
 using UnityEngine;
-using static TONX.Translator;
+using Object = UnityEngine.Object;
 
 namespace TONX;
 
@@ -53,13 +47,6 @@ class CheckMurderPatch
     public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] PlayerControl target)
     {
         if (!AmongUsClient.Instance.AmHost) return false;
-
-        if (Options.CurrentGameMode == CustomGameMode.SoloKombat)
-        {
-            SoloKombatManager.OnPlayerAttack(__instance, target);
-            __instance.RpcMurderPlayer(target, false);
-            return false;
-        }
 
         // 処理は全てCustomRoleManager側で行う
         if (!CustomRoleManager.OnCheckMurder(__instance, target))
@@ -582,8 +569,6 @@ class FixedUpdatePatch
                         RealName = Utils.ColorString(Utils.GetRoleColor(CustomRoles.Pelican), GetString("EatenByPelican"));
                     if (NameNotifyManager.GetNameNotify(target, out var name))
                         RealName = name;
-                    if (Options.CurrentGameMode == CustomGameMode.SoloKombat && target.GetCustomRole() == CustomRoles.KB_Normal)
-                        SoloKombatManager.GetNameNotify(target, ref RealName);
                 }
 
                 //NameColorManager準拠の処理
@@ -621,14 +606,18 @@ class FixedUpdatePatch
                 //seerに関わらず発動するSuffix
                 Suffix.Append(CustomRoleManager.GetSuffixOthers(seer, target));
 
-                if (Options.CurrentGameMode == CustomGameMode.SoloKombat && target.GetCustomRole() == CustomRoles.KB_Normal)
-                    Suffix.Append(SoloKombatManager.GetDisplayHealth(target));
+                //seer作为GM在个人竞技中的Suffix
+                if (Options.CurrentGameMode == CustomGameMode.SoloKombat && PlayerControl.LocalPlayer.GetCustomRole() is CustomRoles.GM && seer != target)
+                {
+                    var role = target.GetRoleClass() as KB_Normal;
+                    Suffix.Append(role == null ? "" : KB_Normal.GetHealthText(role));
+                }
 
                 /*if(main.AmDebugger.Value && main.BlockKilling.TryGetValue(target.PlayerId, out var isBlocked)) {
-                    Mark = isBlocked ? "(true)" : "(false)";
-                }*/
-                if ((Utils.IsActive(SystemTypes.Comms) && Options.CommsCamouflage.GetBool()) || Concealer.IsHidding)
-                    RealName = $"<size=0>{RealName}</size> ";
+                        Mark = isBlocked ? "(true)" : "(false)";
+                    }*/
+                    if ((Utils.IsActive(SystemTypes.Comms) && Options.CommsCamouflage.GetBool()) || Concealer.IsHidding)
+                        RealName = $"<size=0>{RealName}</size> ";
 
                 string DeathReason = seer.Data.IsDead && seer.KnowDeathReason(target) ? $"({Utils.ColorString(Utils.GetRoleColor(CustomRoles.Doctor), Utils.GetVitalText(target.PlayerId))})" : "";
                 //Mark・Suffixの適用
@@ -696,7 +685,7 @@ class PlayerStartPatch
 {
     public static void Postfix(PlayerControl __instance)
     {
-        var roleText = UnityEngine.Object.Instantiate(__instance.cosmetics.nameText);
+        var roleText = Object.Instantiate(__instance.cosmetics.nameText);
         roleText.transform.SetParent(__instance.cosmetics.nameText.transform);
         roleText.transform.localPosition = new Vector3(0f, 0.2f, 0f);
         roleText.transform.localScale = new(1f, 1f, 1f);

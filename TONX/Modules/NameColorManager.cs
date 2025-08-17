@@ -1,6 +1,5 @@
 using Hazel;
 using TONX.Roles.AddOns.Common;
-using TONX.Roles.Core;
 using TONX.Roles.Crewmate;
 using TONX.Roles.Impostor;
 using TONX.Roles.Neutral;
@@ -51,15 +50,17 @@ public static class NameColorManager
         if (seer.Is(CustomRoles.Charmed) && target.Is(CustomRoles.Charmed) && Succubus.OptionTargetKnowOtherTarget.GetBool()) color = Main.roleColors[CustomRoles.Charmed];
 
         if (!string.IsNullOrEmpty(color)) return true;
-        return seer == target 
-           || (Main.GodMode.Value && seer.AmOwner) 
-           || seer.Is(CustomRoles.GM)
-           || target.Is(CustomRoles.GM)
-           || seer.Is(CustomRoles.God)
+        return seer == target
+            || (Main.GodMode.Value && seer.AmOwner)
+            || seer.Is(CustomRoles.GM)
+            || target.Is(CustomRoles.GM)
+            || seer.Is(CustomRoles.God)
+            || seer.Is(CustomRoles.KB_Normal)
+            || target.Is(CustomRoles.KB_Normal)
                
-           || SuperStar.KnowTargetRoleColor(target, isMeeting)
-           || Workaholic.KnowTargetRoleColor(target, isMeeting)
-           || Mare.KnowTargetRoleColor(target, isMeeting);
+            || SuperStar.KnowTargetRoleColor(target, isMeeting)
+            || Workaholic.KnowTargetRoleColor(target, isMeeting)
+            || Mare.KnowTargetRoleColor(target, isMeeting);
     }
     public static bool TryGetData(PlayerControl seer, PlayerControl target, out string colorCode)
     {

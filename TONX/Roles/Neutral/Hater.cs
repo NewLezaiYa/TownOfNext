@@ -1,6 +1,4 @@
 using AmongUs.GameOptions;
-using System.Linq;
-using TONX.Roles.Core;
 using TONX.Roles.Core.Interfaces;
 
 namespace TONX.Roles.Neutral;
@@ -37,7 +35,7 @@ public sealed class Hater : RoleBase, IKiller, IAdditionalWinner, ISchrodingerCa
 
     public bool OverrideKillButtonText(out string text)
     {
-        text = Translator.GetString("HaterButtonText");
+        text = GetString("HaterButtonText");
         return true;
     }
     public void OnMurderPlayerAsKiller(MurderInfo info)

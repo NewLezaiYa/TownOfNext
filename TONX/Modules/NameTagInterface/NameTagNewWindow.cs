@@ -1,8 +1,6 @@
-﻿using System;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
-using static TONX.Translator;
 using Object = UnityEngine.Object;
 
 namespace TONX.Modules.NameTagInterface;

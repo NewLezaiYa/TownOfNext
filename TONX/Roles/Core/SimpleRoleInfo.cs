@@ -1,6 +1,4 @@
 using AmongUs.GameOptions;
-using System;
-using System.Linq;
 using TONX.Roles.Core.Descriptions;
 using UnityEngine;
 using static TONX.Options;
@@ -23,28 +21,28 @@ public class SimpleRoleInfo
     public bool IsEnable = false;
     public OptionCreatorDelegate OptionCreator;
     public string ChatCommand;
-    /// <summary>±¾ÈËÒ•µã¤Î¤ß¥¤¥ó¥Ý¥¹¥¿©`¤ËÒŠ¤¨¤ëÒÛÂš</summary>
+    /// <summary>ï¿½ï¿½ï¿½ï¿½Ò•ï¿½ï¿½Î¤ß¥ï¿½ï¿½ï¿½Ý¥ï¿½ï¿½ï¿½ï¿½`ï¿½ï¿½ÒŠï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Âš</summary>
     public bool IsDesyncImpostor;
     private Func<AudioClip> introSound;
     public AudioClip IntroSound => introSound?.Invoke();
     public bool Experimental;
     public bool Broken;
-    public bool Hidden;
+    public HiddenRoleInfo Hidden;
 
     /// <summary>
-    /// ÈËÊýÉè¶¨ÉÏµÄ×îÐ¡ÈËÊý/×î´óÈËÊý/Ò»µ¥Î»Êý
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½è¶¨ï¿½Ïµï¿½ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½/Ò»ï¿½ï¿½Î»ï¿½ï¿½
     /// </summary>
     public IntegerValueRule AssignCountRule;
     /// <summary>
-    /// ÈËÊýÓ¦¸Ã·ÖÅä¶àÉÙ
-    /// ÒÛÂš¤Î³éßx»ØÊý = ÔO¶¨ÈËÊý / AssignUnitCount
+    /// ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½Ã·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    /// ï¿½ï¿½Âšï¿½Î³ï¿½ï¿½xï¿½ï¿½ï¿½ï¿½ = ï¿½Oï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ / AssignUnitCount
     /// </summary>
     public int AssignUnitCount => AssignCountRule?.Step ?? 1;
     /// <summary>
-    /// ŒgëH¤Ë¥¢¥µ¥¤¥ó¤µ¤ì¤ëÒÛÂš¤ÎÄÚÔU
+    /// ï¿½gï¿½Hï¿½Ë¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ó¤µ¤ï¿½ï¿½ï¿½ï¿½Âšï¿½ï¿½ï¿½ï¿½ï¿½U
     /// </summary>
     public CustomRoles[] AssignUnitRoles;
-    /// <summary>ÒÛÂš¤ÎÕhÃ÷év‚S</summary>
+    /// <summary>ï¿½ï¿½Âšï¿½ï¿½ï¿½hï¿½ï¿½ï¿½vï¿½S</summary>
     public RoleDescription Description { get; private set; }
 
     private SimpleRoleInfo(
@@ -63,7 +61,7 @@ public class SimpleRoleInfo
         Func<AudioClip> introSound,
         bool experimental,
         bool broken,
-        bool hidden,
+        HiddenRoleInfo hidden,
         IntegerValueRule assignCountRule,
         CustomRoles[] assignUnitRoles
     )
@@ -126,7 +124,7 @@ public class SimpleRoleInfo
         CountTypes? countType = null,
         bool experimental = false,
         bool broken = false,
-        bool Hidden = false,
+        HiddenRoleInfo Hidden = null,
         IntegerValueRule assignCountRule = null,
         CustomRoles[] assignUnitRoles = null
     )
@@ -231,7 +229,7 @@ public class SimpleRoleInfo
                 null,
                 false,
                 false,
-                false,
+                null,
                 new(1, 15, 1),
                 new CustomRoles[1] { roleName }
             );

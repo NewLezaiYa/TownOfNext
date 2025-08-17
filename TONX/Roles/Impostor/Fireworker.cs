@@ -1,11 +1,7 @@
 using AmongUs.GameOptions;
-using System.Collections.Generic;
-using System.Linq;
 using TONX.Modules;
-using TONX.Roles.Core;
 using TONX.Roles.Core.Interfaces;
 using UnityEngine;
-using static TONX.Translator;
 
 namespace TONX.Roles.Impostor;
 public sealed class Fireworker : RoleBase, IImpostor

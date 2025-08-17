@@ -1,9 +1,4 @@
 ﻿using AmongUs.GameOptions;
-using Hazel;
-using InnerNet;
-using System.Collections.Generic;
-using System.Linq;
-using TONX.Roles.Core;
 using TONX.Roles.Core.Interfaces;
 using UnityEngine;
 
@@ -34,7 +29,7 @@ public sealed class Butcher : RoleBase, IImpostor
     public override void Add() => ButcherKilledPlayers = new();
     public bool OverrideKillButtonText(out string text)
     {
-        text = Translator.GetString("ButcherButtonText");
+        text = GetString("ButcherButtonText");
         return true;
     }
     public void BeforeMurderPlayerAsKiller(MurderInfo info)

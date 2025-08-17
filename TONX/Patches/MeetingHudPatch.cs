@@ -1,12 +1,8 @@
-using HarmonyLib;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using TONX.Modules;
 using TONX.Roles.AddOns.Common;
-using TONX.Roles.Core;
 using UnityEngine;
-using static TONX.Translator;
+using Object = UnityEngine.Object;
 
 namespace TONX;
 
@@ -96,7 +92,7 @@ public static class MeetingHudPatch
             {
                 var pc = Utils.GetPlayerById(pva.TargetPlayerId);
                 if (pc == null) continue;
-                var roleTextMeeting = UnityEngine.Object.Instantiate(pva.NameText);
+                var roleTextMeeting = Object.Instantiate(pva.NameText);
                 roleTextMeeting.transform.SetParent(pva.NameText.transform);
                 roleTextMeeting.transform.localPosition = new Vector3(0f, -0.18f, 0f);
                 roleTextMeeting.fontSize = 1.5f;

@@ -1,6 +1,3 @@
-using HarmonyLib;
-using System.Collections.Generic;
-
 namespace TONX;
 
 [HarmonyPatch(typeof(TextBoxTMP))]
@@ -19,6 +16,7 @@ public class TextBoxPatch
         { "“", " ''" },
         { "”", "'' " },
         { "！", "! " },
+        { "\r\n", " "},
     };
     [HarmonyPatch(nameof(TextBoxTMP.SetText)), HarmonyPrefix]
     public static bool ModifyCharacterLimit(TextBoxTMP __instance, [HarmonyArgument(0)] string input, [HarmonyArgument(1)] string inputCompo = "")

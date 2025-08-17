@@ -1,8 +1,5 @@
-﻿using HarmonyLib;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using static TONX.NameTagManager;
-using static TONX.Translator;
 
 namespace TONX;
 

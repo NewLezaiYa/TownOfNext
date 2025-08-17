@@ -1,7 +1,6 @@
 ﻿using AmongUs.GameOptions;
 using Hazel;
 using TONX.Modules;
-using TONX.Roles.Core;
 using TONX.Roles.Core.Interfaces;
 using UnityEngine;
 
@@ -48,7 +47,7 @@ public sealed class Escapist : RoleBase, IImpostor
     }
     public override bool GetAbilityButtonText(out string text)
     {
-        text = Marked ? Translator.GetString("EscapistTeleportButtonText") : Translator.GetString("EscapistMarkButtonText");
+        text = Marked ? GetString("EscapistTeleportButtonText") : GetString("EscapistMarkButtonText");
         return !Shapeshifting;
     }
     public override void OnShapeshift(PlayerControl target)

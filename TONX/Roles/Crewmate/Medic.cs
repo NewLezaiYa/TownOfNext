@@ -1,10 +1,6 @@
 ﻿using AmongUs.GameOptions;
-using HarmonyLib;
 using Hazel;
-using System.Collections.Generic;
-using System.Linq;
 using TONX.Modules;
-using TONX.Roles.Core;
 using TONX.Roles.Core.Interfaces;
 using UnityEngine;
 
@@ -92,7 +88,7 @@ public sealed class Medic : RoleBase, IKiller
     }
     public bool OverrideKillButtonText(out string text)
     {
-        text = Translator.GetString("MedicButtonText");
+        text = GetString("MedicButtonText");
         return true;
     }
     public bool OverrideKillButtonSprite(out string buttonName)
@@ -148,7 +144,7 @@ public sealed class Medic : RoleBase, IKiller
         Utils.NotifyRoles(target);
 
         if (OptionKnowTargetShieldBroken.GetBool())
-            Main.AllPlayerControls.Where(x => x.Is(CustomRoles.Medic) && x.PlayerId != target.PlayerId).Do(x => x.Notify(Translator.GetString("MedicTargetShieldBroken")));
+            Main.AllPlayerControls.Where(x => x.Is(CustomRoles.Medic) && x.PlayerId != target.PlayerId).Do(x => x.Notify(GetString("MedicTargetShieldBroken")));
         else
             Main.AllPlayerControls.Where(x => x.Is(CustomRoles.Medic)).Do(x => Utils.NotifyRoles(x));
 

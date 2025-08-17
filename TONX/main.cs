@@ -2,16 +2,10 @@ using AmongUs.GameOptions;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
-using HarmonyLib;
 using Il2CppInterop.Runtime.Injection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using TONX.Attributes;
 using TONX.Modules;
-using TONX.Roles.Core;
 using UnityEngine;
 
 [assembly: AssemblyFileVersion(TONX.Main.PluginVersion)]
@@ -44,7 +38,7 @@ public class Main : BasePlugin
     public const int PluginCreation = 1;
     // == 链接相关设定 / Link Config ==
     public static readonly bool ShowWebsiteButton = false;
-    public static readonly string WebsiteUrl = Translator.IsChineseLanguageUser ? "https://tonx.cc/zh" : "https://tonx.cc";
+    public static readonly string WebsiteUrl = IsChineseLanguageUser ? "https://tonx.cc/zh" : "https://tonx.cc";
     public static readonly bool ShowQQButton = false;
     public static readonly string QQInviteUrl = "https://jq.qq.com/?_wv=1027&k=2RpigaN6";
     public static readonly bool ShowDiscordButton = false;
@@ -267,9 +261,6 @@ public class Main : BasePlugin
                 {CustomRoles.Charmed, "#ff00ff"},
                 {CustomRoles.Bait, "#00f7ff"},
                 {CustomRoles.Beartrap, "#5a8fd0"},
-
-                //SoloKombat
-                {CustomRoles.KB_Normal, "#f55252"}
             };
             var type = typeof(RoleBase);
             var roleClassArray =
@@ -298,12 +289,12 @@ public class Main : BasePlugin
         TONX.Logger.Info($"{Application.version}", "AmongUs Version");
 
         var handler = TONX.Logger.Handler("GitVersion");
-        handler.Info($"{nameof(Main.GitBaseTag)}: {Main.GitBaseTag}");
-        handler.Info($"{nameof(Main.GitCommit)}: {Main.GitCommit}");
-        handler.Info($"{nameof(Main.GitCommits)}: {Main.GitCommits}");
-        handler.Info($"{nameof(Main.GitIsDirty)}: {Main.GitIsDirty}");
-        handler.Info($"{nameof(Main.GitSha)}: {Main.GitSha}");
-        handler.Info($"{nameof(Main.GitTag)}: {Main.GitTag}");
+        handler.Info($"{nameof(GitBaseTag)}: {GitBaseTag}");
+        handler.Info($"{nameof(GitCommit)}: {GitCommit}");
+        handler.Info($"{nameof(GitCommits)}: {GitCommits}");
+        handler.Info($"{nameof(GitIsDirty)}: {GitIsDirty}");
+        handler.Info($"{nameof(GitSha)}: {GitSha}");
+        handler.Info($"{nameof(GitTag)}: {GitTag}");
 
         ClassInjector.RegisterTypeInIl2Cpp<ErrorText>();
 

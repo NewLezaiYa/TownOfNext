@@ -1,27 +1,20 @@
-using AmongUs.Data;
 using AmongUs.GameOptions;
 using Hazel;
 using Il2CppInterop.Runtime.InteropTypes;
 using InnerNet;
-using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using TONX.GameModes;
 using TONX.Modules;
 using TONX.Roles.AddOns.Crewmate;
 using TONX.Roles.AddOns.Impostor;
-using TONX.Roles.Core;
 using TONX.Roles.Core.Interfaces;
 using TONX.Roles.Crewmate;
 using TONX.Roles.Impostor;
 using TONX.Roles.Neutral;
 using UnityEngine;
-using static TONX.Translator;
 
 namespace TONX;
 
@@ -479,7 +472,6 @@ public static class Utils
         var States = PlayerState.GetByPlayerId(p.PlayerId);
         if (p.Role.IsImpostor && p.GetCustomRole() is not CustomRoles.CrewPostor)
             hasTasks = false; //タスクはCustomRoleを元に判定する
-        if (p.GetCustomRole() == CustomRoles.KB_Normal) return false;
         // 死んでいて，死人のタスク免除が有効なら確定でfalse
         if (p.IsDead && Options.GhostIgnoreTasks.GetBool())
         {
@@ -543,7 +535,8 @@ public static class Utils
         seen ??= seer;
         var comms = IsActive(SystemTypes.Comms) || Concealer.IsHidding;
         bool enabled = seer == seen
-            || (Main.VisibleTasksCount && !seer.IsAlive() && Options.GhostCanSeeOtherTasks.GetBool()) || seen.GetCustomRole() == CustomRoles.KB_Normal;
+            || (Main.VisibleTasksCount && !seer.IsAlive() && Options.GhostCanSeeOtherTasks.GetBool())
+            || Options.CurrentGameMode == CustomGameMode.SoloKombat;
         string text = GetProgressText(seen.PlayerId, comms);
 
         //seer側による変更
@@ -551,27 +544,23 @@ public static class Utils
 
         return enabled ? text : "";
     }
+
     private static string GetProgressText(byte playerId, bool comms = false)
     {
         var ProgressText = new StringBuilder();
         var State = PlayerState.GetByPlayerId(playerId);
         var role = State.MainRole;
-        if (GetPlayerById(playerId).GetCustomRole() == CustomRoles.KB_Normal)
-        {
-            ProgressText.Append(SoloKombatManager.GetDisplayScore(playerId));
-        }
-        else
-        {
-            var roleClass = CustomRoleManager.GetByPlayerId(playerId);
-            ProgressText.Append(GetTaskProgressText(playerId, comms));
-            if (roleClass != null)
-            {
-                ProgressText.Append(roleClass.GetProgressText(comms));
-            }
 
-            //SubRoles
-            ProgressText.Append(TicketsStealer.GetProgressText(playerId, comms));
+        var roleClass = CustomRoleManager.GetByPlayerId(playerId);
+        ProgressText.Append(GetTaskProgressText(playerId, comms));
+        if (roleClass != null)
+        {
+            ProgressText.Append(roleClass.GetProgressText(comms));
         }
+
+        //SubRoles
+        ProgressText.Append(TicketsStealer.GetProgressText(playerId, comms));
+
         return ProgressText.ToString();
     }
     public static string GetTaskProgressText(byte playerId, bool comms = false)
@@ -740,7 +729,6 @@ public static class Utils
             if (opt.Value.GetBool()) ShowChildrenSettings(opt.Value, ref sb, deep + 1);
         }
     }
-    public static string LastResult = "";
     public static void ShowLastResult(byte PlayerId = byte.MaxValue)
     {
         if (AmongUsClient.Instance.IsGameStarted)
@@ -748,6 +736,7 @@ public static class Utils
             SendMessage(GetString("CantUse.lastresult"), PlayerId);
             return;
         }
+            
         var sb = new StringBuilder();
         var winnerColor = ((CustomRoles)CustomWinnerHolder.WinnerTeam).GetRoleInfo()?.RoleColor ?? Palette.DisabledGrey;
 
@@ -982,8 +971,6 @@ public static class Utils
                 SelfSuffix.Append(CustomRoleManager.GetSuffixOthers(seer, isForMeeting: isForMeeting));
 
                 //KB自身名字后缀
-                if (Options.CurrentGameMode == CustomGameMode.SoloKombat && seer.GetCustomRole() == CustomRoles.KB_Normal)
-                    SelfSuffix.Append(SoloKombatManager.GetDisplayHealth(seer));
 
                 //RealNameを取得 なければ現在の名前をRealNamesに書き込む
                 string SeerRealName = seer.GetRealName(isForMeeting);
@@ -1002,12 +989,7 @@ public static class Utils
                 if (NameNotifyManager.GetNameNotify(seer, out var name))
                     SelfName = name;
 
-                if (Options.CurrentGameMode == CustomGameMode.SoloKombat && seer.GetCustomRole() == CustomRoles.KB_Normal)
-                {
-                    SoloKombatManager.GetNameNotify(seer, ref SelfName);
-                    SelfName = $"<size={fontSize}>{text}</size>\r\n{SelfName}";
-                }
-                else SelfName = SelfRoleName + "\r\n" + SelfName;
+                SelfName = SelfRoleName + "\r\n" + SelfName;
                 SelfName += SelfSuffix.ToString() == "" ? "" : "\r\n " + SelfSuffix.ToString();
                 if (!isForMeeting) SelfName += "\r\n";
 
@@ -1071,18 +1053,11 @@ public static class Utils
                     //seerに関わらず発動するSuffix
                     TargetSuffix.Append(CustomRoleManager.GetSuffixOthers(seer, target, isForMeeting: isForMeeting));
 
-                    //KB目标玩家名字后缀
-                    if (Options.CurrentGameMode == CustomGameMode.SoloKombat && target.GetCustomRole() == CustomRoles.KB_Normal)
-                        TargetSuffix.Append(SoloKombatManager.GetDisplayHealth(target));
-
                     // 空でなければ先頭に改行を挿入
                     if (TargetSuffix.Length > 0)
                     {
                         TargetSuffix.Insert(0, "\r\n");
                     }
-
-                    if (Options.CurrentGameMode == CustomGameMode.SoloKombat && target.GetCustomRole() == CustomRoles.KB_Normal)
-                        TargetRoleText = $"<size={fontSize}>{GetProgressText(seer, target)}</size>\r\n";
 
                     //RealNameを取得 なければ現在の名前をRealNamesに書き込む
                     string TargetPlayerName = target.GetRealName(isForMeeting);
@@ -1399,7 +1374,7 @@ public static class Utils
             2 => new(42.6f, -19.9f), // Polus
             4 => new(-16.8f, -6.2f), // Airship
             5 => new(9.4f, 17.9f), // The Fungle
-            _ => throw new System.NotImplementedException(),
+            _ => throw new NotImplementedException(),
         };
     }
 }

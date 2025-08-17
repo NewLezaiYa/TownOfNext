@@ -1,6 +1,4 @@
 ﻿using AmongUs.GameOptions;
-
-using TONX.Roles.Core;
 using TONX.Roles.Core.Interfaces;
 
 namespace TONX.Roles.Impostor;
@@ -18,7 +16,7 @@ public sealed class Bard : RoleBase, IImpostor
             "ba|吟游詩人|诗人"
 #if RELEASE
             ,
-            Hidden: true // For Debug
+            Hidden: new HiddenRoleInfo(5, CustomRoles.Arrogance)
 #endif
 
         );
@@ -29,7 +27,7 @@ public sealed class Bard : RoleBase, IImpostor
         player
     )
     { }
-
+    
     private float KillCooldown;
     public override void Add() => KillCooldown = Options.DefaultKillCooldown;
     public float CalculateKillCooldown() => KillCooldown;

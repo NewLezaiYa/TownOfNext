@@ -1,13 +1,7 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
-using TONX.Roles.Core;
 using TONX.Roles.Core.Descriptions;
 using UnityEngine;
-using static TONX.Translator;
 
 namespace TONX.Modules;
 
@@ -342,7 +336,8 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
                 !role.IsEnable()
                 || role.IsAddon()
                 || role.IsVanilla()
-                || role is CustomRoles.GM or CustomRoles.NotAssigned or CustomRoles.KB_Normal
+                || role.IsGameModeRole()
+                || !role.IsValid()
                 || !Options.CustomRoleSpawnChances.ContainsKey(role))
             {
                 Utils.SendMessage(string.Format(GetString("Message.DirectorModeSelectFailed"), roleName), playerId);

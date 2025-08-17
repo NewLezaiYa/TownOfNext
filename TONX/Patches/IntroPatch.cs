@@ -1,11 +1,5 @@
 using AmongUs.GameOptions;
-using HarmonyLib;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using TONX.Roles.Core;
 using UnityEngine;
-using static TONX.Translator;
 
 namespace TONX;
 
@@ -153,7 +147,7 @@ class IntroCutscenePatch
                 break;
         }
 
-        if (role.GetRoleInfo()?.IntroSound is AudioClip introSound)
+        if (role.GetRoleInfo()?.IntroSound is { } introSound)
         {
             PlayerControl.LocalPlayer.Data.Role.IntroSound = introSound;
         }

@@ -1,10 +1,5 @@
 using AmongUs.GameOptions;
-using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using TONX.Attributes;
-using TONX.Roles.Core;
 using TONX.Roles.Neutral;
 
 namespace TONX;
@@ -71,7 +66,6 @@ public class PlayerState
             roleInfo.CountType :
             role switch
             {
-                CustomRoles.KB_Normal => CountTypes.Impostor,
                 CustomRoles.GM => CountTypes.OutOfGame,
                 _ => role.IsImpostor() ? CountTypes.Impostor : CountTypes.Crew,
             };
@@ -177,9 +171,9 @@ public class TaskState
     public bool IsTaskFinished => RemainingTasksCount <= 0 && hasTasks;
     public TaskState()
     {
-        this.AllTasksCount = -1;
-        this.CompletedTasksCount = 0;
-        this.hasTasks = false;
+        AllTasksCount = -1;
+        CompletedTasksCount = 0;
+        hasTasks = false;
     }
 
     public void Init(PlayerControl player)

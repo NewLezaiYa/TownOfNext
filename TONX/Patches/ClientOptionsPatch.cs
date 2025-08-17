@@ -1,6 +1,4 @@
-using System;
 using BepInEx.Configuration;
-using HarmonyLib;
 using TONX.Modules.ClientOptions;
 using TONX.Modules.NameTagInterface;
 using UnityEngine;
@@ -77,7 +75,7 @@ public static class OptionsMenuBehaviourStartPatch
         static void Unlock()
         {
             Application.targetFrameRate = Main.UnlockFPS.Value ? 240 : 60;
-            Logger.SendInGame(string.Format(Translator.GetString("FPSSetTo"), Application.targetFrameRate));
+            Logger.SendInGame(string.Format(GetString("FPSSetTo"), Application.targetFrameRate));
         }
     }
 

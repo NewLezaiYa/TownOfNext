@@ -1,21 +1,13 @@
-using AmongUs.Data;
 using AmongUs.GameOptions;
-using BepInEx.Unity.IL2CPP.Utils;
-using HarmonyLib;
 using Hazel;
 using InnerNet;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using TONX.Modules;
 using TONX.Roles.AddOns.Impostor;
-using TONX.Roles.Core;
 using TONX.Roles.Core.Interfaces;
 using TONX.Roles.Impostor;
 using TONX.Roles.Neutral;
 using UnityEngine;
-using static TONX.Translator;
 
 namespace TONX;
 
@@ -61,12 +53,12 @@ static class ExtendedPlayerControl
         if (player == null || player.Is(newRole)) return;
 
         RoleTypes NewRoleType = newRole.GetRoleTypes();
-        bool NewIsDesync = newRole.GetRoleInfo()?.IsDesyncImpostor ?? newRole is CustomRoles.KB_Normal;
+        bool NewIsDesync = newRole.GetRoleInfo()?.IsDesyncImpostor ?? false;
         foreach (var seer in Main.AllPlayerControls)
         {
             if (seer.PlayerId == 0) player.SetRole(NewIsDesync ? RoleTypes.Crewmate : NewRoleType, true); // 确定房主视角职业显示
             else if (seer.PlayerId == player.PlayerId) player.RpcSetRoleDesync(NewRoleType, player.GetClientId());
-            else player.RpcSetRoleDesync(NewIsDesync || (seer.GetCustomRole().GetRoleInfo()?.IsDesyncImpostor ?? seer.GetCustomRole() is CustomRoles.KB_Normal) ?
+            else player.RpcSetRoleDesync(NewIsDesync || (seer.GetCustomRole().GetRoleInfo()?.IsDesyncImpostor ?? false) ?
                 RoleTypes.Scientist : NewRoleType, seer.GetClientId());
         }
         Logger.Info($"注册模组职业：{player?.Data?.PlayerName} => {newRole}", "ChangeRole");
@@ -419,7 +411,6 @@ static class ExtendedPlayerControl
         if (!pc.IsAlive() || pc.Data.Role.Role == RoleTypes.GuardianAngel || pc.IsEaten()) return false;
 
         var roleCanUse = (pc.GetRoleClass() as IKiller)?.CanUseKillButton();
-        if (pc.GetCustomRole() == CustomRoles.KB_Normal) roleCanUse = pc.SoloAlive();
 
         return roleCanUse ?? pc.Is(CustomRoleTypes.Impostor);
     }
@@ -428,7 +419,6 @@ static class ExtendedPlayerControl
         if (!pc.IsAlive()) return false;
 
         var roleCanUse = (pc.GetRoleClass() as IKiller)?.CanUseImpostorVentButton();
-        if (pc.GetCustomRole() == CustomRoles.KB_Normal) roleCanUse = true;
 
         return roleCanUse ?? false;
     }

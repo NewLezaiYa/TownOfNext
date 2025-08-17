@@ -1,13 +1,8 @@
 ﻿using AmongUs.Data;
-using HarmonyLib;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using TMPro;
 using UnityEngine;
 using static TONX.NameTagManager;
-using static TONX.Translator;
 using Component = TONX.NameTagManager.Component;
 using Object = UnityEngine.Object;
 

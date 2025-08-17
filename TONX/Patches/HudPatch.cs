@@ -1,14 +1,10 @@
-using HarmonyLib;
-using System.Linq;
 using System.Text;
-using System.Collections.Generic;
 using TONX.Attributes;
-using TONX.Roles.Core;
 using TONX.Roles.Core.Interfaces;
 using UnityEngine;
 using TONX.Modules;
-using static TONX.Translator;
-using System;
+using TONX.GameModes;
+using TONX.Roles.GameMode;
 
 namespace TONX;
 
@@ -111,7 +107,6 @@ class HudManagerPatch
                         else __instance.AbilityButton.SetInfiniteUses();
                     }
                 }
-                else if (player.GetCustomRole() == CustomRoles.KB_Normal) __instance.KillButton.OverrideText(GetString("DemonButtonText"));
 
                 //バウンティハンターのターゲットテキスト
                 if (LowerInfoText == null)
@@ -126,8 +121,7 @@ class HudManagerPatch
                     LowerInfoText.fontSizeMin = 2.0f;
                     LowerInfoText.fontSizeMax = 2.0f;
                 }
-                if (Options.CurrentGameMode == CustomGameMode.SoloKombat) LowerInfoText.text = SoloKombatManager.GetHudText();
-                else LowerInfoText.text = roleClass?.GetLowerText(player, isForMeeting: GameStates.IsMeeting, isForHud: true) ?? "";
+                LowerInfoText.text = roleClass?.GetLowerText(player, isForMeeting: GameStates.IsMeeting, isForHud: true) ?? "";
                 LowerInfoText.enabled = LowerInfoText.text != "";
 
                 if ((!AmongUsClient.Instance.IsGameStarted && AmongUsClient.Instance.NetworkMode != NetworkModes.FreePlay) || GameStates.IsMeeting)
@@ -228,7 +222,7 @@ class SetVentOutlinePatch
         __instance.myRend.material.SetColor("_AddColor", mainTarget ? color : Color.clear);
     }
 }
-[HarmonyPatch(typeof(HudManager), nameof(HudManager.SetHudActive), new System.Type[] { typeof(PlayerControl), typeof(RoleBehaviour), typeof(bool) })]
+[HarmonyPatch(typeof(HudManager), nameof(HudManager.SetHudActive), new Type[] { typeof(PlayerControl), typeof(RoleBehaviour), typeof(bool) })]
 class SetHudActivePatch
 {
     public static bool IsActive = false;
@@ -333,18 +327,22 @@ class TaskPanelBehaviourPatch
 
                     var lpc = PlayerControl.LocalPlayer;
 
-                    AllText += "\r\n";
-                    AllText += $"\r\n{GetString("PVP.ATK")}: {lpc.ATK()}";
-                    AllText += $"\r\n{GetString("PVP.DF")}: {lpc.DF()}";
-                    AllText += $"\r\n{GetString("PVP.RCO")}: {lpc.HPRECO()}";
+                    if (lpc.GetCustomRole() is CustomRoles.KB_Normal)
+                    {
+                        AllText += "\r\n";
+                        AllText += $"\r\n{GetString("PVP.ATK")}: {(lpc.GetRoleClass() as KB_Normal)?.ATK}";
+                        AllText += $"\r\n{GetString("PVP.DF")}: {(lpc.GetRoleClass() as KB_Normal)?.DF}";
+                        AllText += $"\r\n{GetString("PVP.RCO")}: {(lpc.GetRoleClass() as KB_Normal)?.HPReco}";  
+                    }
                     AllText += "\r\n";
 
                     Dictionary<byte, string> SummaryText = new();
                     foreach (var id in PlayerState.AllPlayerStates.Keys)
                     {
+                        if (Utils.GetPlayerById(id).GetCustomRole() is CustomRoles.GM) continue;
                         string name = Main.AllPlayerNames[id].RemoveHtmlTags().Replace("\r\n", string.Empty);
                         string summary = $"{SoloKombatManager.GetDisplayScore(id)}  {Utils.ColorString(Main.PlayerColors[id], name)}";
-                        if (SoloKombatManager.GetDisplayScore(id).Trim() == "") continue;
+                        if (SoloKombatManager.GetDisplayScore(id).ToString().Trim() == "") continue;
                         SummaryText[id] = summary;
                     }
 

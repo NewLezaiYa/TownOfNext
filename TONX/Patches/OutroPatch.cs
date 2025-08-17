@@ -1,14 +1,8 @@
-using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using TMPro;
 using UnityEngine;
 using TONX.Modules;
-using TONX.Roles.Core;
 using TONX.Templates;
-using static TONX.Translator;
 
 namespace TONX;
 
@@ -100,7 +94,7 @@ class SetEverythingUpPatch
         var WinnerTextObject = UnityEngine.Object.Instantiate(__instance.WinText.gameObject);
         WinnerTextObject.transform.position = new(__instance.WinText.transform.position.x, __instance.WinText.transform.position.y - 0.5f, __instance.WinText.transform.position.z);
         WinnerTextObject.transform.localScale = new(0.6f, 0.6f, 0.6f);
-        var WinnerText = WinnerTextObject.GetComponent<TMPro.TextMeshPro>(); //WinTextと同じ型のコンポーネントを取得
+        var WinnerText = WinnerTextObject.GetComponent<TextMeshPro>(); //WinTextと同じ型のコンポーネントを取得
         WinnerText.fontSizeMin = 3f;
         WinnerText.text = "";
 
@@ -108,7 +102,7 @@ class SetEverythingUpPatch
         var AdditionalWinnerText = new StringBuilder(32);
         string CustomWinnerColor = Utils.GetRoleColorCode(CustomRoles.Crewmate);
 
-        if (Options.CurrentGameMode == CustomGameMode.SoloKombat && CustomWinnerHolder.WinnerTeam is not CustomWinner.Error and not CustomWinner.None and not CustomWinner.Draw)
+        if (Options.CurrentGameMode is CustomGameMode.SoloKombat && CustomWinnerHolder.WinnerTeam is not CustomWinner.Error and not CustomWinner.None and not CustomWinner.Draw)
         {
             var winnerId = CustomWinnerHolder.WinnerIds.FirstOrDefault();
             __instance.WinText.text = Main.AllPlayerNames[winnerId] + GetString("Win");

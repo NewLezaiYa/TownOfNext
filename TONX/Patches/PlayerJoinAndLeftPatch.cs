@@ -1,13 +1,7 @@
 using AmongUs.Data;
 using AmongUs.GameOptions;
-using HarmonyLib;
 using InnerNet;
-using System;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using TONX.Modules;
-using TONX.Roles.Core;
-using static TONX.Translator;
 
 namespace TONX;
 
@@ -16,7 +10,7 @@ class OnGameJoinedPatch
 {
     public static void Postfix(AmongUsClient __instance)
     {
-        while (!Options.IsLoaded) System.Threading.Tasks.Task.Delay(1);
+        while (!Options.IsLoaded) Task.Delay(1);
         Main.HostNickName = AmongUsClient.Instance?.GetHost()?.PlayerName ?? "";
         Logger.Info($"{__instance.GameId} 加入房间", "OnGameJoined");
         Main.playerVersion = new Dictionary<byte, PlayerVersion>();

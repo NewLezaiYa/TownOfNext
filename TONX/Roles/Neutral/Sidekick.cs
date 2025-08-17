@@ -1,11 +1,9 @@
 using AmongUs.GameOptions;
-
-using TONX.Roles.Core;
 using TONX.Roles.Core.Interfaces;
 
 namespace TONX.Roles.Neutral;
 
-public sealed class Sidekick : RoleBase, IKiller
+public sealed class Sidekick : RoleBase, IKiller, ISchrodingerCatOwner
 {
     public static readonly SimpleRoleInfo RoleInfo =
         SimpleRoleInfo.Create(
@@ -20,7 +18,7 @@ public sealed class Sidekick : RoleBase, IKiller
             "#00b4eb",
             true,
             countType: CountTypes.Jackal,
-            Hidden: true
+            Hidden: new HiddenRoleInfo(0, null)
         );
     public Sidekick(PlayerControl player)
     : base(
@@ -40,6 +38,8 @@ public sealed class Sidekick : RoleBase, IKiller
     public static bool CanVent;
     public static bool CanUseSabotage;
     private static bool HasImpostorVision;
+
+    public SchrodingerCat.TeamType SchrodingerCatChangeTo => SchrodingerCat.TeamType.Jackal;
 
     public bool CanUseKillButton() => CanKill;
     public float CalculateKillCooldown() => CanUseKillButton() ? KillCooldown : 255f;

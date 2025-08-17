@@ -1,9 +1,5 @@
 ﻿using AmongUs.GameOptions;
-using System.Collections.Generic;
-using System.Linq;
 using TONX.Modules;
-using TONX.Roles.Core;
-using static TONX.Translator;
 
 namespace TONX.Roles.Crewmate;
 public sealed class Medium : RoleBase

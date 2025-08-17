@@ -1,9 +1,5 @@
 ﻿using AmongUs.GameOptions;
-using HarmonyLib;
 using Hazel;
-using System;
-using System.Collections.Generic;
-using TONX.Roles.Core;
 using TONX.Roles.Core.Interfaces;
 using UnityEngine;
 
@@ -159,7 +155,7 @@ public sealed class Demon : RoleBase, IKiller, ISchrodingerCatOwner
     }
     public bool OverrideKillButtonText(out string text)
     {
-        text = Translator.GetString("DemonButtonText");
+        text = GetString("DemonButtonText");
         return true;
     }
 }

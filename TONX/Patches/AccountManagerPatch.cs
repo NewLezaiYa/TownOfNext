@@ -1,8 +1,6 @@
-﻿using HarmonyLib;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
-
-using static TONX.Translator;
+using Object = UnityEngine.Object;
 
 namespace TONX;
 

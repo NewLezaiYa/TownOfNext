@@ -1,17 +1,11 @@
 using AmongUs.GameOptions;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
-using HarmonyLib;
 using Hazel;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using TONX.Attributes;
 using TONX.Modules;
 using TONX.Roles.AddOns;
-using TONX.Roles.Core;
 using static TONX.Modules.CustomRoleSelector;
-using static TONX.Translator;
 
 namespace TONX;
 
@@ -178,7 +172,7 @@ internal class SelectRolesPatch
             foreach (var sd in RpcSetRoleReplacer.StoragedData)
             {
                 var kp = RoleResult.FirstOrDefault(x => x.Key.PlayerId == sd.Item1.PlayerId);
-                if (kp.Value == CustomRoles.KB_Normal || kp.Value.GetRoleInfo().IsDesyncImpostor || kp.Value == CustomRoles.CrewPostor)
+                if (kp.Value.GetRoleInfo().IsDesyncImpostor || kp.Value == CustomRoles.CrewPostor)
                 {
                     Logger.Warn($"反向原版职业 => {sd.Item1.GetRealName()}: {sd.Item2}", "Override Role Select");
                     continue;
@@ -213,6 +207,17 @@ internal class SelectRolesPatch
                 state.SetMainRole(role);
             }
 
+            // 个人竞技模式用
+            if (Options.CurrentGameMode == CustomGameMode.SoloKombat)
+            {
+                foreach (var pair in PlayerState.AllPlayerStates)
+                {
+                    ExtendedPlayerControl.RpcSetCustomRole(pair.Key, pair.Value.MainRole);
+                }
+                CustomRoleManager.CreateInstance();
+                goto EndOfSelectRolePatch;
+            }
+
             foreach (var (player, role) in RoleResult.Where(kvp => !(kvp.Value.GetRoleInfo()?.IsDesyncImpostor ?? false)))
             {
                 SetColorPatch.IsAntiGlitchDisabled = true;
@@ -221,13 +226,6 @@ internal class SelectRolesPatch
                 Logger.Info($"注册模组职业：{player?.Data?.PlayerName} => {role}", "AssignCustomRoles");
 
                 SetColorPatch.IsAntiGlitchDisabled = false;
-            }
-
-            // 个人竞技模式用
-            if (Options.CurrentGameMode == CustomGameMode.SoloKombat)
-            {
-                foreach (var pair in PlayerState.AllPlayerStates) ExtendedPlayerControl.RpcSetCustomRole(pair.Key, pair.Value.MainRole);
-                goto EndOfSelectRolePatch;
             }
 
             foreach (var pair in PlayerState.AllPlayerStates)
@@ -316,7 +314,7 @@ internal class SelectRolesPatch
         Logger.Info("Set Disconnected", "SelectRolesPatch");
         foreach (var (player, role) in RoleResult) // 给玩家自己注册职业
         {
-            if (player.PlayerId == 0 && (role.GetRoleInfo()?.IsDesyncImpostor ?? role is CustomRoles.KB_Normal)) player.SetRole(RoleTypes.Crewmate, true);
+            if (player.PlayerId == 0 && (role.GetRoleInfo()?.IsDesyncImpostor ?? false)) player.SetRole(RoleTypes.Crewmate, true);
             else player.RpcSetRoleDesync(role.GetRoleTypes(), player.GetClientId());
         }
         foreach (var player in Main.AllPlayerControls.Where(p => !RoleResult.Select(r => r.Key.PlayerId).ToList().Contains(p.PlayerId)).ToList()) // 给GM或未被分配到职业的玩家注册职业
@@ -340,7 +338,7 @@ internal class SelectRolesPatch
     }
     private static void AssignDesyncRole(CustomRoles role, PlayerControl player, Dictionary<byte, CustomRpcSender> senders, RoleTypes BaseRole, RoleTypes hostBaseRole = RoleTypes.Crewmate)
     {
-        if (!role.IsEnable() && role is not CustomRoles.KB_Normal) return;
+        if (!role.IsEnable() && !role.IsGameModeRole()) return;
 
         var hostId = PlayerControl.LocalPlayer.PlayerId;
 

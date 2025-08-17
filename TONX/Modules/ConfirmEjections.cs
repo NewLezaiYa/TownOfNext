@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using TONX.Roles.Core;
-using static TONX.Translator;
-
-namespace TONX;
+﻿namespace TONX;
 
 public static class ConfirmEjections
 {

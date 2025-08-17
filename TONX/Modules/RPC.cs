@@ -1,15 +1,8 @@
 using AmongUs.GameOptions;
-using HarmonyLib;
 using Hazel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TONX.Modules;
-using TONX.Roles.Core;
 using TONX.Roles.Core.Interfaces;
 using TONX.Roles.Crewmate;
-using static TONX.Translator;
 
 namespace TONX;
 
@@ -275,20 +268,11 @@ internal class RPCHandlerPatch
                 float time = reader.ReadSingle();
                 PlayerControl.LocalPlayer.SetKillTimer(time);
                 break;
-            case CustomRPC.SyncKBPlayer:
-                SoloKombatManager.ReceiveRPCSyncKBPlayer(reader);
-                break;
             case CustomRPC.SyncAllPlayerNames:
                 Main.AllPlayerNames = new();
                 int num = reader.ReadInt32();
                 for (int i = 0; i < num; i++)
                     Main.AllPlayerNames.TryAdd(reader.ReadByte(), reader.ReadString());
-                break;
-            case CustomRPC.SyncKBBackCountdown:
-                SoloKombatManager.ReceiveRPCSyncBackCountdown(reader);
-                break;
-            case CustomRPC.SyncKBNameNotify:
-                SoloKombatManager.ReceiveRPCSyncNameNotify(reader);
                 break;
             case CustomRPC.SyncNameNotify:
                 NameNotifyManager.ReceiveRPC(reader);
@@ -485,7 +469,7 @@ internal static class RPC
             CustomRoleManager.GetByPlayerId(targetId)?.Dispose();
             PlayerState.GetByPlayerId(targetId).SetMainRole(role);
         }
-        else if (role >= CustomRoles.NotAssigned)   //500:NoSubRole 501~:SubRole
+        else
         {
             PlayerState.GetByPlayerId(targetId).SetSubRole(role);
         }
@@ -534,7 +518,7 @@ internal static class RPC
         state.RealKiller.Item2 = killerId;
 
         if (!AmongUsClient.Instance.AmHost) return;
-        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.SetRealKiller, Hazel.SendOption.Reliable, -1);
+        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.SetRealKiller, SendOption.Reliable, -1);
         writer.Write(targetId);
         writer.Write(killerId);
         AmongUsClient.Instance.FinishRpcImmediately(writer);
@@ -542,7 +526,7 @@ internal static class RPC
     public static void NotificationPop(string text)
     {
         if (!AmongUsClient.Instance.AmHost) return;
-        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.NotificationPop, Hazel.SendOption.Reliable, -1);
+        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.NotificationPop, SendOption.Reliable, -1);
         writer.Write(text);
         AmongUsClient.Instance.FinishRpcImmediately(writer);
         NotificationPopperPatch.AddItem(text);

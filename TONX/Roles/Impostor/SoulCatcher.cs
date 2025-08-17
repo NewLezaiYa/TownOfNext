@@ -1,6 +1,4 @@
 ﻿using AmongUs.GameOptions;
-
-using TONX.Roles.Core;
 using TONX.Roles.Core.Interfaces;
 
 namespace TONX.Roles.Impostor;
@@ -43,7 +41,7 @@ public sealed class SoulCatcher : RoleBase, IImpostor
     }
     public override bool GetAbilityButtonText(out string text)
     {
-        text = Translator.GetString("SoulCatcherButtonText");
+        text = GetString("SoulCatcherButtonText");
         return !Shapeshifting;
     }
     private bool Shapeshifting = false;

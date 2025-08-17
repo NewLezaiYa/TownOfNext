@@ -1,9 +1,4 @@
 ﻿using AmongUs.GameOptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using TONX.Roles.Core;
 
 namespace TONX.Modules;
 
@@ -39,14 +34,15 @@ internal static class CustomRoleSelector
         if (Options.CurrentGameMode == CustomGameMode.SoloKombat)
         {
             RoleResult = new();
-            foreach (var pc in Main.AllAlivePlayerControls) RoleResult.Add(pc, pc.AmOwner && Options.EnableGM.GetBool() ? CustomRoles.GM : CustomRoles.KB_Normal);
+            foreach (var pc in Main.AllAlivePlayerControls) RoleResult.Add(pc, pc.PlayerId == 0 && Options.EnableGM.GetBool() ? CustomRoles.GM : CustomRoles.KB_Normal);
             return;
         }
 
         foreach (var cr in Enum.GetValues(typeof(CustomRoles)))
         {
             CustomRoles role = (CustomRoles)Enum.Parse(typeof(CustomRoles), cr.ToString());
-            if (role is CustomRoles.Crewmate or CustomRoles.Impostor or CustomRoles.GM or CustomRoles.NotAssigned or CustomRoles.KB_Normal or CustomRoles.Sidekick) continue;
+            if (role.IsGameModeRole() || !role.IsValid()) continue;
+            if (role is CustomRoles.Crewmate or CustomRoles.Impostor) continue;
             if (role.IsVanilla())
             {
                 if (Options.DisableVanillaRoles.GetBool() || role.GetCount() == 0 || rd.Next(0, 100) > role.GetChance()) continue;
@@ -104,8 +100,12 @@ internal static class CustomRoleSelector
         // 隐藏职业
         if (!Options.DisableHiddenRoles.GetBool())
         {
-            if (rd.Next(0, 100) < 3 && rolesToAssign.Remove(CustomRoles.Jester)) rolesToAssign.Add(CustomRoles.Sunnyboy);
-            if (rd.Next(0, 100) < 5 && rolesToAssign.Remove(CustomRoles.Arrogance)) rolesToAssign.Add(CustomRoles.Bard);
+            foreach (var role in EnumHelper.GetAllValues<CustomRoles>())
+            {
+                if (!role.IsHidden(out var hiddenRoleInfo) || hiddenRoleInfo.TargetRole == null) continue;
+                if (rd.Next(0, 100) < hiddenRoleInfo.Probability && rolesToAssign.Remove(hiddenRoleInfo.TargetRole.Value)) 
+                    rolesToAssign.Add(role);
+            } 
         }
 
         // Dev Roles List Edit

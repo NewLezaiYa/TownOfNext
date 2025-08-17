@@ -1,10 +1,5 @@
 ﻿using AmongUs.GameOptions;
-using HarmonyLib;
-using System.Linq;
 using TONX.Modules;
-using TONX.Roles.Core;
-using UnityEngine;
-using static TONX.Translator;
 
 namespace TONX.Roles.Crewmate;
 public sealed class Grenadier : RoleBase

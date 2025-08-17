@@ -1,7 +1,4 @@
 using AmongUs.GameOptions;
-using System.Linq;
-
-using TONX.Roles.Core;
 
 namespace TONX;
 
@@ -12,7 +9,7 @@ static class CustomRolesHelper
     /// <summary>すべての属性</summary>
     public static readonly CustomRoles[] AllAddOns = EnumHelper.GetAllValues<CustomRoles>().Where(role => role > CustomRoles.NotAssigned).ToArray();
     /// <summary>スタンダードモードで出現できるすべての役職</summary>
-    public static readonly CustomRoles[] AllStandardRoles = AllRoles.Where(role => role is not CustomRoles.KB_Normal).ToArray();
+    public static readonly CustomRoles[] AllStandardRoles = AllRoles.Where(role => !role.IsGameModeRole()).ToArray();
     public static readonly CustomRoleTypes[] AllRoleTypes = EnumHelper.GetAllValues<CustomRoleTypes>();
 
     public static bool IsImpostor(this CustomRoles role)
@@ -28,7 +25,7 @@ static class CustomRolesHelper
         var roleInfo = role.GetRoleInfo();
         if (roleInfo != null)
             return roleInfo.CustomRoleType == CustomRoleTypes.Neutral;
-        return role is CustomRoles.KB_Normal;
+        return false;
     }
     public static bool IsCrewmate(this CustomRoles role)
     {
@@ -42,6 +39,30 @@ static class CustomRolesHelper
             CustomRoles.Tracker or
             CustomRoles.Scientist;
     }
+    public static bool IsGameModeRole(this CustomRoles role)
+    {
+        try
+        {
+            var roleInfo = role.GetRoleInfo();
+            if (roleInfo != null)
+                return roleInfo.CustomRoleType == CustomRoleTypes.GameMode;
+        }
+        catch
+        {
+            /* ignored */
+        }
+        return (int)role is >= 400 and < 500 && role is not CustomRoles.GM;
+    }
+
+    public static bool IsHidden(this CustomRoles role, out HiddenRoleInfo hiddenRoleInfo)
+    {
+        var roleInfo = role.GetRoleInfo();
+        hiddenRoleInfo = null;
+        if (roleInfo == null) return false;
+        hiddenRoleInfo = roleInfo.Hidden;
+        return roleInfo.Hidden != null;
+    }
+    
     public static bool IsAddon(this CustomRoles role) => (int)role > 500;
     public static bool IsValid(this CustomRoles role) => role is not CustomRoles.GM and not CustomRoles.NotAssigned;
     public static bool IsExist(this CustomRoles role, bool CountDeath = false) => Main.AllPlayerControls.Any(x => x.Is(role) && (x.IsAlive() || CountDeath));
@@ -139,22 +160,20 @@ static class CustomRolesHelper
             return roleInfo.BaseRoleType.Invoke();
         return role switch
         {
-            CustomRoles.KB_Normal => RoleTypes.Impostor,
             CustomRoles.GM => RoleTypes.GuardianAngel,
-
             _ => role.IsImpostor() ? RoleTypes.Impostor : RoleTypes.Crewmate,
         };
     }
 }
 public enum CountTypes
 {
-    OutOfGame,
-    None,
-    Crew,
-    Impostor,
-    Jackal,
-    Pelican,
-    Demon,
-    BloodKnight,
-    Succubus,
+    OutOfGame = -1,
+    None = -2,
+    Crew = CustomWinner.Crewmate,
+    Impostor = CustomWinner.Impostor,
+    Jackal = CustomWinner.Jackal,
+    Pelican = CustomWinner.Pelican,
+    Demon = CustomWinner.Demon,
+    BloodKnight = CustomWinner.BloodKnight,
+    Succubus = CustomWinner.Succubus,
 }

@@ -1,5 +1,4 @@
 using BepInEx.Configuration;
-using System;
 using UnityEngine;
 
 namespace TONX.Modules.ClientOptions;
@@ -51,7 +50,7 @@ public sealed class ClientOptionItem<T> : ClientActionItem
                     else
                         currentIndex = (currentIndex + 1) % allValues.Length;
                     config.Value = allValues[currentIndex];
-                    item.ToggleButton.Text.text += $"\n|{Translator.GetString(config.Value.ToString())}|";
+                    item.ToggleButton.Text.text += $"\n|{GetString(config.Value.ToString())}|";
                     break;
             }
 
@@ -92,7 +91,7 @@ public sealed class ClientOptionItem<T> : ClientActionItem
 
                 Config.Value = allValues[currentIndex];
                 Rename();
-                ToggleButton.Text.text += $"\n|{Translator.GetString($"Value.{Config.Value.ToString()}")}|";
+                ToggleButton.Text.text += $"\n|{GetString($"Value.{Config.Value.ToString()}")}|";
                 break;
         }
 

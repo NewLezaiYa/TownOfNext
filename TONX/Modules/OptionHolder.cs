@@ -1,14 +1,9 @@
-using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using TONX.GameModes;
 using TONX.Modules;
 using TONX.Modules.OptionItems;
 using TONX.Roles.AddOns.Common;
 using TONX.Roles.AddOns.Crewmate;
 using TONX.Roles.AddOns.Impostor;
-using TONX.Roles.Core;
 using UnityEngine;
 
 namespace TONX;
@@ -494,7 +489,7 @@ public static class Options
         CustomRoleCounts = new();
         CustomRoleSpawnChances = new();
 
-        var sortedRoleInfo = CustomRoleManager.AllRolesInfo.Values.Where(role => !(role.RoleName.GetRoleInfo()?.Hidden ?? false)).OrderBy(role => role.ConfigId);
+        var sortedRoleInfo = CustomRoleManager.AllRolesInfo.Values.Where(role => role.Hidden == null).OrderBy(role => role.ConfigId);
 
         // 各职业的总体设定
         ImpKnowAlliesRole = BooleanOptionItem.Create(1_000_001, "ImpKnowAlliesRole", true, TabGroup.ImpostorRoles, false)
@@ -615,9 +610,9 @@ public static class Options
 
         #region Options of Lover
         SetupAddonOptions(80100, TabGroup.Addons, CustomRoles.Lovers, Rates, false);
-        LoverKnowRoles = BooleanOptionItem.Create(80100 + 4, "LoverKnowRoles", true, TabGroup.Addons, false).SetParent(Options.CustomRoleSpawnChances[CustomRoles.Lovers])
+        LoverKnowRoles = BooleanOptionItem.Create(80100 + 4, "LoverKnowRoles", true, TabGroup.Addons, false).SetParent(CustomRoleSpawnChances[CustomRoles.Lovers])
             .SetGameMode(CustomGameMode.Standard);
-        LoverSuicide = BooleanOptionItem.Create(80100 + 3, "LoverSuicide", true, TabGroup.Addons, false).SetParent(Options.CustomRoleSpawnChances[CustomRoles.Lovers])
+        LoverSuicide = BooleanOptionItem.Create(80100 + 3, "LoverSuicide", true, TabGroup.Addons, false).SetParent(CustomRoleSpawnChances[CustomRoles.Lovers])
             .SetGameMode(CustomGameMode.Standard);
         #endregion
 
@@ -1141,7 +1136,7 @@ public static class Options
         var spawnOption = new RoleSpawnChanceOptionItem(id, role.ToString(), 0, tab, false, RoleSpwanModes, role, roleColor)
             .SetColor(broken ? Palette.DisabledGrey : Utils.GetRoleColor(role))
             .SetHeader(true)
-            .SetAddDesc(broken ? Utils.ColorString(Palette.DisabledGrey, Translator.GetString("RoleBroken")) : "")
+            .SetAddDesc(broken ? Utils.ColorString(Palette.DisabledGrey, GetString("RoleBroken")) : "")
             .SetGameMode(customGameMode) as StringOptionItem;
 
         var countOption = IntegerOptionItem.Create(id + 1, "Maximum", assignCountRule, assignCountRule.Step, tab, false)

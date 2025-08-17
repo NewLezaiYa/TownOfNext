@@ -1,6 +1,5 @@
 using AmongUs.GameOptions;
 using TONX.Modules;
-using TONX.Roles.Core;
 
 namespace TONX.Roles.Crewmate;
 public sealed class Dictator : RoleBase
@@ -31,7 +30,7 @@ public sealed class Dictator : RoleBase
         if (votedFor != null && lastVoted == votedFor.PlayerId) return true;
         lastVoted = votedFor.PlayerId;
         ModifyVote(Player.PlayerId, votedFor.PlayerId, true);
-        Utils.SendMessage(Translator.GetString("DictatorOnVote"), Player.PlayerId);
+        Utils.SendMessage(GetString("DictatorOnVote"), Player.PlayerId);
         return false;
     }
     public override (byte? votedForId, int? numVotes, bool doVote) ModifyVote(byte voterId, byte sourceVotedForId, bool isIntentional)

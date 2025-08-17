@@ -1,9 +1,4 @@
-﻿using HarmonyLib;
-using System.Collections.Generic;
-using System.Linq;
-using static TONX.Translator;
-
-namespace TONX;
+﻿namespace TONX;
 
 [HarmonyPatch(typeof(CreditsController))]
 public class CreditsControllerPatch

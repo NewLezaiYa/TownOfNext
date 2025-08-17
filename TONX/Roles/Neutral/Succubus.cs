@@ -1,6 +1,5 @@
 ﻿using AmongUs.GameOptions;
 using Hazel;
-using TONX.Roles.Core;
 using TONX.Roles.Core.Interfaces;
 using UnityEngine;
 
@@ -96,8 +95,8 @@ public sealed class Succubus : RoleBase, IKiller
             SendRPC();
             target.RpcSetCustomRole(CustomRoles.Charmed);
 
-            killer.Notify(Utils.ColorString(Utils.GetRoleColor(CustomRoles.Succubus), Translator.GetString("SuccubusCharmedPlayer")));
-            target.Notify(Utils.ColorString(Utils.GetRoleColor(CustomRoles.Succubus), Translator.GetString("CharmedBySuccubus")));
+            killer.Notify(Utils.ColorString(Utils.GetRoleColor(CustomRoles.Succubus), GetString("SuccubusCharmedPlayer")));
+            target.Notify(Utils.ColorString(Utils.GetRoleColor(CustomRoles.Succubus), GetString("CharmedBySuccubus")));
             Utils.NotifyRoles();
 
             killer.ResetKillCooldown();
@@ -110,7 +109,7 @@ public sealed class Succubus : RoleBase, IKiller
             Logger.Info($"{killer.GetNameWithRole()} : 剩余{CharmLimit}次魅惑机会", "Succubus");
             return false;
         }
-        killer.Notify(Utils.ColorString(Utils.GetRoleColor(CustomRoles.Succubus), Translator.GetString("SuccubusInvalidTarget")));
+        killer.Notify(Utils.ColorString(Utils.GetRoleColor(CustomRoles.Succubus), GetString("SuccubusInvalidTarget")));
         Logger.Info($"{killer.GetNameWithRole()} : 剩余{CharmLimit}次魅惑机会", "Succubus");
         return false;
     }
@@ -126,7 +125,7 @@ public sealed class Succubus : RoleBase, IKiller
     public static bool CanBeCharmed(PlayerControl pc) => pc != null && (pc.GetCustomRole().IsCrewmate() || pc.GetCustomRole().IsImpostor()) && !pc.Is(CustomRoles.Charmed);
     public bool OverrideKillButtonText(out string text)
     {
-        text = Translator.GetString("SuccubusKillButtonText");
+        text = GetString("SuccubusKillButtonText");
         return true;
     }
     public bool OverrideKillButtonSprite(out string buttonName)
