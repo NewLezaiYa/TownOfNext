@@ -19,6 +19,7 @@ public enum CustomRPC
     SetLoversPlayers,
     SetRealKiller,
     CustomRoleSync,
+    RemoveSubRole,
 
     //TONX
     AntiBlackout,
@@ -31,6 +32,8 @@ public enum CustomRPC
     KillFlash,
     NotificationPop,
     SetKickReason,
+    SyncRolesRecord,
+    SyncTaskState,
 
     //Roles
     Judge,
@@ -300,6 +303,24 @@ internal class RPCHandlerPatch
             case CustomRPC.CustomRoleSync:
                 CustomRoleManager.DispatchRpc(reader);
                 break;
+            case CustomRPC.SyncRolesRecord:
+                Utils.RolesRecord = new();
+                int num2 = reader.ReadInt32();
+                for (int i = 0; i < num2; i++)
+                    Utils.RolesRecord.TryAdd(reader.ReadByte(), reader.ReadString());
+                break;
+            case CustomRPC.RemoveSubRole:
+                byte CustomRoleTargetId2 = reader.ReadByte();
+                CustomRoles role2 = (CustomRoles)reader.ReadPackedInt32();
+                PlayerState.GetByPlayerId(CustomRoleTargetId2).RemoveSubRole(role2, false);
+                break;
+            case CustomRPC.SyncTaskState:
+                byte id = reader.ReadByte();
+                TaskState state = Utils.GetPlayerById(id).GetPlayerTaskState();
+                state.AllTasksCount = reader.ReadInt32();
+                state.CompletedTasksCount = reader.ReadInt32();
+                state.hasTasks = reader.ReadBoolean();
+                break;
         }
     }
 }
@@ -530,6 +551,28 @@ internal static class RPC
         writer.Write(text);
         AmongUsClient.Instance.FinishRpcImmediately(writer);
         NotificationPopperPatch.AddItem(text);
+    }
+    public static void SyncRolesRecord()
+    {
+        if (!AmongUsClient.Instance.AmHost) return;
+        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.SyncRolesRecord, SendOption.Reliable, -1);
+        writer.Write(Utils.RolesRecord.Count);
+        foreach (var rec in Utils.RolesRecord)
+        {
+            writer.Write(rec.Key);
+            writer.Write(rec.Value);
+        }
+        AmongUsClient.Instance.FinishRpcImmediately(writer);
+    }
+    public static void SyncTaskState(byte playerId, int allTasksCount, int completedTasksCount, bool hastasks)
+    {
+        if (!AmongUsClient.Instance.AmHost) return;
+        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.SyncTaskState, SendOption.Reliable, -1);
+        writer.Write(playerId);
+        writer.Write(allTasksCount);
+        writer.Write(completedTasksCount);
+        writer.Write(hastasks);
+        AmongUsClient.Instance.FinishRpcImmediately(writer);
     }
 }
 [HarmonyPatch(typeof(InnerNet.InnerNetClient), nameof(InnerNet.InnerNetClient.StartRpcImmediately))]

@@ -538,11 +538,6 @@ class FixedUpdatePatch
             }
             if (GameStates.IsInGame)
             {
-                //if (Options.CurrentGameMode == CustomGameMode.HideAndSeek)
-                //{
-                //    var hasRole = main.AllPlayerCustomRoles.TryGetValue(__instance.PlayerId, out var role);
-                //    if (hasRole) RoleTextData = Utils.GetRoleTextHideAndSeek(__instance.Data.Role.Role, role);
-                //}
                 (RoleText.enabled, RoleText.text) = Utils.GetRoleNameAndProgressTextData(PlayerControl.LocalPlayer, __instance);
                 if (!AmongUsClient.Instance.IsGameStarted && AmongUsClient.Instance.NetworkMode != NetworkModes.FreePlay)
                 {
@@ -810,11 +805,13 @@ class PlayerControlRemoveProtectionPatch
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.RpcSetRole))]
 class PlayerControlSetRolePatch
 {
-    public static bool Prefix(PlayerControl __instance, ref RoleTypes roleType)
+    public static bool Prefix(PlayerControl __instance, ref RoleTypes roleType, ref bool canOverrideRole)
     {
         var target = __instance;
         var targetName = __instance.GetNameWithRole();
         Logger.Info($"{targetName} =>{roleType}", "PlayerControl.RpcSetRole");
+
+        canOverrideRole = true;
         if (!ShipStatus.Instance.enabled) return true;
         if (roleType is RoleTypes.CrewmateGhost or RoleTypes.ImpostorGhost)
         {
