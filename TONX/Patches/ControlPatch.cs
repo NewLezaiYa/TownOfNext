@@ -101,7 +101,7 @@ internal class ControllerManagerUpdatePatch
             GameManager.Instance.LogicFlow.CheckEndCriteria();
         }
         //强制结束会议或召开会议
-        if (GetKeysDown(KeyCode.Return, KeyCode.M, KeyCode.LeftShift) && GameStates.IsInGame)
+        if (GetKeysDown(KeyCode.Return, KeyCode.M, KeyCode.LeftShift) && GameStates.IsInGame && RoleDraftManager.RoleDraftState == RoleDraftState.None)
         {
             if (GameStates.IsMeeting) MeetingHud.Instance.RpcClose();
             else PlayerControl.LocalPlayer.NoCheckStartMeeting(null, true);
@@ -148,6 +148,7 @@ internal class ControllerManagerUpdatePatch
             PlayerControl.LocalPlayer.RpcExileV2();
             state.SetDead();
             Utils.SendMessage(GetString("HostKillSelfByCommand"), title: $"<color=#ff0000>{GetString("DefaultSystemMessageTitle")}</color>");
+            _ = new LateTask(() => { Utils.NotifyRoles(); }, 0.1f, "HostKillSeftNotify");
         }
         //切换日志是否也在游戏中输出
         if (GetKeysDown(KeyCode.F2, KeyCode.LeftControl))

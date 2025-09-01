@@ -245,10 +245,11 @@ public static class MeetingHudPatch
     {
         public static void Postfix()
         {
-            MeetingStates.FirstMeeting = false;
+            if (RoleDraftManager.RoleDraftState == RoleDraftState.None) MeetingStates.FirstMeeting = false;
             Logger.Info("------------会议结束------------", "Phase");
             if (AmongUsClient.Instance.AmHost)
             {
+                if (Options.EnableRoleDraftMode.GetBool() && RoleDraftManager.RoleDraftState == RoleDraftState.Drafting) RoleDraftManager.AssignDraftRoles();
                 AntiBlackout.SetIsDead();
                 EAC.MeetingTimes = 0;
             }

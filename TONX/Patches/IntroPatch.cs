@@ -1,4 +1,5 @@
 using AmongUs.GameOptions;
+using TONX.Modules;
 using UnityEngine;
 
 namespace TONX;
@@ -169,6 +170,15 @@ class IntroCutscenePatch
             PlayerControl.LocalPlayer.Data.Role.IntroSound = DestroyableSingleton<HnSImpostorScreamSfx>.Instance.HnSOtherImpostorTransformSfx;
         }
 
+        if (RoleDraftManager.RoleDraftState == RoleDraftState.ReadyToDraft)
+        {
+            __instance.TeamTitle.text = GetString("RoleDraft");
+            __instance.TeamTitle.color = Color.gray;
+            __instance.ImpostorText.gameObject.SetActive(false);
+            __instance.BackgroundBar.material.color = Color.gray;
+            PlayerControl.LocalPlayer.Data.Role.IntroSound = GetIntroSound(RoleTypes.Crewmate);
+        }
+
         if (Input.GetKey(KeyCode.RightShift))
         {
             __instance.TeamTitle.text = "明天就跑路啦";
@@ -325,5 +335,7 @@ class IntroCutscenePatch
 
         GameStates.InTask = true;
         Logger.Info("タスクフェイズ開始", "Phase");
+
+        if (Options.EnableRoleDraftMode.GetBool() && AmongUsClient.Instance.AmHost) PlayerControl.LocalPlayer.NoCheckStartMeeting(null, true);
     }
 }

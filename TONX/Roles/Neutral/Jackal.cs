@@ -5,7 +5,7 @@ using Hazel;
 
 namespace TONX.Roles.Neutral;
 
-public sealed class Jackal : RoleBase, IKiller, ISchrodingerCatOwner
+public sealed class Jackal : RoleBase, IKiller
 {
     public static readonly SimpleRoleInfo RoleInfo =
         SimpleRoleInfo.Create(
@@ -75,8 +75,6 @@ public sealed class Jackal : RoleBase, IKiller, ISchrodingerCatOwner
     public int RecruitLimit;
     public int KillCount;
 
-    public SchrodingerCat.TeamType SchrodingerCatChangeTo => SchrodingerCat.TeamType.Jackal;
-
     private static void SetupOptionItem()
     {
         OptionKillCooldown = FloatOptionItem.Create(RoleInfo, 10, GeneralOption.KillCooldown, new(2.5f, 180f, 2.5f), 20f, false)
@@ -124,16 +122,13 @@ public sealed class Jackal : RoleBase, IKiller, ISchrodingerCatOwner
     }
     public override void OnPlayerDeath(PlayerControl player, CustomDeathReason deathReason, bool isOnMeeting = false)
     {
-        if (!OptionSidekickCanBecomeJackal.GetBool()) return;
-        new LateTask(() =>
+        if (!OptionSidekickCanBecomeJackal.GetBool() || player != Player) return;
+        foreach (var sidekick in Main.AllPlayerControls.Where(p => p.IsAlive() && p.Is(CustomRoles.Sidekick)).ToList())
         {
-            foreach (var sidekick in Main.AllPlayerControls.Where(p => p.IsAlive() && p.Is(CustomRoles.Sidekick)).ToList())
-            {
-                sidekick.RpcChangeRole(CustomRoles.Jackal);
-                Logger.Info($"跟班{sidekick?.Data?.PlayerName}上位", "Jackal");
-            }
-            Utils.NotifyRoles();
-        }, 0.1f, "Sidekick become Jackal");
+            sidekick.RpcChangeRole(CustomRoles.Jackal);
+            Logger.Info($"跟班{sidekick?.Data?.PlayerName}上位", "Jackal");
+        }
+        Utils.NotifyRoles();
     }
     public static void OnMurderPlayerOthers(MurderInfo info)
     {

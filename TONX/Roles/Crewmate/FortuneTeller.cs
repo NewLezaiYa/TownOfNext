@@ -88,6 +88,7 @@ public sealed class FortuneTeller : RoleBase
                 CustomRoles.LazyGuy or
                 CustomRoles.Repairman or
                 CustomRoles.Jackal or
+                CustomRoles.Sidekick or
                 CustomRoles.Mario or
                 CustomRoles.Cleaner or
                 CustomRoles.CrewPostor or
@@ -152,7 +153,8 @@ public sealed class FortuneTeller : RoleBase
                 CustomRoles.BallLightning or
                 CustomRoles.Workaholic or
                 CustomRoles.Provocateur or
-                CustomRoles.SchrodingerCat
+                CustomRoles.SchrodingerCat or
+                CustomRoles.Swapper
                 => "Incomprehensible",
 
                 CustomRoles.Fireworker or

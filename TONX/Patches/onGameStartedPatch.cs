@@ -44,6 +44,7 @@ internal class ChangeRoleSettings
             GameOptionsManager.Instance.currentNormalGameOptions.ConfirmImpostor = false;
 
             Main.isFirstTurn = false;
+            RoleDraftManager.RoleDraftState = Options.EnableRoleDraftMode.GetBool() ? RoleDraftState.ReadyToDraft : RoleDraftState.None;
 
             Main.DefaultCrewmateVision = Main.RealOptionsData.GetFloat(FloatOptionNames.CrewLightMod);
             Main.DefaultImpostorVision = Main.RealOptionsData.GetFloat(FloatOptionNames.ImpostorLightMod);
@@ -222,17 +223,9 @@ internal class SelectRolesPatch
             // 个人竞技模式用
             if (Options.CurrentGameMode == CustomGameMode.SoloKombat) goto EndOfSelectRolePatch;
 
-            if (CustomRoles.Lovers.IsEnable() && CustomRoles.Hater.IsEnable()) AssignLoversRoles();
-            else if (CustomRoles.Lovers.IsEnable() && rd.Next(0, 100) < Options.GetRoleChance(CustomRoles.Lovers)) AssignLoversRoles();
-            if (CustomRoles.Madmate.IsEnable() && Options.MadmateSpawnMode.GetInt() == 0) AssignMadmateRoles();
-            AddOnsAssignData.AssignAddOnsFromList();
+            if (RoleDraftManager.RoleDraftState == RoleDraftState.ReadyToDraft) goto EndOfSelectRolePatch;
 
-            foreach (var pair in PlayerState.AllPlayerStates)
-            {
-                foreach (var subRole in pair.Value.SubRoles)
-                    ExtendedPlayerControl.RpcSetCustomRole(pair.Key, subRole);
-            }
-            CustomRoleManager.CreateInstance(true);
+            AssignAddons();
 
         EndOfSelectRolePatch:
 
@@ -258,8 +251,9 @@ internal class SelectRolesPatch
                     break;
             }
 
-            // 给玩家自己注册职业
-            AmongUsClient.Instance.StartCoroutine(CoEndAssign().WrapToIl2Cpp());
+            Utils.CanRecord = RoleDraftManager.RoleDraftState == RoleDraftState.None;
+            if (Utils.CanRecord) foreach (var pc in Main.AllPlayerControls) Utils.RecordPlayerRoles(pc.PlayerId);
+            AmongUsClient.Instance.StartCoroutine(CoEndAssign().WrapToIl2Cpp()); // 准备进入IntroCutscene
         }
         catch (Exception ex)
         {
@@ -271,10 +265,10 @@ internal class SelectRolesPatch
     {
         yield return new WaitForSeconds(1.0f);
 
-        Dictionary<byte, bool> realDisconnectInfo = new();
+        Dictionary<byte, bool> isDisconnectedCache = new();
         foreach (var pc in Main.AllPlayerControls)
         {
-            realDisconnectInfo[pc.PlayerId] = pc.Data.Disconnected;
+            isDisconnectedCache[pc.PlayerId] = pc.Data.Disconnected;
             pc.Data.Disconnected = true;
             pc.Data.MarkDirty();
             AmongUsClient.Instance.SendAllStreamedObjects();
@@ -297,7 +291,7 @@ internal class SelectRolesPatch
 
         foreach (var pc in Main.AllPlayerControls)
         {
-            bool disconnected = realDisconnectInfo[pc.PlayerId];
+            bool disconnected = isDisconnectedCache[pc.PlayerId];
             pc.Data.Disconnected = disconnected;
             if (!disconnected)
             {
@@ -305,7 +299,7 @@ internal class SelectRolesPatch
                 AmongUsClient.Instance.SendAllStreamedObjects();
             }
         }
-        Logger.Info("Recover Disconnect Data", "CoAssignForSelf");
+        Logger.Info("Restore Disconnect Data", "CoAssignForSelf");
         yield return new WaitForSeconds(1.0f);
 
         GameOptionsSender.AllSenders.Clear();
@@ -317,10 +311,21 @@ internal class SelectRolesPatch
         Utils.CountAlivePlayers(true);
         Utils.SyncAllSettings();
         SetColorPatch.IsAntiGlitchDisabled = false;
-
-        Utils.CanRecord = true;
-        foreach (var pc in Main.AllPlayerControls) Utils.RecordPlayerRoles(pc.PlayerId);
         yield break;
+    }
+    public static void AssignAddons()
+    {
+        if (CustomRoles.Lovers.IsEnable() && CustomRoles.Hater.IsEnable()) AssignLoversRoles();
+        else if (CustomRoles.Lovers.IsEnable() && IRandom.Instance.Next(0, 100) < Options.GetRoleChance(CustomRoles.Lovers)) AssignLoversRoles();
+        if (CustomRoles.Madmate.IsEnable() && Options.MadmateSpawnMode.GetInt() == 0) AssignMadmateRoles();
+        AddOnsAssignData.AssignAddOnsFromList();
+
+        foreach (var pair in PlayerState.AllPlayerStates)
+        {
+            foreach (var subRole in pair.Value.SubRoles)
+                ExtendedPlayerControl.RpcSetCustomRole(pair.Key, subRole);
+        }
+        CustomRoleManager.CreateInstance(true);
     }
     private static void AssignDesyncRole(CustomRoles role, PlayerControl player, Dictionary<byte, CustomRpcSender> senders, RoleTypes BaseRole, RoleTypes hostBaseRole = RoleTypes.Crewmate)
     {

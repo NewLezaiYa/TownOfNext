@@ -33,6 +33,14 @@ public class MeetingTimeManager
     }
     public static void OnReportDeadBody()
     {
+        if (RoleDraftManager.RoleDraftState != RoleDraftState.None)
+        {
+            DiscussionTime = Main.AllAlivePlayerControls.Count() * 20 + 10;
+            VotingTime = 0;
+            Logger.Info($"DiscussionTime:{DiscussionTime}, VotingTime{VotingTime}", "MeetingTimeManager.OnReportDeadBody");
+            return;
+        }
+
         if (Options.AllAliveMeeting.GetBool() && Utils.IsAllAlive)
         {
             DiscussionTime = 0;

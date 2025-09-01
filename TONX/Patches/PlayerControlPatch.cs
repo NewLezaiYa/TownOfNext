@@ -505,6 +505,9 @@ class FixedUpdatePatch
             if (GameStates.IsInGame && player.AmOwner)
                 DisableDevice.FixedUpdate();
 
+            if (AmongUsClient.Instance.AmHost && RoleDraftManager.IsValidRoleDraftState())
+                RoleDraftManager.OnFixedUpdate();
+
             NameTagManager.ApplyFor(player);
         }
         //LocalPlayer専用
@@ -859,7 +862,7 @@ public static class PlayerControlDiePatch
     {
         if (AmongUsClient.Instance.AmHost)
         {
-            if (ShipStatus.Instance.enabled) CustomRoleManager.AllActiveRoles.Values.Do(role => role.OnPlayerDeath(__instance, PlayerState.GetByPlayerId(__instance.PlayerId).DeathReason, GameStates.IsMeeting));
+            if (ShipStatus.Instance.enabled) CustomRoleManager.AllActiveRoles.Values.ToList().Do(role => role.OnPlayerDeath(__instance, PlayerState.GetByPlayerId(__instance.PlayerId).DeathReason, GameStates.IsMeeting));
             // 死者の最終位置にペットが残るバグ対応
             __instance.RpcSetPet("");
         }

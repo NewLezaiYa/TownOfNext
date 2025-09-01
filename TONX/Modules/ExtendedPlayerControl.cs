@@ -61,12 +61,12 @@ static class ExtendedPlayerControl
         writer.WritePacked((int)role);
         AmongUsClient.Instance.FinishRpcImmediately(writer);
     }
-    public static void RpcChangeRole(this PlayerControl player, CustomRoles newRole)
+    public static void RpcChangeRole(this PlayerControl player, CustomRoles newRole, bool refreshSeer = true, bool refreshSeen = true, bool refreshTasks = true)
     {
         if (!AmongUsClient.Instance.AmHost) return;
         if (player == null || player.Is(newRole) || newRole >= CustomRoles.NotAssigned) return;
 
-        player.RpcChangeBaseRole(newRole);
+        player.RpcChangeBaseRole(newRole, refreshSeer, refreshSeen);
         Logger.Info($"注册模组职业：{player?.Data?.PlayerName} => {newRole}", "ChangeRole");
 
         player.RpcSetCustomRole(newRole);
@@ -74,22 +74,41 @@ static class ExtendedPlayerControl
         player.ResetKillCooldown();
         player.SyncSettings();
         player.SetKillCooldown();
+        HudManager.Instance.SetHudActive(true);
         Utils.RecordPlayerRoles(player.PlayerId);
-        player.GetPlayerTaskState().Init(player);
+        if (!refreshTasks) return;
+        PlayerState.GetByPlayerId(player.PlayerId).InitTask(player);
+        GameData.Instance.RecomputeTaskCounts();
+        TaskState.InitialTotalTasks = GameData.Instance.TotalTasks;
     }
-    public static void RpcChangeBaseRole(this PlayerControl player, CustomRoles newRole)
+    public static void RpcChangeBaseRole(this PlayerControl player, CustomRoles newRole, bool refreshSeer = true, bool refreshSeen = true)
     {
         if (!AmongUsClient.Instance.AmHost) return;
         if (player == null) return;
 
         RoleTypes NewRoleType = newRole.GetRoleTypes();
         bool NewIsDesync = newRole.GetRoleInfo()?.IsDesyncImpostor ?? false;
-        foreach (var seer in Main.AllPlayerControls)
+
+        player.RpcSetRoleDesync(NewRoleType, player.GetClientId()); // 我看自己
+        if (refreshSeer)
         {
-            if (seer.PlayerId == 0) player.SetRole(NewIsDesync ? RoleTypes.Crewmate : NewRoleType, true); // 确定房主视角职业显示
-            else if (seer.PlayerId == player.PlayerId) player.RpcSetRoleDesync(NewRoleType, player.GetClientId());
-            else player.RpcSetRoleDesync(NewIsDesync || (seer.GetCustomRole().GetRoleInfo()?.IsDesyncImpostor ?? false) ?
-                RoleTypes.Scientist : NewRoleType, seer.GetClientId());
+            foreach (var seer in Main.AllPlayerControls) // 其他玩家看我
+            {
+                if (seer.PlayerId == player.PlayerId) continue;
+                if (seer.PlayerId == 0) player.SetRole(NewIsDesync ? RoleTypes.Crewmate : NewRoleType, true); // 确定房主视角职业显示
+                else player.RpcSetRoleDesync(NewIsDesync || (seer.GetCustomRole().GetRoleInfo()?.IsDesyncImpostor ?? false) ?
+                    RoleTypes.Scientist : NewRoleType, seer.GetClientId());
+            }
+        }
+        if (refreshSeen)
+        {
+            foreach (var seen in Main.AllPlayerControls) // 我看其他玩家
+            {
+                if (seen.PlayerId == player.PlayerId) continue;
+                if (player.PlayerId == 0) seen.SetRole(NewIsDesync ? RoleTypes.Crewmate : NewRoleType, true); // 确定房主视角职业显示
+                else seen.RpcSetRoleDesync(NewIsDesync || (seen.GetCustomRole().GetRoleInfo()?.IsDesyncImpostor ?? false) ?
+                    RoleTypes.Scientist : NewRoleType, player.GetClientId());
+            }
         }
     }
     public static void RpcExile(this PlayerControl player)
@@ -101,8 +120,6 @@ static class ExtendedPlayerControl
         if (!AmongUsClient.Instance.AmHost) return;
         if (player == null || (!player.Data.IsDead && player.IsAlive())) return;
 
-        if (Camouflage.IsCamouflage) Camouflage.RpcSetSkin(player);
-
         PlayerState.GetByPlayerId(player.PlayerId).DeathReason = CustomDeathReason.etc;
         PlayerState.GetByPlayerId(player.PlayerId).IsDead = false;
         RPC.Revive(player.PlayerId);
@@ -112,6 +129,7 @@ static class ExtendedPlayerControl
         player.SyncSettings();
         player.SetKillCooldown();
         player.RpcResetAbilityCooldown();
+        if (Camouflage.IsCamouflage) Camouflage.RpcSetSkin(player);
 
         Utils.NotifyRoles(SpecifySeer: player);
     }

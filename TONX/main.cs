@@ -34,7 +34,7 @@ public class Main : BasePlugin
     // == 版本相关设定 / Version Config ==
     public const string LowestSupportedVersion = "2025.4.15"; // 16.0.5
     public static readonly bool IsPublicAvailableOnThisVersion = false;
-    public const string PluginVersion = "3.0.2";
+    public const string PluginVersion = "3.1.0";
     public const int PluginCreation = 1;
     // == 链接相关设定 / Link Config ==
     public static readonly bool ShowWebsiteButton = false;
@@ -112,7 +112,7 @@ public class Main : BasePlugin
     public static float DefaultImpostorVision;
     public static bool IsInitialRelease = DateTime.Now.Month == 1 && DateTime.Now.Day is 17;
     public static bool IsAprilFools = DateTime.Now.Month == 4 && DateTime.Now.Day is 1;
-    public const float RoleTextSize = 2f;
+    public const float RoleTextSize = 1.5f;
 
     public static Dictionary<byte, CustomRoles> DevRole = new();
 
@@ -226,7 +226,7 @@ public class Main : BasePlugin
                 {CustomRoles.GM, "#ff5b70"},
 
                 //Vanilla
-                {CustomRoles.Crewmate, "#ffffff"},
+                {CustomRoles.Crewmate, "#8cffff"},
                 {CustomRoles.Engineer, "#8cffff"},
                 {CustomRoles.Scientist, "#8cffff"},
                 {CustomRoles.Noisemaker, "#8cffff"},
