@@ -34,10 +34,11 @@ static class CustomRolesHelper
             return roleInfo.CustomRoleType == CustomRoleTypes.Crewmate;
         return
             role is CustomRoles.Crewmate or
+            CustomRoles.Scientist or
             CustomRoles.Engineer or
             CustomRoles.Noisemaker or
             CustomRoles.Tracker or
-            CustomRoles.Scientist;
+            CustomRoles.Detective;
     }
     public static bool IsGameModeRole(this CustomRoles role)
     {
@@ -70,14 +71,16 @@ static class CustomRolesHelper
     {
         return
             role is CustomRoles.Crewmate or
-                CustomRoles.Engineer or
                 CustomRoles.Scientist or
-                CustomRoles.Tracker or
-                CustomRoles.Noisemaker or
                 CustomRoles.GuardianAngel or
+                CustomRoles.Engineer or
+                CustomRoles.Noisemaker or
+                CustomRoles.Tracker or
+                CustomRoles.Detective or
                 CustomRoles.Impostor or
                 CustomRoles.Shapeshifter or
-                CustomRoles.Phantom;
+                CustomRoles.Phantom or
+                CustomRoles.Viper;
     }
 
     public static CustomRoleTypes GetCustomRoleTypes(this CustomRoles role)
@@ -104,13 +107,16 @@ static class CustomRolesHelper
             return role switch
             {
                 CustomRoles.Crewmate => roleOpt.GetNumPerGame(RoleTypes.Crewmate),
-                CustomRoles.Engineer => roleOpt.GetNumPerGame(RoleTypes.Engineer),
-                CustomRoles.GuardianAngel => roleOpt.GetNumPerGame(RoleTypes.GuardianAngel),
                 CustomRoles.Scientist => roleOpt.GetNumPerGame(RoleTypes.Scientist),
-                CustomRoles.Tracker => roleOpt.GetNumPerGame(RoleTypes.Tracker),
+                CustomRoles.GuardianAngel => roleOpt.GetNumPerGame(RoleTypes.GuardianAngel),
+                CustomRoles.Engineer => roleOpt.GetNumPerGame(RoleTypes.Engineer),
                 CustomRoles.Noisemaker => roleOpt.GetNumPerGame(RoleTypes.Noisemaker),
+                CustomRoles.Tracker => roleOpt.GetNumPerGame(RoleTypes.Tracker),
+                CustomRoles.Detective => roleOpt.GetNumPerGame(RoleTypes.Detective),
+                CustomRoles.Impostor => roleOpt.GetNumPerGame(RoleTypes.Impostor),
                 CustomRoles.Shapeshifter => roleOpt.GetNumPerGame(RoleTypes.Shapeshifter),
                 CustomRoles.Phantom => roleOpt.GetNumPerGame(RoleTypes.Phantom),
+                CustomRoles.Viper => roleOpt.GetNumPerGame(RoleTypes.Viper),
                 _ => 0
             };
         }
@@ -124,13 +130,16 @@ static class CustomRolesHelper
             return role switch
             {
                 CustomRoles.Crewmate => roleOpt.GetChancePerGame(RoleTypes.Crewmate),
-                CustomRoles.Engineer => roleOpt.GetChancePerGame(RoleTypes.Engineer),
-                CustomRoles.GuardianAngel => roleOpt.GetChancePerGame(RoleTypes.GuardianAngel),
                 CustomRoles.Scientist => roleOpt.GetChancePerGame(RoleTypes.Scientist),
-                CustomRoles.Tracker => roleOpt.GetChancePerGame(RoleTypes.Tracker),
+                CustomRoles.GuardianAngel => roleOpt.GetChancePerGame(RoleTypes.GuardianAngel),
+                CustomRoles.Engineer => roleOpt.GetChancePerGame(RoleTypes.Engineer),
                 CustomRoles.Noisemaker => roleOpt.GetChancePerGame(RoleTypes.Noisemaker),
+                CustomRoles.Tracker => roleOpt.GetChancePerGame(RoleTypes.Tracker),
+                CustomRoles.Detective => roleOpt.GetChancePerGame(RoleTypes.Detective),
+                CustomRoles.Impostor => roleOpt.GetChancePerGame(RoleTypes.Impostor),
                 CustomRoles.Shapeshifter => roleOpt.GetChancePerGame(RoleTypes.Shapeshifter),
                 CustomRoles.Phantom => roleOpt.GetChancePerGame(RoleTypes.Phantom),
+                CustomRoles.Viper => roleOpt.GetChancePerGame(RoleTypes.Viper),
                 _ => 0
             };
         }
@@ -142,14 +151,16 @@ static class CustomRolesHelper
         return role switch
         {
             RoleTypes.Crewmate => CustomRoles.Crewmate,
-            RoleTypes.Engineer => CustomRoles.Engineer,
             RoleTypes.Scientist => CustomRoles.Scientist,
+            RoleTypes.GuardianAngel => CustomRoles.GuardianAngel,
+            RoleTypes.Engineer => CustomRoles.Engineer,
             RoleTypes.Noisemaker => CustomRoles.Noisemaker,
             RoleTypes.Tracker => CustomRoles.Tracker,
-            RoleTypes.GuardianAngel => CustomRoles.GuardianAngel,
+            RoleTypes.Detective => CustomRoles.Detective,
             RoleTypes.Impostor => CustomRoles.Impostor,
             RoleTypes.Shapeshifter => CustomRoles.Shapeshifter,
             RoleTypes.Phantom => CustomRoles.Phantom,
+            RoleTypes.Viper => CustomRoles.Viper,
             _ => CustomRoles.NotAssigned
         };
     }

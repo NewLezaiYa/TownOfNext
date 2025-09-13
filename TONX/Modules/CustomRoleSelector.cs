@@ -59,16 +59,16 @@ internal static class CustomRoleSelector
         // 职业设置为：优先
         foreach (var role in roleList.Where(x => Options.GetRoleChance(x) == 2).Concat(roleList.Where(x => x.IsVanilla())))
         {
-            if (role.IsImpostor()) for (int i = 0; i < role.GetAssignCount(); i++) ImpOnList.Add(role);
-            else if (role.IsNeutral()) for (int i = 0; i < role.GetAssignCount(); i++) NeutralOnList.Add(role);
-            else for (int i = 0; i < role.GetAssignCount(); i++) roleOnList.Add(role);
+            if (role.IsImpostor()) ImpOnList.Add(role);
+            else if (role.IsNeutral()) NeutralOnList.Add(role);
+            else roleOnList.Add(role);
         }
         // 职业设置为：启用
         foreach (var role in roleList.Where(x => Options.GetRoleChance(x) == 1))
         {
-            if (role.IsImpostor()) for (int i = 0; i < role.GetAssignCount(); i++) ImpRateList.Add(role);
-            else if (role.IsNeutral()) for (int i = 0; i < role.GetAssignCount(); i++) NeutralRateList.Add(role);
-            else for (int i = 0; i < role.GetAssignCount(); i++) roleRateList.Add(role);
+            if (role.IsImpostor()) ImpRateList.Add(role);
+            else if (role.IsNeutral()) NeutralRateList.Add(role);
+            else roleRateList.Add(role);
         }
 
         if (Options.EnableRoleDraftMode.GetBool())
@@ -197,30 +197,36 @@ internal static class CustomRoleSelector
 
     public static int addScientistNum = 0;
     public static int addEngineerNum = 0;
-    public static int addTrackerNum = 0;
     public static int addNoisemakerNum = 0; 
-    public static int addPhantomNum = 0;
+    public static int addTrackerNum = 0;
+    public static int addDetectiveNum = 0; 
     public static int addShapeshifterNum = 0;
+    public static int addPhantomNum = 0;
+    public static int addViperNum = 0;
     public static void CalculateVanillaRoleCount()
     {
         // 计算原版特殊职业数量
-        addEngineerNum = 0;
         addScientistNum = 0;
-        addShapeshifterNum = 0;
+        addEngineerNum = 0;
         addNoisemakerNum = 0;
-        addPhantomNum = 0;
-
         addTrackerNum = 0;
+        addDetectiveNum = 0;
+        addShapeshifterNum = 0;
+        addPhantomNum = 0;
+        addViperNum = 0;
+
         foreach (var role in AllRoles)
         {
             switch (role.GetRoleInfo()?.BaseRoleType.Invoke())
             {
-                case RoleTypes.Engineer: addEngineerNum++; break;
                 case RoleTypes.Scientist: addScientistNum++; break;
-                case RoleTypes.Tracker: addTrackerNum++; break;
+                case RoleTypes.Engineer: addEngineerNum++; break;
                 case RoleTypes.Noisemaker: addNoisemakerNum++; break;
+                case RoleTypes.Tracker: addTrackerNum++; break;
+                case RoleTypes.Detective: addDetectiveNum++; break;
                 case RoleTypes.Shapeshifter: addShapeshifterNum++; break;
                 case RoleTypes.Phantom: addPhantomNum++; break;
+                case RoleTypes.Viper: addViperNum++; break;
             }
         }
     }
@@ -228,12 +234,14 @@ internal static class CustomRoleSelector
     {
         return type switch
         {
-            RoleTypes.Engineer => addEngineerNum,
             RoleTypes.Scientist => addScientistNum,
-            RoleTypes.Tracker => addTrackerNum,
+            RoleTypes.Engineer => addEngineerNum,
             RoleTypes.Noisemaker => addNoisemakerNum,
+            RoleTypes.Tracker => addTrackerNum,
+            RoleTypes.Detective => addDetectiveNum,
             RoleTypes.Shapeshifter => addShapeshifterNum,
             RoleTypes.Phantom => addPhantomNum,
+            RoleTypes.Viper => addViperNum,
             _ => 0
         };
     }

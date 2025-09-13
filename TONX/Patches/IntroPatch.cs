@@ -198,7 +198,7 @@ class IntroCutscenePatch
     }
     public static AudioClip GetIntroSound(RoleTypes roleType)
     {
-        return RoleManager.Instance.AllRoles.FirstOrDefault(role => role.Role == roleType).IntroSound;
+        return RoleManager.Instance.AllRoles.ToArray().FirstOrDefault(role => role.Role == roleType).IntroSound;
     }
     private static async void StartFadeIntro(IntroCutscene __instance, Color start, Color end)
     {
@@ -290,7 +290,7 @@ class IntroCutscenePatch
                     }, 2f, "FixKillCooldownTask");
                 _ = new LateTask(() =>
                 {
-                    CustomRoleManager.AllActiveRoles.Values.Do(x => x?.OnGameStart());
+                    CustomRoleManager.AllActiveRoles.Values.ToList().Do(x => x?.OnGameStart());
                 }, 0.1f, "RoleClassOnGameStartTask");
             }
             // _ = new LateTask(() => Main.AllPlayerControls.Do(pc => pc.RpcSetRoleDesync(RoleTypes.Shapeshifter, -3)), 2f, "SetImpostorForServer");
@@ -336,6 +336,6 @@ class IntroCutscenePatch
         GameStates.InTask = true;
         Logger.Info("タスクフェイズ開始", "Phase");
 
-        if (Options.EnableRoleDraftMode.GetBool() && AmongUsClient.Instance.AmHost) PlayerControl.LocalPlayer.NoCheckStartMeeting(null, true);
+        if (RoleDraftManager.RoleDraftState == RoleDraftState.ReadyToDraft && AmongUsClient.Instance.AmHost) PlayerControl.LocalPlayer.NoCheckStartMeeting(null, true);
     }
 }

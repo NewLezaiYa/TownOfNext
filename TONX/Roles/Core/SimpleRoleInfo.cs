@@ -172,6 +172,14 @@ public class SimpleRoleInfo
 
         switch (baseRoleType)
         {
+            case RoleTypes.Scientist:
+                roleName = CustomRoles.Scientist;
+                customRoleType = CustomRoleTypes.Crewmate;
+                break;
+            case RoleTypes.GuardianAngel:
+                roleName = CustomRoles.GuardianAngel;
+                customRoleType = CustomRoleTypes.Crewmate;
+                break;
             case RoleTypes.Engineer:
                 roleName = CustomRoles.Engineer;
                 customRoleType = CustomRoleTypes.Crewmate;
@@ -184,16 +192,17 @@ public class SimpleRoleInfo
                 roleName = CustomRoles.Tracker;
                 customRoleType = CustomRoleTypes.Crewmate;
                 break;
-            case RoleTypes.Scientist:
-                roleName = CustomRoles.Scientist;
-                customRoleType = CustomRoleTypes.Crewmate;
-                break;
-            case RoleTypes.GuardianAngel:
-                roleName = CustomRoles.GuardianAngel;
+            case RoleTypes.Detective:
+                roleName = CustomRoles.Detective;
                 customRoleType = CustomRoleTypes.Crewmate;
                 break;
             case RoleTypes.Impostor:
                 roleName = CustomRoles.Impostor;
+                customRoleType = CustomRoleTypes.Impostor;
+                countType = CountTypes.Impostor;
+                break;
+            case RoleTypes.Shapeshifter:
+                roleName = CustomRoles.Shapeshifter;
                 customRoleType = CustomRoleTypes.Impostor;
                 countType = CountTypes.Impostor;
                 break;
@@ -202,8 +211,8 @@ public class SimpleRoleInfo
                 customRoleType = CustomRoleTypes.Impostor;
                 countType = CountTypes.Impostor;
                 break;
-            case RoleTypes.Shapeshifter:
-                roleName = CustomRoles.Shapeshifter;
+            case RoleTypes.Viper:
+                roleName = CustomRoles.Viper;
                 customRoleType = CustomRoleTypes.Impostor;
                 countType = CountTypes.Impostor;
                 break;

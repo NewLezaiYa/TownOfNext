@@ -539,6 +539,7 @@ public enum CustomRoles
     Impostor,
     Shapeshifter,
     Phantom,
+    Viper,
     //Impostor
     BountyHunter,
     Fireworker,
@@ -585,11 +586,12 @@ public enum CustomRoles
     Messenger,
     Insider,
     //Crewmate(Vanilla)
-    Engineer,
-    GuardianAngel,
     Scientist,
-    Tracker,
+    GuardianAngel,
+    Engineer,
     Noisemaker,
+    Tracker,
+    Detective,
     //Crewmate
     Luckey,
     LazyGuy,
@@ -604,7 +606,7 @@ public enum CustomRoles
     SpeedBooster,
     Dictator,
     Doctor,
-    Detective,
+    ModDetective,
     Vigilante,
     NiceGuesser,
     Transporter,
