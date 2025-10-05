@@ -51,7 +51,6 @@ class HudManagerPatch
     public static void Postfix(HudManager __instance)
     {
         if (!GameStates.IsModHost) return;
-
         if (HudManagerInitializePatch.RoleInfoButton != null)
         {
             var template = HudManager.Instance.MapButton;

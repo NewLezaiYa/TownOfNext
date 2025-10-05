@@ -1,6 +1,7 @@
 ﻿using Hazel;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using UnityEngine;
 
 namespace TONX.Modules;
 
@@ -28,8 +29,13 @@ public static class CustomSoundsManager
     }
     public static void ReceiveRPC(MessageReader reader) => Play(reader.ReadString());
 
-
+#if Windows
     private static readonly string SOUNDS_PATH = @$"{Environment.CurrentDirectory.Replace(@"\", "/")}/BepInEx/resources/";
+#elif Android
+    private static readonly string SOUNDS_PATH = @$"{Application.persistentDataPath}/TONX_DATA/resources/";
+#endif
+    
+    
     public static void Play(string sound)
     {
         if (!Constants.ShouldPlaySfx() || !Main.EnableCustomSoundEffect.Value) return;
@@ -56,6 +62,11 @@ public static class CustomSoundsManager
 
     [DllImport("winmm.dll")]
     public static extern bool PlaySound(string Filename, int Mod, int Flags);
-    public static void StartPlay(string path) => PlaySound(@$"{path}", 0, 1); //第3个形参，把1换为9，连续播放
+    public static void StartPlay(string path)
+#if Windows
+        => PlaySound(@$"{path}", 0, 1); // 第3个形参，把1换为9，连续播放
+#elif Android
+        {} // 安卓暂不处理
+#endif
 
 }

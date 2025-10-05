@@ -57,10 +57,10 @@ public class MainMenuManagerPatch
         {
             var pos1 = TitleLogoPatch.RightPanel.transform.localPosition;
             var pos3 = new Vector3(TitleLogoPatch.RightPanelOp.x * Utils.GetResolutionOffset(Screen.width, Screen.height), TitleLogoPatch.RightPanelOp.y, TitleLogoPatch.RightPanelOp.z);
-            Vector3 lerp1 = Vector3.Lerp(pos1, ShowingPanel ? pos3 : TitleLogoPatch.RightPanelOp + new Vector3(10f, 0f, 0f), Time.deltaTime * (ShowingPanel ? 3f : 2f));
+            Vector3 lerp1 = Vector3.Lerp(pos1, ShowingPanel ? pos3 : TitleLogoPatch.RightPanelOp + new Vector3(20f, 0f, 0f), Time.deltaTime * (ShowingPanel ? 3f : 2f));
             if (ShowingPanel
                 ? TitleLogoPatch.RightPanel.transform.localPosition.x > pos3.x + 0.03f
-                : TitleLogoPatch.RightPanel.transform.localPosition.x < TitleLogoPatch.RightPanelOp.x + 9f
+                : TitleLogoPatch.RightPanel.transform.localPosition.x < TitleLogoPatch.RightPanelOp.x + 19f
                 ) TitleLogoPatch.RightPanel.transform.localPosition = lerp1;
         }
 
@@ -81,6 +81,15 @@ public class MainMenuManagerPatch
         SimpleButton.SetBase(__instance.quitButton);
 
         int row = 1; int col = 0;
+        void OpenUrl(string url)
+        {
+#if Android
+            OpenURLAndroid(url);
+#elif Windows
+            Application.OpenURL(url);
+#endif
+        }
+
         GameObject CreatButton(string text, Action action)
         {
             col++; if (col > 2) { col = 1; row++; }
@@ -93,7 +102,16 @@ public class MainMenuManagerPatch
             passiveButton.OnClick = new();
             passiveButton.OnClick.AddListener(action);
             AspectPosition aspectPosition = button.GetComponent<AspectPosition>();
-            aspectPosition.anchorPoint = new Vector2(col == 1 ? 0.415f : 0.583f, 0.5f - 0.08f * row);
+#if Android
+            var yPosition = col == 1 ? 0.5f - 0.08f * row : 0.5f - 0.08f * (row - 1);
+#else
+            var yPosition = 0.5f - 0.08f * row;
+#endif
+
+            aspectPosition.anchorPoint = new Vector2(
+                col == 1 ? 0.415f : 0.583f,
+                yPosition
+            );
             return button;
         }
 
@@ -107,14 +125,14 @@ public class MainMenuManagerPatch
         //     extraLinkEnabled = true;
         // }
 
-        if (InviteButton == null) InviteButton = CreatButton(extraLinkName, () => { Application.OpenURL(extraLinkUrl); });
+        if (InviteButton == null) InviteButton = CreatButton(extraLinkName, () => { OpenUrl(extraLinkUrl); });
         InviteButton.gameObject.SetActive(extraLinkEnabled);
         InviteButton.name = "TONX Extra Link Button";
 
         // if (WebsiteButton == null) WebsiteButton = CreatButton(GetString("Website"), () => Application.OpenURL(Main.WebsiteUrl));
         // WebsiteButton.gameObject.SetActive(Main.ShowWebsiteButton);
         // WebsiteButton.name = "TONX Website Button";
-
+#if Windows
         if (UpdateButton == null)
         {
             PlayButton = __instance.playButton.gameObject;
@@ -134,7 +152,37 @@ public class MainMenuManagerPatch
             }));
             UpdateButton.transform.transform.FindChild("FontPlacer").GetChild(0).gameObject.DestroyTranslator();
         }
+#endif
 
         Application.targetFrameRate = Main.UnlockFPS.Value ? 165 : 60;
     }
+#if Android
+    private static void OpenURLAndroid(string url)
+    {
+        try
+        {
+            AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+            AndroidJavaObject currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+            AndroidJavaClass intentClass = new AndroidJavaClass("android.content.Intent");
+            AndroidJavaObject intentObject =
+                new AndroidJavaObject("android.content.Intent", "android.intent.action.VIEW");
+            AndroidJavaClass uriClass = new AndroidJavaClass("android.net.Uri");
+            AndroidJavaObject uriObject = uriClass.CallStatic<AndroidJavaObject>("parse", url);
+            intentObject.Call<AndroidJavaObject>("setData", uriObject);
+            var FLAG_ACTIVITY_NEW_TASK = 0x10000000;
+            intentObject.Call<AndroidJavaObject>("setFlags", FLAG_ACTIVITY_NEW_TASK);
+            currentActivity.Call("startActivity", intentObject);
+            unityPlayer.Dispose();
+            currentActivity.Dispose();
+            intentClass.Dispose();
+            intentObject.Dispose();
+            uriClass.Dispose();
+            uriObject.Dispose();
+        }
+        catch
+        {
+            Application.OpenURL(url);
+        }
+    }
+#endif
 }
