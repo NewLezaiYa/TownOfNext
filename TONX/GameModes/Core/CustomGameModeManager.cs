@@ -17,10 +17,18 @@ public static class CustomGameModeManager
     {
         Options.CurrentGameMode.GetModeClass()?.Init();
     }
+    private static Dictionary<byte, long> LastSecondsUpdate = new();
     public static void OnFixedUpdate(PlayerControl player)
     {
         if (GameStates.IsInTask)
         {
+            var now = Utils.GetTimeStamp();
+            LastSecondsUpdate.TryAdd(player.PlayerId, 0);
+            if (LastSecondsUpdate[player.PlayerId] != now)
+            {
+                Options.CurrentGameMode.GetModeClass()?.OnSecondsUpdate(player, now);
+                LastSecondsUpdate[player.PlayerId] = now;
+            }
             Options.CurrentGameMode.GetModeClass()?.OnFixedUpdate(player);
         }
     }

@@ -81,13 +81,9 @@ public sealed class SoloKombat : GameModeBase
     }
     public override bool ShouldAssignAddons() => false;
     public override string GetLobbyUpperTag() => $"<color=#f55252><size=1.7>{GetString("ModeSoloKombat")}</size></color>";
-    private static long LastFixedUpdate;
-    public override void OnFixedUpdate(PlayerControl player)
+    public override void OnSecondsUpdate(PlayerControl player, long now)
     {
         if (!GameStates.IsInTask) return;
-
-        if (LastFixedUpdate == Utils.GetTimeStamp()) return;
-        LastFixedUpdate = Utils.GetTimeStamp();
         // 减少全局倒计时
         RoundTime--;
     }

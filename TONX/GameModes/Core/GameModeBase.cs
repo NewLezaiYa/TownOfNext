@@ -48,6 +48,15 @@ public abstract class GameModeBase
     public virtual void OnFixedUpdate(PlayerControl player)
     { }
     /// <summary>
+    /// 秒 Task 处理函数<br/>
+    /// 不需要验证您的身份，因为调用前已经验证<br/>
+    /// 请注意：全部模组端都会调用<br/>
+    /// </summary>
+    /// <param name="player">目标玩家</param>
+    /// <param name="now">当前10位时间戳</param>
+    public virtual void OnSecondsUpdate(PlayerControl player, long now)
+    { }
+    /// <summary>
     /// 报告前检查调用的函数
     /// 与报告事件无关的玩家也会调用该函数
     /// </summary>
