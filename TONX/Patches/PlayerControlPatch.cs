@@ -144,15 +144,7 @@ class RpcMurderPlayerPatch
                 logger.Info($"{__instance.GetNameWithRole()} => {target.GetNameWithRole()}(シェイプシフト中のため遅延)");
                 return;
             }
-            if (Main.CheckShapeshift.TryGetValue(target.PlayerId, out var shapeshifting) && shapeshifting)
-            {
-                //シェイプシフト強制解除
-                target.RpcShapeshift(target, false);
-            }
-            if (Main.CheckVanish.TryGetValue(target.PlayerId, out var vanishing) && vanishing)
-            {
-                target.RpcAppear(false);
-            }
+            target.StopAbility();
             Camouflage.RpcSetSkin(target, ForceRevert: true, RevertToDefault: true);
         }
         logger.Info($"{__instance.GetNameWithRole()} => {target.GetNameWithRole()}(didSucceed:{didSucceed})");

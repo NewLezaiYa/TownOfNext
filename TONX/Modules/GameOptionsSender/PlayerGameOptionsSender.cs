@@ -77,7 +77,7 @@ public class PlayerGameOptionsSender : GameOptionsSender
         CustomRoles role = player.GetCustomRole();
         switch (role.GetCustomRoleTypes())
         {
-            case CustomRoleTypes.Impostor:
+            case CustomRoleTypes.Impostor when role is not CustomRoles.Shapeshifter:
                 AURoleOptions.ShapeshifterCooldown = Options.DefaultShapeshiftCooldown.GetFloat();
                 break;
         }

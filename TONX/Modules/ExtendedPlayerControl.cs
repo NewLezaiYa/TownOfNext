@@ -362,6 +362,18 @@ static class ExtendedPlayerControl
 
         RPC.BeKilled(player.PlayerId, KilledById);
     }*/
+    public static void StopAbility(this PlayerControl target)
+    {
+        if (Main.CheckShapeshift.TryGetValue(target.PlayerId, out var shapeshifting) && shapeshifting)
+        {
+            //シェイプシフト強制解除
+            target.RpcShapeshift(target, false);
+        }
+        if (Main.CheckVanish.TryGetValue(target.PlayerId, out var vanishing) && vanishing)
+        {
+            target.RpcAppear(false);
+        }
+    }
     public static void MarkDirtySettings(this PlayerControl player)
     {
         PlayerGameOptionsSender.SetDirty(player.PlayerId);
