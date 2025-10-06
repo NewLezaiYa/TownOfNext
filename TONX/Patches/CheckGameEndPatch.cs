@@ -284,9 +284,9 @@ class GameEndChecker
         {
             reason = GameOverReason.ImpostorsByKill;
 
-            if (SoloKombatManager.RoundTime > 0) return false;
+            if (SoloKombat.RoundTime > 0) return false;
 
-            var list = Main.AllPlayerControls.Where(x => !x.Is(CustomRoles.GM) && SoloKombatManager.GetRankOfScore(x.PlayerId) == 1);
+            var list = Main.AllPlayerControls.Where(x => !x.Is(CustomRoles.GM) && SoloKombat.GetRankOfScore(x.PlayerId) == 1);
             var winner = list.FirstOrDefault();
             if (winner != null) CustomWinnerHolder.WinnerIds = new() { winner.PlayerId };
             else CustomWinnerHolder.ResetAndSetWinner(CustomWinner.None);

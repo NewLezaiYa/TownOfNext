@@ -9,6 +9,7 @@ using TONX.Roles.GameMode;
 using TONX.Roles.Impostor;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using TONX.GameModes.Core;
 
 namespace TONX;
 
@@ -507,6 +508,7 @@ class FixedUpdatePatch
             TargetArrow.OnFixedUpdate(__instance);
             LocateArrow.OnFixedUpdate(__instance);
         }
+        CustomGameModeManager.OnFixedUpdate(__instance);
         CustomRoleManager.OnFixedUpdate(__instance);
         if (AmongUsClient.Instance.AmHost)
         {//実行クライアントがホストの場合のみ実行

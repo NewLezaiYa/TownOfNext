@@ -1,4 +1,5 @@
 using TONX.GameModes;
+using TONX.GameModes.Core;
 using TONX.Modules;
 using TONX.Modules.OptionItems;
 using TONX.Roles.AddOns.Common;
@@ -802,8 +803,8 @@ public static class Options
 
         #region 游戏设置
 
-        //SoloKombat
-        SoloKombatManager.SetupCustomOption();
+        // 游戏模式
+        CustomGameModeManager.AllModes.ToList().ForEach(m => m.GetModeInfo()?.OptionCreator?.Invoke());
 
         // 驱逐相关设定
         TextOptionItem.Create(3_100_001, "MenuTitle.Ejections", TabGroup.GameSettings)

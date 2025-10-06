@@ -1,11 +1,22 @@
-using TONX.Attributes;
-using TONX.Roles.GameMode;
 using UnityEngine;
+using TONX.GameModes.Core;
+using TONX.Roles.GameMode;
 
 namespace TONX.GameModes;
 
-internal static class SoloKombatManager
+public sealed class SoloKombat : GameModeBase
 {
+    public static readonly GameModeInfo ModeInfo =
+        GameModeInfo.Create(
+            typeof(SoloKombat),
+            () => new SoloKombat(),
+            CustomGameMode.SoloKombat,
+            101,
+            SetupCustomOption,
+            "#f55252"
+        );
+    public SoloKombat() : base(ModeInfo)
+    { }
     public static int RoundTime;
 
     //Options
@@ -57,14 +68,52 @@ internal static class SoloKombatManager
             .SetColor(Utils.GetRoleColor(CustomRoles.KB_Normal))
             .SetValueFormat(OptionFormat.Multiplier);
     }
-
-    [GameModuleInitializer]
-    public static void Init()
+    public override void Init()
     {
-        if (Options.CurrentGameMode != CustomGameMode.SoloKombat) return;
         RoundTime = KB_GameTime.GetInt() + 8;
     }
-    
+    private static long LastFixedUpdate;
+    public override void OnFixedUpdate(PlayerControl player)
+    {
+        if (!GameStates.IsInTask) return;
+
+        if (LastFixedUpdate == Utils.GetTimeStamp()) return;
+        LastFixedUpdate = Utils.GetTimeStamp();
+        // 减少全局倒计时
+        RoundTime--;
+    }
+    public override void EditTaskText(TaskPanelBehaviour taskPanel, ref string AllText)
+    {
+        var lpc = PlayerControl.LocalPlayer;
+
+        if (lpc.GetCustomRole() is CustomRoles.KB_Normal)
+        {
+            AllText += "\r\n";
+            AllText += $"\r\n{GetString("PVP.ATK")}: {(lpc.GetRoleClass() as KB_Normal)?.ATK}";
+            AllText += $"\r\n{GetString("PVP.DF")}: {(lpc.GetRoleClass() as KB_Normal)?.DF}";
+            AllText += $"\r\n{GetString("PVP.RCO")}: {(lpc.GetRoleClass() as KB_Normal)?.HPReco}";
+        }
+        AllText += "\r\n";
+
+        Dictionary<byte, string> SummaryText = new();
+        List<byte> AllPlayerIds = PlayerState.AllPlayerStates.Keys.Where(k => (Utils.GetPlayerById(k)?.Data ?? null) != null).ToList();
+        foreach (var id in AllPlayerIds)
+        {
+            if (Utils.GetPlayerById(id).GetCustomRole() is CustomRoles.GM) continue;
+            string name = Main.AllPlayerNames[id].RemoveHtmlTags().Replace("\r\n", string.Empty);
+            string summary = $"{SoloKombat.GetDisplayScore(id)}  {Utils.ColorString(Main.PlayerColors[id], name)}";
+            if (SoloKombat.GetDisplayScore(id).ToString().Trim() == "") continue;
+            SummaryText[id] = summary;
+        }
+
+        List<(int, byte)> list = new();
+        foreach (var id in AllPlayerIds) list.Add((SoloKombat.GetRankOfScore(id), id));
+        list.Sort();
+        foreach (var id in list.Where(x => SummaryText.ContainsKey(x.Item2))) AllText += "\r\n" + SummaryText[id.Item2];
+
+        AllText = $"<size=80%>{AllText}</size>";
+    }
+
     private static Dictionary<byte, int> KBScore = new();
     public static string GetDisplayScore(byte playerId)
     {
@@ -95,21 +144,6 @@ internal static class SoloKombatManager
         catch
         {
             return Main.AllPlayerControls.Count();
-        }
-    }
-
-    [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.FixedUpdate))]
-    class FixedUpdatePatch
-    {
-        private static long LastFixedUpdate;
-        public static void Postfix()
-        {
-            if (!GameStates.IsInTask || Options.CurrentGameMode != CustomGameMode.SoloKombat) return;
-
-            if (LastFixedUpdate == Utils.GetTimeStamp()) return;
-            LastFixedUpdate = Utils.GetTimeStamp();
-            // 减少全局倒计时
-            RoundTime--;
         }
     }
 }

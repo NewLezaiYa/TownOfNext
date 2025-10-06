@@ -5,6 +5,7 @@ using UnityEngine;
 using TONX.Modules;
 using TONX.GameModes;
 using TONX.Roles.GameMode;
+using TONX.GameModes.Core;
 
 namespace TONX;
 
@@ -166,7 +167,7 @@ class HudManagerPatch
                         LowerInfoText.fontSizeMin = 2.0f;
                         LowerInfoText.fontSizeMax = 2.0f;
                     }
-                    LowerInfoText.text = string.Format(GetString("KBTimeRemain"), SoloKombatManager.RoundTime.ToString());
+                    LowerInfoText.text = string.Format(GetString("KBTimeRemain"), SoloKombat.RoundTime.ToString());
                     LowerInfoText.enabled = true;
                 }
             }
@@ -309,64 +310,7 @@ class TaskPanelBehaviourPatch
 
             var AllText = Utils.ColorString(player.GetRoleColor(), RoleWithInfo);
 
-            switch (Options.CurrentGameMode)
-            {
-                case CustomGameMode.Standard:
-
-                    var lines = taskText.Split("\r\n</color>\n")[0].Split("\r\n\n")[0].Split("\r\n");
-                    StringBuilder sb = new();
-                    foreach (var eachLine in lines)
-                    {
-                        var line = eachLine.Trim();
-                        if ((line.StartsWith("<color=#FF1919FF>") || line.StartsWith("<color=#FF0000FF>")) && sb.Length < 1 && !line.Contains('(')) continue;
-                        sb.Append(line + "\r\n");
-                    }
-                    if (sb.Length > 1)
-                    {
-                        var text = sb.ToString().TrimEnd('\n').TrimEnd('\r');
-                        if (!Utils.HasTasks(player.Data, false) && sb.ToString().Count(s => (s == '\n')) >= 2)
-                            text = $"{Utils.ColorString(new Color32(255, 20, 147, byte.MaxValue), GetString("FakeTask"))}\r\n{text}";
-                        AllText += $"\r\n\r\n<size=85%>{text}</size>";
-                    }
-
-                    if (MeetingStates.FirstMeeting)
-                        AllText += $"\r\n\r\n</color><size=70%>{GetString("PressF1ShowRoleDescription")}</size>";
-
-                    break;
-
-                case CustomGameMode.SoloKombat:
-
-                    var lpc = PlayerControl.LocalPlayer;
-
-                    if (lpc.GetCustomRole() is CustomRoles.KB_Normal)
-                    {
-                        AllText += "\r\n";
-                        AllText += $"\r\n{GetString("PVP.ATK")}: {(lpc.GetRoleClass() as KB_Normal)?.ATK}";
-                        AllText += $"\r\n{GetString("PVP.DF")}: {(lpc.GetRoleClass() as KB_Normal)?.DF}";
-                        AllText += $"\r\n{GetString("PVP.RCO")}: {(lpc.GetRoleClass() as KB_Normal)?.HPReco}";  
-                    }
-                    AllText += "\r\n";
-
-                    Dictionary<byte, string> SummaryText = new();
-                    List<byte> AllPlayerIds = PlayerState.AllPlayerStates.Keys.Where(k => (Utils.GetPlayerById(k)?.Data ?? null) != null).ToList();
-                    foreach (var id in AllPlayerIds)
-                    {
-                        if (Utils.GetPlayerById(id).GetCustomRole() is CustomRoles.GM) continue;
-                        string name = Main.AllPlayerNames[id].RemoveHtmlTags().Replace("\r\n", string.Empty);
-                        string summary = $"{SoloKombatManager.GetDisplayScore(id)}  {Utils.ColorString(Main.PlayerColors[id], name)}";
-                        if (SoloKombatManager.GetDisplayScore(id).ToString().Trim() == "") continue;
-                        SummaryText[id] = summary;
-                    }
-
-                    List<(int, byte)> list = new();
-                    foreach (var id in AllPlayerIds) list.Add((SoloKombatManager.GetRankOfScore(id), id));
-                    list.Sort();
-                    foreach (var id in list.Where(x => SummaryText.ContainsKey(x.Item2))) AllText += "\r\n" + SummaryText[id.Item2];
-
-                    AllText = $"<size=80%>{AllText}</size>";
-
-                    break;
-            }
+            Options.CurrentGameMode.GetModeClass()?.EditTaskText(__instance, ref AllText);
 
             __instance.taskText.text = AllText;
         }

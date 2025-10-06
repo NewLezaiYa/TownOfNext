@@ -2,7 +2,7 @@ using AmongUs.GameOptions;
 using Hazel;
 using TONX.Roles.Core.Interfaces;
 using UnityEngine;
-using static TONX.GameModes.SoloKombatManager;
+using static TONX.GameModes.SoloKombat;
 
 namespace TONX.Roles.GameMode;
 

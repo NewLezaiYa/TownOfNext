@@ -5,6 +5,7 @@ using BepInEx.Unity.IL2CPP;
 using Il2CppInterop.Runtime.Injection;
 using System.Reflection;
 using TONX.Attributes;
+using TONX.GameModes.Core;
 using TONX.Modules;
 using UnityEngine;
 
@@ -273,6 +274,17 @@ public class Main : BasePlugin
 
             foreach (var roleClassType in roleClassArray)
                 roleClassType.GetField("RoleInfo")?.GetValue(type);
+
+            var type2 = typeof(GameModeBase);
+            var modeClassArray =
+            CustomGameModeManager.AllModesClassType = Assembly.GetAssembly(type2)
+                .GetTypes()
+                .Where(x => x.IsSubclassOf(type2)).ToArray();
+
+            foreach (var modeClassType in modeClassArray)
+                modeClassType.GetField("ModeInfo")?.GetValue(type2);
+
+            CustomGameModeManager.AllModesInfo.Values.Do(modeInfo => modeInfo.CreateInstance());
         }
         catch (ArgumentException ex)
         {

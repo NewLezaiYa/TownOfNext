@@ -757,7 +757,7 @@ public static class Utils
 
         sb.Append("<size=70%>\n");
         List<byte> cloneRoles = new(PlayerState.AllPlayerStates.Keys);
-        if (Options.CurrentGameMode == CustomGameMode.SoloKombat) cloneRoles = cloneRoles.OrderBy(SoloKombatManager.GetRankOfScore).ToList();
+        if (Options.CurrentGameMode == CustomGameMode.SoloKombat) cloneRoles = cloneRoles.OrderBy(SoloKombat.GetRankOfScore).ToList();
         foreach (var id in Main.winnerList.Where(i => !EndGamePatch.SummaryText[i].Contains("NotAssigned")))
         {
             sb.Append($"\n★ ".Color(winnerColor)).Append(SummaryTexts(id, true));
