@@ -113,7 +113,23 @@ public sealed class Jackal : RoleBase, IKiller
             KillCount++;
             return true;
         }
-        target.RpcChangeRole(CustomRoles.Sidekick);
+        if (target.shapeshifting)
+        {
+            _ = new LateTask(() =>
+            {
+                if (GameStates.IsInTask)
+                {
+                    target.RpcShapeshift(target, false);
+                    target.RpcChangeRole(CustomRoles.Sidekick);
+                }
+            },
+            1.5f, "RevertShapeshift");
+        }
+        else
+        {
+            target.StopAbility();
+            target.RpcChangeRole(CustomRoles.Sidekick);
+        }
         Logger.Info($"豺狼{killer?.Data?.PlayerName}招募了{target?.Data?.PlayerName}", "Jackal");
         RecruitLimit--;
         SendRPC();
