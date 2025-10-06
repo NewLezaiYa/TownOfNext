@@ -24,12 +24,6 @@ public static class CustomGameModeManager
             Options.CurrentGameMode.GetModeClass()?.OnFixedUpdate(player);
         }
     }
-    public static bool OnSabotage(PlayerControl player, SystemTypes systemType)
-    {
-        bool cancel = false;
-        Options.CurrentGameMode.GetModeClass()?.OnSabotage(player, systemType);
-        return !cancel;
-    }
 }
 
 

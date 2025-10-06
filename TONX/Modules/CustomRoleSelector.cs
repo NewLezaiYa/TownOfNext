@@ -1,4 +1,5 @@
 ﻿using AmongUs.GameOptions;
+using TONX.GameModes.Core;
 
 namespace TONX.Modules;
 
@@ -11,6 +12,8 @@ internal static class CustomRoleSelector
     {
         // 开始职业抽取
         RoleResult = new();
+        if (Options.CurrentGameMode.GetModeClass().SelectCustomRoles(ref RoleResult)) return;
+
         var rd = IRandom.Instance;
         int playerCount = Main.AllAlivePlayerControls.Count();
         int optImpNum = Main.RealOptionsData.GetInt(Int32OptionNames.NumImpostors);
@@ -30,13 +33,6 @@ internal static class CustomRoleSelector
         List<CustomRoles> roleRateList = new();
         List<CustomRoles> ImpRateList = new();
         List<CustomRoles> NeutralRateList = new();
-
-        if (Options.CurrentGameMode == CustomGameMode.SoloKombat)
-        {
-            RoleResult = new();
-            foreach (var pc in Main.AllAlivePlayerControls) RoleResult.Add(pc, pc.PlayerId == 0 && Options.EnableGM.GetBool() ? CustomRoles.GM : CustomRoles.KB_Normal);
-            return;
-        }
 
         foreach (var cr in Enum.GetValues(typeof(CustomRoles)))
         {
@@ -260,7 +256,7 @@ internal static class CustomRoleSelector
     public static List<CustomRoles> AddonRolesList = new();
     public static void SelectAddonRoles()
     {
-        if (Options.CurrentGameMode == CustomGameMode.SoloKombat) return;
+        if (!Options.CurrentGameMode.GetModeClass().ShouldAssignAddons()) return;
 
         AddonRolesList = new();
         foreach (var cr in Enum.GetValues(typeof(CustomRoles)))

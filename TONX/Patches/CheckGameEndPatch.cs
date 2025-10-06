@@ -3,6 +3,7 @@ using BepInEx.Unity.IL2CPP.Utils.Collections;
 using Hazel;
 using System.Collections;
 using TONX.GameModes;
+using TONX.GameModes.Core;
 using TONX.Modules;
 using TONX.Roles.Core.Interfaces;
 using TONX.Roles.Neutral;
@@ -30,17 +31,8 @@ class GameEndChecker
         //ゲーム終了判定
         predicate.CheckForEndGame(out reason);
 
-        // SoloKombat
-        if (Options.CurrentGameMode == CustomGameMode.SoloKombat)
-        {
-            if (CustomWinnerHolder.WinnerIds.Count > 0 || CustomWinnerHolder.WinnerTeam != CustomWinner.Default)
-            {
-                ShipStatus.Instance.enabled = false;
-                StartEndGame(reason);
-                predicate = null;
-            }
-            return false;
-        }
+        //特殊模式判断
+        if (Options.CurrentGameMode.GetModeClass().AfterCheckForGameEnd(reason, ref predicate)) return false;
 
         //ゲーム終了時
         if (CustomWinnerHolder.WinnerTeam != CustomWinner.Default)
@@ -136,7 +128,7 @@ class GameEndChecker
             void SetGhostRole(bool ToGhostImpostor)
             {
                 var isDead = pc.Data.IsDead;
-                if (!isDead) ReviveRequiredPlayerIds.Add(pc.PlayerId); 
+                if (!isDead) ReviveRequiredPlayerIds.Add(pc.PlayerId);
                 if (ToGhostImpostor)
                 {
                     Logger.Info($"{pc.GetNameWithRole()}: ImpostorGhostに変更", "ResetRoleAndEndGame");
@@ -182,8 +174,7 @@ class GameEndChecker
     }
     private const float EndGameDelay = 0.2f;
 
-    public static void SetPredicateToNormal() => predicate = new NormalGameEndPredicate();
-    public static void SetPredicateToSoloKombat() => predicate = new SoloKombatGameEndPredicate();
+    public static void SetPredicate() => predicate = Options.CurrentGameMode.GetModeClass().Predicate() ?? new NormalGameEndPredicate();
 
     // ===== ゲーム終了条件 =====
     // 通常ゲーム用
@@ -265,33 +256,6 @@ class GameEndChecker
                 default:
                     return false; // 胜利条件未达成
             }
-            return true;
-        }
-    }
-
-    // 个人竞技模式用
-    class SoloKombatGameEndPredicate : GameEndPredicate
-    {
-        public override bool CheckForEndGame(out GameOverReason reason)
-        {
-            reason = GameOverReason.ImpostorsByKill;
-            if (CustomWinnerHolder.WinnerIds.Count > 0) return false;
-            if (CheckGameEndByLivingPlayers(out reason)) return true;
-            return false;
-        }
-
-        public bool CheckGameEndByLivingPlayers(out GameOverReason reason)
-        {
-            reason = GameOverReason.ImpostorsByKill;
-
-            if (SoloKombat.RoundTime > 0) return false;
-
-            var list = Main.AllPlayerControls.Where(x => !x.Is(CustomRoles.GM) && SoloKombat.GetRankOfScore(x.PlayerId) == 1);
-            var winner = list.FirstOrDefault();
-            if (winner != null) CustomWinnerHolder.WinnerIds = new() { winner.PlayerId };
-            else CustomWinnerHolder.ResetAndSetWinner(CustomWinner.None);
-            Main.DoBlockNameChange = true;
-
             return true;
         }
     }

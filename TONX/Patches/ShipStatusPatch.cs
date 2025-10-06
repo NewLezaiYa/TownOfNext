@@ -1,3 +1,5 @@
+using TONX.GameModes.Core;
+
 namespace TONX;
 
 [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.FixedUpdate))]
@@ -48,9 +50,9 @@ class ShipStatusUpdateSystemPatch
 [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.CloseDoorsOfType))]
 class CloseDoorsPatch
 {
-    public static bool Prefix(ShipStatus __instance)
+    public static bool Prefix(ShipStatus __instance, [HarmonyArgument(0)]SystemTypes room)
     {
-        return !Options.DisableSabotage.GetBool() && Options.CurrentGameMode != CustomGameMode.SoloKombat;
+        return !Options.CurrentGameMode.GetModeClass().OnCloseDoors(room) && !Options.DisableSabotage.GetBool();
     }
 }
 [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.Start))]

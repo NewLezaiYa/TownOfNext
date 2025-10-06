@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System.Text;
 using Sentry.Protocol;
 using UnityEngine;
+using TONX.GameModes.Core;
 
 namespace TONX;
 
@@ -73,11 +74,7 @@ public static class NameTagManager
             if (GameStates.IsOnlineGame)
             {
                 var upper = $"<size=80%><color=#ffd6ec>{Main.ModName}</color><color=#baf7ca>★</color>";
-                upper += Options.CurrentGameMode switch
-                {
-                    CustomGameMode.SoloKombat => $"<color=#f55252><size=1.7>{GetString("ModeSoloKombat")}</size></color>",
-                    _ => $"<color=#87cefa>{Main.PluginVersion}</color>",
-                };
+                upper += Options.CurrentGameMode.GetModeClass().GetLobbyUpperTag();
                 name = upper + "</size>\r\n" + name;
             }
         }

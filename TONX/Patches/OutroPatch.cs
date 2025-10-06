@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using TONX.Modules;
 using TONX.Templates;
+using TONX.GameModes.Core;
 
 namespace TONX;
 
@@ -104,15 +105,16 @@ class SetEverythingUpPatch
         var AdditionalWinnerText = new StringBuilder(32);
         string CustomWinnerColor = Utils.GetRoleColorCode(CustomRoles.Crewmate);
 
-        if (Options.CurrentGameMode is CustomGameMode.SoloKombat && CustomWinnerHolder.WinnerTeam is not CustomWinner.Error and not CustomWinner.None and not CustomWinner.Draw)
+        var format = Options.CurrentGameMode.GetModeClass().GetOutroFormat(CustomWinnerHolder.WinnerIds.FirstOrDefault());
+        if (format.HasValue && CustomWinnerHolder.WinnerTeam is not CustomWinner.Error and not CustomWinner.None and not CustomWinner.Draw)
         {
-            var winnerId = CustomWinnerHolder.WinnerIds.FirstOrDefault();
-            __instance.WinText.text = Main.AllPlayerNames[winnerId] + GetString("Win");
-            __instance.WinText.fontSize -= 5f;
-            __instance.WinText.color = Main.PlayerColors[winnerId];
-            __instance.BackgroundBar.material.color = new Color32(245, 82, 82, 255);
-            WinnerText.text = $"<color=#f55252>{GetString("ModeSoloKombat")}</color>";
-            WinnerText.color = Color.red;
+            var (wintext, textfont, textcolor, bgcolor, largetext, largecolor) = format.Value;
+            __instance.WinText.text = wintext;
+            __instance.WinText.fontSize -= textfont;
+            __instance.WinText.color = textcolor;
+            __instance.BackgroundBar.material.color = bgcolor;
+            WinnerText.text = largetext;
+            WinnerText.color = largecolor;
             goto EndOfText;
         }
 

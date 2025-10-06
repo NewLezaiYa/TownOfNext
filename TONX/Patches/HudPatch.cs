@@ -15,7 +15,7 @@ class HudManagerInitializePatch
     [GameModuleInitializer]
     public static void CreateRoleInfoButton()
     {
-        if (!GameStates.IsModHost || Options.CurrentGameMode == CustomGameMode.SoloKombat) return;
+        if (!GameStates.IsModHost || Options.CurrentGameMode != CustomGameMode.Standard) return;
         var template = HudManager.Instance.MapButton;
         RoleInfoButton = UnityEngine.Object.Instantiate(template, template.transform.parent);
         RoleInfoButton.OnClick.AddListener((Action)(() =>

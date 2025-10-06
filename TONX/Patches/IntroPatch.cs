@@ -1,4 +1,5 @@
 using AmongUs.GameOptions;
+using TONX.GameModes.Core;
 using TONX.Modules;
 using UnityEngine;
 
@@ -168,15 +169,16 @@ public class IntroCutscenePatch
             PlayerControl.LocalPlayer.Data.Role.IntroSound = GetIntroSound(RoleTypes.Impostor);
         }
 
-        if (Options.CurrentGameMode == CustomGameMode.SoloKombat)
+        var format = Options.CurrentGameMode.GetModeClass().GetIntroFormat(role);
+        if (format.HasValue)
         {
-            var color = ColorUtility.TryParseHtmlString("#f55252", out var c) ? c : new(255, 255, 255, 255);
-            __instance.TeamTitle.text = Utils.GetRoleName(role);
-            __instance.TeamTitle.color = Utils.GetRoleColor(role);
+            var (teamtext, textcolor, imptext, bgcolor, introsound) = format.Value;
+            __instance.TeamTitle.text = teamtext;
+            __instance.TeamTitle.color = textcolor;
             __instance.ImpostorText.gameObject.SetActive(true);
-            __instance.ImpostorText.text = GetString("ModeSoloKombat");
-            __instance.BackgroundBar.material.color = color;
-            PlayerControl.LocalPlayer.Data.Role.IntroSound = DestroyableSingleton<HnSImpostorScreamSfx>.Instance.HnSOtherImpostorTransformSfx;
+            __instance.ImpostorText.text = imptext;
+            __instance.BackgroundBar.material.color = bgcolor;
+            PlayerControl.LocalPlayer.Data.Role.IntroSound = introsound;
         }
 
         if (RoleDraftManager.RoleDraftState == RoleDraftState.ReadyToDraft)
@@ -299,7 +301,7 @@ public class IntroCutscenePatch
                     pc.SyncSettings();
                     pc.RpcResetAbilityCooldown();
                 });
-                if (Options.FixFirstKillCooldown.GetBool() && Options.CurrentGameMode != CustomGameMode.SoloKombat)
+                if (Options.FixFirstKillCooldown.GetBool() && Options.CurrentGameMode == CustomGameMode.Standard)
                     _ = new LateTask(() =>
                     {
                         if (GameStates.IsInTask)

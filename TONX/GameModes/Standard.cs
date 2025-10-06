@@ -17,7 +17,6 @@ public sealed class Standard : GameModeBase
         );
     public Standard() : base(ModeInfo)
     { }
-    
     public override void EditTaskText(TaskPanelBehaviour taskPanel, ref string AllText)
     {
         var taskText = taskPanel.taskText.text;

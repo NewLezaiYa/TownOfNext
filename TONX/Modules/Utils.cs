@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using TONX.GameModes;
+using TONX.GameModes.Core;
 using TONX.Modules;
 using TONX.Roles.AddOns.Crewmate;
 using TONX.Roles.AddOns.Impostor;
@@ -1231,13 +1232,11 @@ public static class Utils
         {
             return ChatSummary[id] ?? "";
         }
+        var (showKillCount, showVitalText, showKillerText, spaceBeforeRole) = Options.CurrentGameMode.GetModeClass().GetSummaryTextContent();
         builder.Append(Main.AllPlayerNames[id]);
         builder.Append(": ").Append(GetProgressText(id).RemoveColorTags());
-        if (Options.CurrentGameMode != CustomGameMode.SoloKombat)
-        {
-            builder.Append(' ').Append(GetKillCountText(id).RemoveColorTags());
-            builder.Append(' ').Append(GetVitalText(id));
-        }
+        if (showKillCount) builder.Append(' ').Append(GetKillCountText(id).RemoveColorTags());
+        if (showVitalText) builder.Append(' ').Append(GetVitalText(id));
         builder.Append(' ').Append(RolesRecord.ContainsKey(id) ? RolesRecord[id].RemoveColorTags() : "");
         ChatSummary[id] = builder.ToString();
         builder = new StringBuilder();
@@ -1252,20 +1251,26 @@ public static class Utils
         builder.AppendFormat("<pos={0}em>", pos).Append(GetProgressText(id)).Append("</pos>");
         // "(00/00) " = 4em
         pos += 4f;
-        if (Options.CurrentGameMode != CustomGameMode.SoloKombat)
+        if (showKillCount)
         {
             builder.AppendFormat("<pos={0}em>", pos).Append(GetKillCountText(id)).Append("</pos>");
             // "Kills: {0} " = 5.5em
             // "击杀：{0} " = 5em
             pos += DestroyableSingleton<TranslationController>.Instance.currentLanguage.languageID is SupportedLangs.English or SupportedLangs.Russian ? 5.5f : 5f;
+        }
+        if (showVitalText)
+        {
             builder.AppendFormat("<pos={0}em>", pos).Append(GetVitalText(id)).Append("</pos>");
             // "Lover's Suicide " = 8em
             // "断开连接 " = 4.5em
             pos += DestroyableSingleton<TranslationController>.Instance.currentLanguage.languageID is SupportedLangs.English or SupportedLangs.Russian ? 6f : 2.5f;
+        }
+        if (showKillerText)
+        {
             builder.AppendFormat("<pos={0}em>", pos).Append(GetKillerText(id)).Append("</pos>");
             pos += Math.Min(((float)longestNameByteCount / 2) + 2.0f /* ★+末尾的全角空白 */ , 12.0f);
         }
-        else pos += 6.5f;
+        pos += spaceBeforeRole;
         builder.AppendFormat("<pos={0}em>", pos);
         builder.Append(RolesRecord.ContainsKey(id) ? RolesRecord[id] : "");
         builder.Append("</pos>");

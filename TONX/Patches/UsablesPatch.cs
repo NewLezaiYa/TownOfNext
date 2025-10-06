@@ -13,14 +13,6 @@ class CanUsePatch
         return __instance.AllowImpostor || Utils.HasTasks(PlayerControl.LocalPlayer.Data, false);
     }
 }
-[HarmonyPatch(typeof(EmergencyMinigame), nameof(EmergencyMinigame.Update))]
-class EmergencyMinigamePatch
-{
-    public static void Postfix(EmergencyMinigame __instance)
-    {
-        if (Options.CurrentGameMode == CustomGameMode.SoloKombat) __instance.Close();
-    }
-}
 [HarmonyPatch(typeof(Vent), nameof(Vent.CanUse))]
 class CanUseVentPatch
 {

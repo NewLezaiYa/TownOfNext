@@ -3,6 +3,7 @@ using BepInEx.Unity.IL2CPP.Utils.Collections;
 using Hazel;
 using System.Collections;
 using TONX.Attributes;
+using TONX.GameModes.Core;
 using TONX.Modules;
 using TONX.Roles.AddOns;
 using UnityEngine;
@@ -221,8 +222,7 @@ internal class SelectRolesPatch
             }
             CustomRoleManager.CreateInstance();
 
-            // 个人竞技模式用
-            if (Options.CurrentGameMode == CustomGameMode.SoloKombat) goto EndOfSelectRolePatch;
+            if (!Options.CurrentGameMode.GetModeClass().ShouldAssignAddons()) goto EndOfSelectRolePatch;
 
             if (RoleDraftManager.RoleDraftState == RoleDraftState.ReadyToDraft) goto EndOfSelectRolePatch;
 
@@ -242,16 +242,7 @@ internal class SelectRolesPatch
                 roleOpt.SetRoleRate(roleTypes, 0, 0);
             }
 
-            switch (Options.CurrentGameMode)
-            {
-                case CustomGameMode.Standard:
-                    GameEndChecker.SetPredicateToNormal();
-                    break;
-                case CustomGameMode.SoloKombat:
-                    GameEndChecker.SetPredicateToSoloKombat();
-                    break;
-            }
-
+            GameEndChecker.SetPredicate();
             Utils.CanRecord = RoleDraftManager.RoleDraftState == RoleDraftState.None;
             if (Utils.CanRecord) foreach (var pc in Main.AllPlayerControls) Utils.RecordPlayerRoles(pc.PlayerId);
             AmongUsClient.Instance.StartCoroutine(CoEndAssign().WrapToIl2Cpp()); // 准备进入IntroCutscene

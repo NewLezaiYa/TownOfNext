@@ -72,6 +72,15 @@ public sealed class SoloKombat : GameModeBase
     {
         RoundTime = KB_GameTime.GetInt() + 8;
     }
+    public override bool SelectCustomRoles(ref Dictionary<PlayerControl, CustomRoles> RoleResult)
+    {
+        RoleResult = new();
+        foreach (var pc in Main.AllAlivePlayerControls)
+            RoleResult.Add(pc, pc.PlayerId == 0 && Options.EnableGM.GetBool() ? CustomRoles.GM : CustomRoles.KB_Normal);
+        return true;
+    }
+    public override bool ShouldAssignAddons() => false;
+    public override string GetLobbyUpperTag() => $"<color=#f55252><size=1.7>{GetString("ModeSoloKombat")}</size></color>";
     private static long LastFixedUpdate;
     public override void OnFixedUpdate(PlayerControl player)
     {
@@ -82,16 +91,19 @@ public sealed class SoloKombat : GameModeBase
         // 减少全局倒计时
         RoundTime--;
     }
+    public override bool OnCloseDoors(SystemTypes door) => false;
+    public override bool OnCheckReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo target) => false;
     public override void EditTaskText(TaskPanelBehaviour taskPanel, ref string AllText)
     {
         var lpc = PlayerControl.LocalPlayer;
+        var kb_Normal = lpc.GetRoleClass() as KB_Normal;
 
         if (lpc.GetCustomRole() is CustomRoles.KB_Normal)
         {
             AllText += "\r\n";
-            AllText += $"\r\n{GetString("PVP.ATK")}: {(lpc.GetRoleClass() as KB_Normal)?.ATK}";
-            AllText += $"\r\n{GetString("PVP.DF")}: {(lpc.GetRoleClass() as KB_Normal)?.DF}";
-            AllText += $"\r\n{GetString("PVP.RCO")}: {(lpc.GetRoleClass() as KB_Normal)?.HPReco}";
+            AllText += $"\r\n{GetString("PVP.ATK")}: {kb_Normal?.ATK}";
+            AllText += $"\r\n{GetString("PVP.DF")}: {kb_Normal?.DF}";
+            AllText += $"\r\n{GetString("PVP.RCO")}: {kb_Normal?.HPReco}";
         }
         AllText += "\r\n";
 
@@ -101,19 +113,36 @@ public sealed class SoloKombat : GameModeBase
         {
             if (Utils.GetPlayerById(id).GetCustomRole() is CustomRoles.GM) continue;
             string name = Main.AllPlayerNames[id].RemoveHtmlTags().Replace("\r\n", string.Empty);
-            string summary = $"{SoloKombat.GetDisplayScore(id)}  {Utils.ColorString(Main.PlayerColors[id], name)}";
-            if (SoloKombat.GetDisplayScore(id).ToString().Trim() == "") continue;
+            string summary = $"{GetDisplayScore(id)}  {Utils.ColorString(Main.PlayerColors[id], name)}";
+            if (GetDisplayScore(id).ToString().Trim() == "") continue;
             SummaryText[id] = summary;
         }
 
         List<(int, byte)> list = new();
-        foreach (var id in AllPlayerIds) list.Add((SoloKombat.GetRankOfScore(id), id));
+        foreach (var id in AllPlayerIds) list.Add((GetRankOfScore(id), id));
         list.Sort();
         foreach (var id in list.Where(x => SummaryText.ContainsKey(x.Item2))) AllText += "\r\n" + SummaryText[id.Item2];
 
         AllText = $"<size=80%>{AllText}</size>";
     }
-
+    public override (bool, bool, bool, float) GetSummaryTextContent() => (false, false, false, 6.5f);
+    public override (string, Color, string, Color, AudioClip)? GetIntroFormat(CustomRoles role)
+        => (
+            Utils.GetRoleName(role),
+            Utils.GetRoleColor(role),
+            GetString("ModeSoloKombat"),
+            ColorUtility.TryParseHtmlString("#f55252", out var c) ? c : new(255, 255, 255, 255),
+            DestroyableSingleton<HnSImpostorScreamSfx>.Instance.HnSOtherImpostorTransformSfx
+        );
+    public override (string, float, Color, Color, string, Color)? GetOutroFormat(byte winnerId)
+        => (
+            Main.AllPlayerNames[winnerId] + GetString("Win"),
+            5f,
+            Main.PlayerColors[winnerId],
+            new Color32(245, 82, 82, 255),
+            $"<color=#f55252>{GetString("ModeSoloKombat")}</color>",
+            Color.red
+        );
     private static Dictionary<byte, int> KBScore = new();
     public static string GetDisplayScore(byte playerId)
     {
@@ -144,6 +173,42 @@ public sealed class SoloKombat : GameModeBase
         catch
         {
             return Main.AllPlayerControls.Count();
+        }
+    }
+    public override bool AfterCheckForGameEnd(GameOverReason reason, ref GameEndPredicate predicate)
+    {
+        if (CustomWinnerHolder.WinnerIds.Count > 0 || CustomWinnerHolder.WinnerTeam != CustomWinner.Default)
+        {
+            ShipStatus.Instance.enabled = false;
+            GameEndChecker.StartEndGame(reason);
+            predicate = null;
+        }
+        return true;
+    }
+    public override GameEndPredicate Predicate() => new SoloKombatGameEndPredicate();
+    class SoloKombatGameEndPredicate : GameEndPredicate
+    {
+        public override bool CheckForEndGame(out GameOverReason reason)
+        {
+            reason = GameOverReason.ImpostorsByKill;
+            if (CustomWinnerHolder.WinnerIds.Count > 0) return false;
+            if (CheckGameEndByLivingPlayers(out reason)) return true;
+            return false;
+        }
+
+        public bool CheckGameEndByLivingPlayers(out GameOverReason reason)
+        {
+            reason = GameOverReason.ImpostorsByKill;
+
+            if (RoundTime > 0) return false;
+
+            var list = Main.AllPlayerControls.Where(x => !x.Is(CustomRoles.GM) && GetRankOfScore(x.PlayerId) == 1);
+            var winner = list.FirstOrDefault();
+            if (winner != null) CustomWinnerHolder.WinnerIds = new() { winner.PlayerId };
+            else CustomWinnerHolder.ResetAndSetWinner(CustomWinner.None);
+            Main.DoBlockNameChange = true;
+
+            return true;
         }
     }
 }
