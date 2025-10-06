@@ -83,7 +83,7 @@ public sealed class SoloKombat : GameModeBase
     public override string GetLobbyUpperTag() => $"<color=#f55252><size=1.7>{GetString("ModeSoloKombat")}</size></color>";
     public override void OnSecondsUpdate(PlayerControl player, long now)
     {
-        if (!GameStates.IsInTask) return;
+        if (!GameStates.IsInTask || player != PlayerControl.LocalPlayer) return;
         // 减少全局倒计时
         RoundTime--;
     }
