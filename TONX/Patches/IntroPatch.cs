@@ -169,17 +169,7 @@ public class IntroCutscenePatch
             PlayerControl.LocalPlayer.Data.Role.IntroSound = GetIntroSound(RoleTypes.Impostor);
         }
 
-        var format = Options.CurrentGameMode.GetModeClass().GetIntroFormat(role);
-        if (format.HasValue)
-        {
-            var (teamtext, textcolor, imptext, bgcolor, introsound) = format.Value;
-            __instance.TeamTitle.text = teamtext;
-            __instance.TeamTitle.color = textcolor;
-            __instance.ImpostorText.gameObject.SetActive(true);
-            __instance.ImpostorText.text = imptext;
-            __instance.BackgroundBar.material.color = bgcolor;
-            PlayerControl.LocalPlayer.Data.Role.IntroSound = introsound;
-        }
+        if (!Options.CurrentGameMode.GetModeClass().EditIntroFormat(ref __instance)) return;
 
         if (RoleDraftManager.RoleDraftState == RoleDraftState.ReadyToDraft)
         {
@@ -301,7 +291,7 @@ public class IntroCutscenePatch
                     pc.SyncSettings();
                     pc.RpcResetAbilityCooldown();
                 });
-                if (Options.FixFirstKillCooldown.GetBool() && Options.CurrentGameMode == CustomGameMode.Standard)
+                if (Options.FixFirstKillCooldown.GetBool() && CustomGameMode.Standard.IsEnable())
                     _ = new LateTask(() =>
                     {
                         if (GameStates.IsInTask)

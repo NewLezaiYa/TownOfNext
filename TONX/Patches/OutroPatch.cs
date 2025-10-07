@@ -105,17 +105,9 @@ class SetEverythingUpPatch
         var AdditionalWinnerText = new StringBuilder(32);
         string CustomWinnerColor = Utils.GetRoleColorCode(CustomRoles.Crewmate);
 
-        var format = Options.CurrentGameMode.GetModeClass().GetOutroFormat(CustomWinnerHolder.WinnerIds.FirstOrDefault());
-        if (format.HasValue && CustomWinnerHolder.WinnerTeam is not CustomWinner.Error and not CustomWinner.None and not CustomWinner.Draw)
+        if (CustomWinnerHolder.WinnerTeam is not CustomWinner.Error and not CustomWinner.None and not CustomWinner.Draw)
         {
-            var (wintext, textfont, textcolor, bgcolor, largetext, largecolor) = format.Value;
-            __instance.WinText.text = wintext;
-            __instance.WinText.fontSize -= textfont;
-            __instance.WinText.color = textcolor;
-            __instance.BackgroundBar.material.color = bgcolor;
-            WinnerText.text = largetext;
-            WinnerText.color = largecolor;
-            goto EndOfText;
+            if (!Options.CurrentGameMode.GetModeClass().EditOutroFormat(ref __instance, ref WinnerText)) goto EndOfText;
         }
 
         var winnerRole = (CustomRoles)CustomWinnerHolder.WinnerTeam;

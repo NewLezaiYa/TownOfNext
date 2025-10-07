@@ -32,7 +32,7 @@ internal class ControllerManagerUpdatePatch
             }
         }
         //职业介绍
-        if (GameStates.IsInGame && (GameStates.IsCanMove || GameStates.IsMeeting) && Options.CurrentGameMode == CustomGameMode.Standard)
+        if (GameStates.IsInGame && (GameStates.IsCanMove || GameStates.IsMeeting) && CustomGameMode.Standard.IsEnable())
         {
             if (Input.GetKeyDown(KeyCode.F1))
             {

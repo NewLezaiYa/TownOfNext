@@ -645,7 +645,7 @@ class FixedUpdatePatch
                 Suffix.Append(CustomRoleManager.GetSuffixOthers(seer, target));
 
                 //seer作为GM在个人竞技中的Suffix
-                if (Options.CurrentGameMode == CustomGameMode.SoloKombat && PlayerControl.LocalPlayer.GetCustomRole() is CustomRoles.GM && seer != target)
+                if (CustomGameMode.SoloKombat.IsEnable() && PlayerControl.LocalPlayer.GetCustomRole() is CustomRoles.GM && seer != target)
                 {
                     var role = target.GetRoleClass() as KB_Normal;
                     Suffix.Append(role == null ? "" : KB_Normal.GetHealthText(role));

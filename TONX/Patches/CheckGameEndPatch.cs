@@ -2,7 +2,6 @@ using AmongUs.GameOptions;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using Hazel;
 using System.Collections;
-using TONX.GameModes;
 using TONX.GameModes.Core;
 using TONX.Modules;
 using TONX.Roles.Core.Interfaces;
@@ -32,7 +31,7 @@ class GameEndChecker
         predicate.CheckForEndGame(out reason);
 
         //特殊模式判断
-        if (Options.CurrentGameMode.GetModeClass().AfterCheckForGameEnd(reason, ref predicate)) return false;
+        if (!Options.CurrentGameMode.GetModeClass().AfterCheckForGameEnd(reason, ref predicate)) return false;
 
         //ゲーム終了時
         if (CustomWinnerHolder.WinnerTeam != CustomWinner.Default)

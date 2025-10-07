@@ -13,6 +13,7 @@ internal static class CustomRoleSelector
         // 开始职业抽取
         RoleResult = new();
         if (Options.CurrentGameMode.GetModeClass().SelectCustomRoles(ref RoleResult)) return;
+        RoleResult = new();
 
         var rd = IRandom.Instance;
         int playerCount = Main.AllAlivePlayerControls.Count();

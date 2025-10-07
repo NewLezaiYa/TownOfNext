@@ -804,7 +804,7 @@ public static class Options
         #region 游戏设置
 
         // 游戏模式
-        CustomGameModeManager.AllModes.ToList().ForEach(m => m.GetModeInfo()?.OptionCreator?.Invoke());
+        CustomGameModesHelper.AllModes.ToList().ForEach(m => m.GetModeInfo()?.OptionCreator?.Invoke());
 
         // 驱逐相关设定
         TextOptionItem.Create(3_100_001, "MenuTitle.Ejections", TabGroup.GameSettings)

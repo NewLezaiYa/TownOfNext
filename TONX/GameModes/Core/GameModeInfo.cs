@@ -1,4 +1,3 @@
-using AmongUs.GameOptions;
 using UnityEngine;
 
 namespace TONX.GameModes.Core;

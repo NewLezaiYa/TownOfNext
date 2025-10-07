@@ -20,7 +20,7 @@ class HudManagerInitializePatch
         RoleInfoButton = UnityEngine.Object.Instantiate(template, template.transform.parent);
         RoleInfoButton.OnClick.AddListener((Action)(() =>
         {
-            if (GameStates.IsInGame && (GameStates.IsCanMove || GameStates.IsMeeting) && Options.CurrentGameMode == CustomGameMode.Standard)
+            if (GameStates.IsInGame && (GameStates.IsCanMove || GameStates.IsMeeting) && CustomGameMode.Standard.IsEnable())
             {
                 if (InGameRoleInfoMenu.Showing) InGameRoleInfoMenu.Hide();
                 else
@@ -153,7 +153,7 @@ class HudManagerPatch
                 __instance.AbilityButton.OverrideText(GetString(StringNames.HauntAbilityName));
                 __instance.AbilityButton.SetInfiniteUses();
 
-                if (Options.CurrentGameMode == CustomGameMode.SoloKombat)
+                if (CustomGameMode.SoloKombat.IsEnable())
                 {
                     if (LowerInfoText == null)
                     {
@@ -310,8 +310,28 @@ class TaskPanelBehaviourPatch
 
             var AllText = Utils.ColorString(player.GetRoleColor(), RoleWithInfo);
 
-            Options.CurrentGameMode.GetModeClass()?.EditTaskText(__instance, ref AllText);
+            if (!Options.CurrentGameMode.GetModeClass().EditTaskText(__instance, ref AllText)) goto EndOfEditingTaskText;
 
+            var lines = taskText.Split("\r\n</color>\n")[0].Split("\r\n\n")[0].Split("\r\n");
+            StringBuilder sb = new();
+            foreach (var eachLine in lines)
+            {
+                var line = eachLine.Trim();
+                if ((line.StartsWith("<color=#FF1919FF>") || line.StartsWith("<color=#FF0000FF>")) && sb.Length < 1 && !line.Contains('(')) continue;
+                sb.Append(line + "\r\n");
+            }
+            if (sb.Length > 1)
+            {
+                var text = sb.ToString().TrimEnd('\n').TrimEnd('\r');
+                if (!Utils.HasTasks(PlayerControl.LocalPlayer.Data, false) && sb.ToString().Count(s => s == '\n') >= 2)
+                    text = $"{Utils.ColorString(new Color32(255, 20, 147, byte.MaxValue), GetString("FakeTask"))}\r\n{text}";
+                AllText += $"\r\n\r\n<size=85%>{text}</size>";
+            }
+
+            if (MeetingStates.FirstMeeting)
+                AllText += $"\r\n\r\n</color><size=70%>{GetString("PressF1ShowRoleDescription")}</size>";
+
+        EndOfEditingTaskText:
             __instance.taskText.text = AllText;
         }
 
