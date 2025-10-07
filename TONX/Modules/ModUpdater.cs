@@ -84,6 +84,7 @@ public class ModUpdater
     }
     public static void CheckForUpdate()
     {
+#if Windows
         isChecked = false;
         DeleteOldFiles();
 
@@ -127,6 +128,16 @@ public class ModUpdater
         }
 
         SetUpdateButtonStatus();
+
+#elif Android
+        isChecked = true;
+        if (firstLaunch)
+        {
+            firstLaunch = false;
+            var annos = IsChineseUser ? announcement_zh : announcement_en;
+            CustomPopup.Show(GetString(StringNames.AnnouncementLabel), annos, new() { (GetString(StringNames.Okay), null) });
+        }
+#endif
     }
     public static string Get(string url)
     {
