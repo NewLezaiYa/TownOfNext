@@ -270,11 +270,12 @@ public class IntroCutscenePatch
         BeginCrewmate_Postfix(__instance, ref yourTeam);
     }
 #if Windows
-    [HarmonyPatch(nameof(IntroCutscene.OnDestroy)), HarmonyPostfix]
+    [HarmonyPatch(nameof(IntroCutscene.OnDestroy))]
 #elif Android
-    [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.StartSFX)), HarmonyPostfix]
-    [HarmonyPatch(typeof(FungleShipStatus), nameof(FungleShipStatus.StartSFX)), HarmonyPostfix]
+    [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.StartSFX))]
+    [HarmonyPatch(typeof(FungleShipStatus), nameof(FungleShipStatus.StartSFX))]
 #endif
+    [HarmonyPostfix]
     public static void OnDestroy_Postfix()
     {
         if (!GameStates.IsInGame) return;
