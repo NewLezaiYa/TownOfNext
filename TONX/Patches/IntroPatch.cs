@@ -273,7 +273,7 @@ public class IntroCutscenePatch
     [HarmonyPatch(nameof(IntroCutscene.OnDestroy)), HarmonyPostfix]
 #elif Android
     [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.StartSFX)), HarmonyPostfix]
-    [HarmonyPatch(typeof(FungleShipStatus), nameof(FungleShipStatus.StartSFX))]
+    [HarmonyPatch(typeof(FungleShipStatus), nameof(FungleShipStatus.StartSFX)), HarmonyPostfix]
 #endif
     public static void OnDestroy_Postfix()
     {
