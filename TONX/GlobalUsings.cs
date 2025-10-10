@@ -7,4 +7,5 @@ global using System.Net.Http;
 global using System.Threading;
 global using System.Threading.Tasks;
 global using TONX.Roles.Core;
+global using TONX.GameModes.Core;
 global using static TONX.Translator;

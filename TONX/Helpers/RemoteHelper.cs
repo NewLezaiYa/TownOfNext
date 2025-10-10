@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text.Json;
 
-namespace TONX.Helpers;
+namespace TONX;
 
 // 来源：https://github.com/Slok7565/FinalSuspect/blob/FinalSus/FinalSuspect/Helpers/RemoteHelper.cs
 public static class RemoteHelper

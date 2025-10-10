@@ -1,5 +1,3 @@
-using TONX.GameModes.Core;
-
 namespace TONX.GameModes;
 
 public sealed class Standard : GameModeBase
@@ -9,7 +7,7 @@ public sealed class Standard : GameModeBase
             typeof(Standard),
             () => new Standard(),
             CustomGameMode.Standard,
-            100,
+            10_000_000,
             null,
             "#ffffff"
         );

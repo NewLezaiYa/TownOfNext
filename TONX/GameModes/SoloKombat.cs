@@ -1,5 +1,4 @@
 using UnityEngine;
-using TONX.GameModes.Core;
 using TONX.Roles.GameMode;
 using TMPro;
 
@@ -12,7 +11,7 @@ public sealed class SoloKombat : GameModeBase
             typeof(SoloKombat),
             () => new SoloKombat(),
             CustomGameMode.SoloKombat,
-            101,
+            20_000_000,
             SetupCustomOption,
             "#f55252"
         );
@@ -32,41 +31,23 @@ public sealed class SoloKombat : GameModeBase
 
     public static void SetupCustomOption()
     {
-        TextOptionItem.Create(10_100_001, "MenuTitle.GameMode", TabGroup.GameSettings)
-            .SetGameMode(CustomGameMode.SoloKombat)
-            .SetColor(Utils.GetRoleColor(CustomRoles.KB_Normal));
-        KB_GameTime = IntegerOptionItem.Create(10_000_001, "KB_GameTime", new(30, 300, 5), 180, TabGroup.GameSettings, false)
-            .SetGameMode(CustomGameMode.SoloKombat)
-            .SetColor(Utils.GetRoleColor(CustomRoles.KB_Normal))
+        TextOptionItem.Create(ModeInfo, 100_001, "MenuTitle.GameMode");
+        KB_GameTime = IntegerOptionItem.Create(ModeInfo, 1, "KB_GameTime", new(30, 300, 5), 180, false)
             .SetValueFormat(OptionFormat.Seconds)
             .SetHeader(true);
-        KB_ATKCooldown = FloatOptionItem.Create(10_000_002, "KB_ATKCooldown", new(1f, 10f, 0.1f), 1f, TabGroup.GameSettings, false)
-            .SetGameMode(CustomGameMode.SoloKombat)
-            .SetColor(Utils.GetRoleColor(CustomRoles.KB_Normal))
+        KB_ATKCooldown = FloatOptionItem.Create(ModeInfo, 2, "KB_ATKCooldown", new(1f, 10f, 0.1f), 1f, false)
             .SetValueFormat(OptionFormat.Seconds);
-        KB_HPMax = FloatOptionItem.Create(10_000_003, "KB_HPMax", new(10f, 990f, 5f), 100f, TabGroup.GameSettings, false)
-            .SetGameMode(CustomGameMode.SoloKombat)
-            .SetColor(Utils.GetRoleColor(CustomRoles.KB_Normal))
+        KB_HPMax = FloatOptionItem.Create(ModeInfo, 3, "KB_HPMax", new(10f, 990f, 5f), 100f, false)
             .SetValueFormat(OptionFormat.Health);
-        KB_ATK = FloatOptionItem.Create(10_000_004, "KB_ATK", new(1f, 100f, 1f), 8f, TabGroup.GameSettings, false)
-            .SetGameMode(CustomGameMode.SoloKombat)
-            .SetColor(Utils.GetRoleColor(CustomRoles.KB_Normal))
+        KB_ATK = FloatOptionItem.Create(ModeInfo, 4, "KB_ATK", new(1f, 100f, 1f), 8f, false)
             .SetValueFormat(OptionFormat.Health);
-        KB_RecoverPerSecond = FloatOptionItem.Create(10_000_005, "KB_RecoverPerSecond", new(1f, 180f, 1f), 2f, TabGroup.GameSettings, false)
-            .SetGameMode(CustomGameMode.SoloKombat)
-            .SetColor(Utils.GetRoleColor(CustomRoles.KB_Normal))
+        KB_RecoverPerSecond = FloatOptionItem.Create(ModeInfo, 5, "KB_RecoverPerSecond", new(1f, 180f, 1f), 2f, false)
             .SetValueFormat(OptionFormat.Health);
-        KB_RecoverAfterSecond = IntegerOptionItem.Create(10_000_006, "KB_RecoverAfterSecond", new(0, 60, 1), 8, TabGroup.GameSettings, false)
-            .SetGameMode(CustomGameMode.SoloKombat)
-            .SetColor(Utils.GetRoleColor(CustomRoles.KB_Normal))
+        KB_RecoverAfterSecond = IntegerOptionItem.Create(ModeInfo, 6, "KB_RecoverAfterSecond", new(0, 60, 1), 8, false)
             .SetValueFormat(OptionFormat.Seconds);
-        KB_ResurrectionWaitingTime = IntegerOptionItem.Create(10_000_007, "KB_ResurrectionWaitingTime", new(5, 990, 1), 15, TabGroup.GameSettings, false)
-            .SetGameMode(CustomGameMode.SoloKombat)
-            .SetColor(Utils.GetRoleColor(CustomRoles.KB_Normal))
+        KB_ResurrectionWaitingTime = IntegerOptionItem.Create(ModeInfo, 7, "KB_ResurrectionWaitingTime", new(5, 990, 1), 15, false)
             .SetValueFormat(OptionFormat.Seconds);
-        KB_KillBonusMultiplier = FloatOptionItem.Create(10_000_008, "KB_KillBonusMultiplier", new(0.25f, 5f, 0.25f), 1.25f, TabGroup.GameSettings, false)
-            .SetGameMode(CustomGameMode.SoloKombat)
-            .SetColor(Utils.GetRoleColor(CustomRoles.KB_Normal))
+        KB_KillBonusMultiplier = FloatOptionItem.Create(ModeInfo, 8, "KB_KillBonusMultiplier", new(0.25f, 5f, 0.25f), 1.25f, false)
             .SetValueFormat(OptionFormat.Multiplier);
     }
     public override void Init()

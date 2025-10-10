@@ -30,13 +30,25 @@ public class StringOptionItem : OptionItem
         );
     }
     public static StringOptionItem Create(
-         SimpleRoleInfo roleInfo, int idOffset, Enum name, string[] selections, int defaultIndex, bool isSingleValue, OptionItem parent = null
+        SimpleRoleInfo roleInfo, int idOffset, Enum name, string[] selections, int defaultIndex, bool isSingleValue, OptionItem parent = null
     )
     {
         var opt = new StringOptionItem(
             roleInfo.ConfigId + idOffset, name.ToString(), defaultIndex, roleInfo.Tab, isSingleValue, selections
         );
         opt.SetParent(parent ?? roleInfo.RoleOption);
+        return opt;
+    }
+    public static StringOptionItem Create(
+        GameModeInfo modeInfo, int idOffset, string name, string[] selections, int defaultIndex, bool isSingleValue, OptionItem parent = null
+    )
+    {
+        var opt = new StringOptionItem(
+            modeInfo.ConfigId + idOffset, name, defaultIndex, TabGroup.GameSettings, isSingleValue, selections
+        );
+        if (parent != null) opt.SetParent(parent);
+        opt.SetGameMode(modeInfo.ModeName);
+        opt.SetColor(modeInfo.ModeColor);
         return opt;
     }
 

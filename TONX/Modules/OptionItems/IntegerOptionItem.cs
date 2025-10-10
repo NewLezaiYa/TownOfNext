@@ -37,6 +37,18 @@ public class IntegerOptionItem : OptionItem
         opt.SetParent(parent ?? roleInfo.RoleOption);
         return opt;
     }
+    public static IntegerOptionItem Create(
+        GameModeInfo modeInfo, int idOffset, string name, IntegerValueRule rule, int defaultValue, bool isSingleValue, OptionItem parent = null
+    )
+    {
+        var opt = new IntegerOptionItem(
+            modeInfo.ConfigId + idOffset, name, defaultValue, TabGroup.GameSettings, isSingleValue, rule
+        );
+        if (parent != null) opt.SetParent(parent);
+        opt.SetGameMode(modeInfo.ModeName);
+        opt.SetColor(modeInfo.ModeColor);
+        return opt;
+    }
 
     // Getter
     public override int GetInt() => Rule.GetValueByIndex(CurrentValue);

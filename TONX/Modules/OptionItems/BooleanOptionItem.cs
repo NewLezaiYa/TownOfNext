@@ -36,6 +36,18 @@ public class BooleanOptionItem : OptionItem
         opt.SetParent(parent ?? roleInfo.RoleOption);
         return opt;
     }
+    public static BooleanOptionItem Create(
+        GameModeInfo modeInfo, int idOffset, string name, bool defaultValue, bool isSingleValue, OptionItem parent = null
+    )
+    {
+        var opt = new BooleanOptionItem(
+            modeInfo.ConfigId + idOffset, name, defaultValue, TabGroup.GameSettings, isSingleValue
+        );
+        if (parent != null) opt.SetParent(parent);
+        opt.SetGameMode(modeInfo.ModeName);
+        opt.SetColor(modeInfo.ModeColor);
+        return opt;
+    }
 
     // Getter
     public override string GetString()
