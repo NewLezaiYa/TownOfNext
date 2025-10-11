@@ -114,7 +114,7 @@ public sealed class SoloKombat : GameModeBase
         intro.ImpostorText.text = GetString("ModeSoloKombat");
         intro.BackgroundBar.material.color = color;
         PlayerControl.LocalPlayer.Data.Role.IntroSound = DestroyableSingleton<HnSImpostorScreamSfx>.Instance.HnSOtherImpostorTransformSfx;
-        return true;
+        return false;
     }
     public override bool EditOutroFormat(ref EndGameManager outro, ref TextMeshPro winnerText)
     {

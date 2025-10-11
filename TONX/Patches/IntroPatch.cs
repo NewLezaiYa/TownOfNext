@@ -168,7 +168,7 @@ public class IntroCutscenePatch
             PlayerControl.LocalPlayer.Data.Role.IntroSound = GetIntroSound(RoleTypes.Impostor);
         }
 
-        if (!Options.CurrentGameMode.GetModeClass().EditIntroFormat(ref __instance)) return;
+        if (!Options.CurrentGameMode.GetModeClass().EditIntroFormat(ref __instance)) goto EndOfText;
 
         if (RoleDraftManager.RoleDraftState == RoleDraftState.ReadyToDraft)
         {
@@ -178,6 +178,8 @@ public class IntroCutscenePatch
             __instance.BackgroundBar.material.color = Color.gray;
             PlayerControl.LocalPlayer.Data.Role.IntroSound = GetIntroSound(RoleTypes.Crewmate);
         }
+
+    EndOfText:
 
         if (Input.GetKey(KeyCode.RightShift))
         {
