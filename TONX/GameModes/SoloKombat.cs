@@ -19,7 +19,6 @@ public sealed class SoloKombat : GameModeBase
     { }
     public static int RoundTime;
 
-    //Options
     public static OptionItem KB_GameTime;
     public static OptionItem KB_ATKCooldown;
     public static OptionItem KB_HPMax;
@@ -50,26 +49,39 @@ public sealed class SoloKombat : GameModeBase
         KB_KillBonusMultiplier = FloatOptionItem.Create(ModeInfo, 8, "KB_KillBonusMultiplier", new(0.25f, 5f, 0.25f), 1.25f, false)
             .SetValueFormat(OptionFormat.Multiplier);
     }
+
     public override void Init()
     {
         RoundTime = KB_GameTime.GetInt() + 8;
     }
+    public override bool ShouldAssignAddons() => false;
     public override bool SelectCustomRoles(ref Dictionary<PlayerControl, CustomRoles> RoleResult)
     {
         foreach (var pc in Main.AllAlivePlayerControls)
             RoleResult.Add(pc, pc.PlayerId == 0 && Options.EnableGM.GetBool() ? CustomRoles.GM : CustomRoles.KB_Normal);
         return true;
     }
-    public override bool ShouldAssignAddons() => false;
+
     public override string GetLobbyUpperTag() => $"<color=#f55252><size=1.7>{GetString("ModeSoloKombat")}</size></color>";
+    public override List<byte> ArrangedSummaryText(List<byte> clone) => clone.OrderBy(GetRankOfScore).ToList();
+    public override (bool, bool, bool, float) GetSummaryTextContent() => (false, false, false, 6.5f);
+    public override bool OnSendRolesInfo(string input, byte playerId)
+    {
+        Utils.SendMessage(GetString("ModeDescribe.SoloKombat"), playerId);
+        return false;
+    }
+
+    public override bool CanSeeOtherProgressText() => true;
+    public override bool ShouldRandomSpawn() => true;
+    public override bool OnCloseDoors(SystemTypes door) => false;
+    public override bool OnCheckReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo target) => false;
     public override void OnSecondsUpdate(PlayerControl player, long now)
     {
         if (!GameStates.IsInTask || player != PlayerControl.LocalPlayer) return;
         // 减少全局倒计时
         RoundTime--;
     }
-    public override bool OnCloseDoors(SystemTypes door) => false;
-    public override bool OnCheckReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo target) => false;
+
     public override bool EditTaskText(TaskPanelBehaviour taskPanel, ref string AllText)
     {
         var lpc = PlayerControl.LocalPlayer;
@@ -103,7 +115,6 @@ public sealed class SoloKombat : GameModeBase
         AllText = $"<size=80%>{AllText}</size>";
         return false;
     }
-    public override (bool, bool, bool, float) GetSummaryTextContent() => (false, false, false, 6.5f);
     public override bool EditIntroFormat(ref IntroCutscene intro)
     {
         CustomRoles role = PlayerControl.LocalPlayer.GetCustomRole();
@@ -127,38 +138,7 @@ public sealed class SoloKombat : GameModeBase
         winnerText.color = Color.red;
         return false;
     }
-    private static Dictionary<byte, int> KBScore = new();
-    public static string GetDisplayScore(byte playerId)
-    {
-        int rank = GetRankOfScore(playerId);
-        string score = KBScore.TryGetValue(playerId, out var s) ? $"{s}" : "Invalid";
-        string text = string.Format(GetString("KBDisplayScore"), rank.ToString(), score);
-        Color color = Utils.GetRoleColor(CustomRoles.KB_Normal);
-        return Utils.ColorString(color, text);
-    }
-    public static int GetRankOfScore(byte playerId)
-    {
-        if (!GameStates.IsLobby)
-        {
-            foreach (var player in Main.AllPlayerControls)
-            {
-                var role = player.GetRoleClass() as KB_Normal;
-                KBScore.TryAdd(player.PlayerId, role?.Score ?? -255);
-                KBScore[player.PlayerId] = role?.Score ?? -255;
-            }
-        }
-        try
-        {
-            int ms = KBScore[playerId];
-            int rank = 1 + KBScore.Values.Where(x => x > ms).Count();
-            rank += KBScore.Where(x => x.Value == ms).ToList().IndexOf(new(playerId, ms));
-            return rank;
-        }
-        catch
-        {
-            return Main.AllPlayerControls.Count();
-        }
-    }
+
     public override bool AfterCheckForGameEnd(GameOverReason reason, ref GameEndPredicate predicate)
     {
         if (CustomWinnerHolder.WinnerIds.Count > 0 || CustomWinnerHolder.WinnerTeam != CustomWinner.Default)
@@ -193,6 +173,39 @@ public sealed class SoloKombat : GameModeBase
             Main.DoBlockNameChange = true;
 
             return true;
+        }
+    }
+
+    private static Dictionary<byte, int> KBScore = new();
+    public static string GetDisplayScore(byte playerId)
+    {
+        int rank = GetRankOfScore(playerId);
+        string score = KBScore.TryGetValue(playerId, out var s) ? $"{s}" : "Invalid";
+        string text = string.Format(GetString("KBDisplayScore"), rank.ToString(), score);
+        Color color = Utils.GetRoleColor(CustomRoles.KB_Normal);
+        return Utils.ColorString(color, text);
+    }
+    public static int GetRankOfScore(byte playerId)
+    {
+        if (!GameStates.IsLobby)
+        {
+            foreach (var player in Main.AllPlayerControls)
+            {
+                var role = player.GetRoleClass() as KB_Normal;
+                KBScore.TryAdd(player.PlayerId, role?.Score ?? -255);
+                KBScore[player.PlayerId] = role?.Score ?? -255;
+            }
+        }
+        try
+        {
+            int ms = KBScore[playerId];
+            int rank = 1 + KBScore.Values.Where(x => x > ms).Count();
+            rank += KBScore.Where(x => x.Value == ms).ToList().IndexOf(new(playerId, ms));
+            return rank;
+        }
+        catch
+        {
+            return Main.AllPlayerControls.Count();
         }
     }
 }

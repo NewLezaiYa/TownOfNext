@@ -544,7 +544,7 @@ public static class Utils
         var comms = IsActive(SystemTypes.Comms) || Concealer.IsHidding;
         bool enabled = seer == seen
             || (Main.VisibleTasksCount && !seer.IsAlive() && Options.GhostCanSeeOtherTasks.GetBool())
-            || CustomGameMode.SoloKombat.IsEnable();
+            || Options.CurrentGameMode.GetModeClass().CanSeeOtherProgressText();
         string text = GetProgressText(seen.PlayerId, comms);
 
         //seer側による変更
@@ -757,7 +757,7 @@ public static class Utils
 
         sb.Append("<size=70%>\n");
         List<byte> cloneRoles = new(PlayerState.AllPlayerStates.Keys);
-        if (CustomGameMode.SoloKombat.IsEnable()) cloneRoles = cloneRoles.OrderBy(SoloKombat.GetRankOfScore).ToList();
+        cloneRoles = Options.CurrentGameMode.GetModeClass().ArrangedSummaryText(cloneRoles);
         foreach (var id in Main.winnerList.Where(i => !EndGamePatch.SummaryText[i].Contains("NotAssigned")))
         {
             sb.Append($"\n★ ".Color(winnerColor)).Append(SummaryTexts(id, true));

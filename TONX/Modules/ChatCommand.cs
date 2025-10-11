@@ -292,9 +292,8 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
     }
     public static void SendRolesInfo(string input, byte playerId)
     {
-        if (CustomGameMode.SoloKombat.IsEnable())
+        if (!Options.CurrentGameMode.GetModeClass().OnSendRolesInfo(input, playerId))
         {
-            Utils.SendMessage(GetString("ModeDescribe.SoloKombat"), playerId);
             return;
         }
         if (string.IsNullOrWhiteSpace(input))
@@ -311,9 +310,8 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
     }
     public static void SpecifyRole(string input, byte playerId)
     {
-        if (CustomGameMode.SoloKombat.IsEnable())
+        if (!Options.CurrentGameMode.GetModeClass().OnSendRolesInfo(input, playerId))
         {
-            Utils.SendMessage(GetString("ModeDescribe.SoloKombat"), playerId);
             return;
         }
         if (string.IsNullOrWhiteSpace(input))

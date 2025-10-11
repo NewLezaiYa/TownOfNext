@@ -75,12 +75,37 @@ public abstract class GameModeBase
     /// <param name="door">关门的房间</param>
     /// <returns>返回false取消关门</returns>
     public virtual bool OnCloseDoors(SystemTypes door) => true;
+    /// <summary>
+    /// 是否能看到他人游戏进度<br/>
+    /// 判断优先级高于职业相关代码<br/>
+    /// </summary>
+    /// <returns>返回true则能看到</returns>
+    public virtual bool CanSeeOtherProgressText() => false;
+    /// <summary>
+    /// 是否能应随机出生<br/>
+    /// 判断优先级高于设置的<br/>
+    /// </summary>
+    /// <returns>返回true则默认随机出生</returns>
+    public virtual bool ShouldRandomSpawn() => false;
 
     // == 字符串相关 ==
     /// <summary>
     /// 获取大厅房主标签
     /// </summary>
     public virtual string GetLobbyUpperTag() => $"<color=#87cefa>{Main.PluginVersion}</color>";
+    /// <summary>
+    /// 职业设置显示的内容
+    /// </summary>
+    /// <param name="input">输入内容</param>
+    /// <param name="playerId">玩家id</param>
+    /// <returns>返回false则不进行后续代码</returns>
+    public virtual bool OnSendRolesInfo(string input, byte playerId) => true;
+    /// <summary>
+    /// 对复盘信息进行排序
+    /// </summary>
+    /// <param name="clone">当前复盘信息包含的所有玩家id</param>
+    /// <returns>返回排序后的玩家id</returns>
+    public virtual List<byte> ArrangedSummaryText(List<byte> clone) => clone;
     /// <summary>
     /// 复盘信息显示的内容<br/>
     /// (是否显示击杀数量, 是否显示生命状态, 是否显示击杀者, 职业名前的附加空格)<br/>
