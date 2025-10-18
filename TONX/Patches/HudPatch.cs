@@ -5,6 +5,7 @@ using UnityEngine;
 using TONX.Modules;
 using TONX.GameModes;
 using TONX.Roles.GameMode;
+using AmongUs.GameOptions;
 
 namespace TONX;
 
@@ -93,8 +94,8 @@ class HudManagerPatch
                 var roleClass = player.GetRoleClass();
                 if (roleClass != null)
                 {
-                    var killLabel = (roleClass as IKiller)?.OverrideKillButtonText(out string text) == true ? text : "";
-                    if (killLabel != "") __instance.KillButton.OverrideText(killLabel);
+                    __instance.KillButton.OverrideText((roleClass as IKiller)?.OverrideKillButtonText(out string text) == true ? text 
+                        : (player.GetCustomRole().GetRoleTypes() is RoleTypes.Viper ? GetString(StringNames.ViperAbility) : GetString(StringNames.KillLabel)));
                     var reportLabel = roleClass?.GetReportButtonText() ?? "";
                     if (reportLabel != "") __instance.ReportButton.OverrideText(reportLabel);
                     if (roleClass.HasAbility)
@@ -269,6 +270,28 @@ class VentButtonDoClickPatch
             return false;
         }
         return true;
+    }
+}
+[HarmonyPatch(typeof(SabotageButton), nameof(SabotageButton.Refresh))]
+class SabotageButtonRefreshPatch
+{
+    public static bool Prefix(SabotageButton __instance)
+    {
+        if (GameManager.Instance == null || PlayerControl.LocalPlayer == null)
+        {
+            __instance.ToggleVisible(visible: false);
+            __instance.SetDisabled();
+        }
+        else if (PlayerControl.LocalPlayer.inVent || !GameManager.Instance.SabotagesEnabled() || PlayerControl.LocalPlayer.petting)
+        {
+            __instance.ToggleVisible(PlayerControl.LocalPlayer.CanUseSabotageButton() && GameManager.Instance.SabotagesEnabled());
+            __instance.SetDisabled();
+        }
+        else
+        {
+            __instance.SetEnabled();
+        }
+        return false;
     }
 }
 [HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.Show))]
