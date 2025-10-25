@@ -22,7 +22,7 @@ public class ModUpdater
 #else
         "https://raw.githubusercontent.com/TownOfNext/TownOfNext/TONX-unofficial/info.json",
         "https://cdn.jsdelivr.net/gh/TownOfNext/TownOfNext/info.json",
-        "https://hub.gitmirror.com/https://raw.githubusercontent.com/TownOfNext/TownOfNext/TONX-unofficial/info.json",
+        "https://tonx.leever.cn/api/version.json",
 #endif
     };
     private static IReadOnlyList<string> GetInfoFileUrlList()
@@ -45,7 +45,7 @@ public class ModUpdater
     public static Version minimumVersion = null;
     public static int creation = 0;
     public static string md5 = "";
-    public static int visit => isChecked ? 216822 : 0;
+    public static int visit_count = 0;
 
     public static string announcement_zh = "";
     public static string announcement_en = "";
@@ -61,7 +61,11 @@ public class ModUpdater
     {
         CustomPopup.Init();
 
-        if (!isChecked && firstStart) CheckForUpdate();
+        if (!isChecked && firstStart)
+        {
+            CustomPopup.Show(GetString("updateCheckPopupTitle"), GetString("PleaseWait"), null);
+            CheckForUpdate();
+        }
         SetUpdateButtonStatus();
 
         firstStart = false;
@@ -81,61 +85,67 @@ public class ModUpdater
         CustomPopup.Show(GetString("updateCheckPopupTitle"), GetString("PleaseWait"), null);
         _ = new LateTask(CheckForUpdate, 0.3f, "Retry Check Update");
     }
-    public static void CheckForUpdate()
+    public static async void CheckForUpdate()
     {
-#if Windows
         isChecked = false;
+#if Windows
         DeleteOldFiles();
 
         foreach (var url in GetInfoFileUrlList())
         {
-            if (GetVersionInfo(url).GetAwaiter().GetResult())
+            if (await GetVersionInfo(url))
             {
                 isChecked = true;
                 break;
             }
         }
 
-        Logger.Msg("Check For Update: " + isChecked, "CheckRelease");
-        isBroken = !isChecked;
-        if (isChecked)
+        new LateTask(() => // 利用LateTask使UI相关操作在主线程进行
         {
-            Logger.Info("Has Update: " + hasUpdate, "CheckRelease");
-            Logger.Info("Latest Version: " + latestVersion.ToString(), "CheckRelease");
-            Logger.Info("Minimum Version: " + minimumVersion.ToString(), "CheckRelease");
-            Logger.Info("Creation: " + creation.ToString(), "CheckRelease");
-            Logger.Info("Force Update: " + forceUpdate, "CheckRelease");
-            Logger.Info("File MD5: " + md5, "CheckRelease");
-            Logger.Info("Github Url: " + downloadUrl_github, "CheckRelease");
-            // Logger.Info("Gitee Url: " + downloadUrl_gitee, "CheckRelease");
-            // Logger.Info("COS Url: " + downloadUrl_cos, "CheckRelease");
-            Logger.Info("Announcement (English): " + announcement_en, "CheckRelease");
-            Logger.Info("Announcement (SChinese): " + announcement_zh, "CheckRelease");
+            Logger.Msg("Check For Update: " + isChecked, "CheckRelease");
+            isBroken = !isChecked;
+            if (isChecked)
+            {
+                Logger.Info("Has Update: " + hasUpdate, "CheckRelease");
+                Logger.Info("Latest Version: " + latestVersion.ToString(), "CheckRelease");
+                Logger.Info("Minimum Version: " + minimumVersion.ToString(), "CheckRelease");
+                Logger.Info("Creation: " + creation.ToString(), "CheckRelease");
+                Logger.Info("Force Update: " + forceUpdate, "CheckRelease");
+                Logger.Info("File MD5: " + md5, "CheckRelease");
+                Logger.Info("Github Url: " + downloadUrl_github, "CheckRelease");
+                // Logger.Info("Gitee Url: " + downloadUrl_gitee, "CheckRelease");
+                // Logger.Info("COS Url: " + downloadUrl_cos, "CheckRelease");
+                Logger.Info("Announcement (English): " + announcement_en, "CheckRelease");
+                Logger.Info("Announcement (SChinese): " + announcement_zh, "CheckRelease");
 
-            if (firstLaunch || isBroken)
+                if (firstLaunch || isBroken)
+                {
+                    firstLaunch = false;
+                    var annos = IsChineseUser ? announcement_zh : announcement_en;
+                    if (isBroken) CustomPopup.Show(GetString(StringNames.AnnouncementLabel), annos, new() { (GetString(StringNames.ExitGame), Application.Quit) });
+                    else CustomPopup.Show(GetString(StringNames.AnnouncementLabel), annos, new() { (GetString(StringNames.Okay), null) });
+                }
+            }
+            else
+            {
+                if (retried >= 2) CustomPopup.Show(GetString("updateCheckPopupTitle"), GetString("updateCheckFailedExit"), new() { (GetString(StringNames.Okay), null) });
+                else CustomPopup.Show(GetString("updateCheckPopupTitle"), GetString("updateCheckFailedRetry"), new() { (GetString("Retry"), Retry) });
+            }
+
+            SetUpdateButtonStatus();
+        }, 0f, "CheckForUpdate");
+#elif Android
+        await Task.CompletedTask;
+        isChecked = true;
+        new LateTask(() => // 利用LateTask使UI相关操作在主线程进行
+        {
+            if (firstLaunch)
             {
                 firstLaunch = false;
                 var annos = IsChineseUser ? announcement_zh : announcement_en;
-                if (isBroken) CustomPopup.Show(GetString(StringNames.AnnouncementLabel), annos, new() { (GetString(StringNames.ExitGame), Application.Quit) });
-                else CustomPopup.Show(GetString(StringNames.AnnouncementLabel), annos, new() { (GetString(StringNames.Okay), null) });
+                CustomPopup.Show(GetString(StringNames.AnnouncementLabel), annos, new() { (GetString(StringNames.Okay), null) });
             }
-        }
-        else
-        {
-            if (retried >= 2) CustomPopup.Show(GetString("updateCheckPopupTitle"), GetString("updateCheckFailedExit"), new() { (GetString(StringNames.Okay), null) });
-            else CustomPopup.Show(GetString("updateCheckPopupTitle"), GetString("updateCheckFailedRetry"), new() { (GetString("Retry"), Retry) });
-        }
-
-        SetUpdateButtonStatus();
-
-#elif Android
-        isChecked = true;
-        if (firstLaunch)
-        {
-            firstLaunch = false;
-            var annos = IsChineseUser ? announcement_zh : announcement_en;
-            CustomPopup.Show(GetString(StringNames.AnnouncementLabel), annos, new() { (GetString(StringNames.Okay), null) });
-        }
+        }, 0f, "CheckForUpdate");
 #endif
     }
     public static string Get(string url)
@@ -300,6 +310,46 @@ public class ModUpdater
             return "";
         }
     }
-    
+
 #endif
+
+    public static async void RecordVisit() => await CountAsVisit();
+    private static async Task<bool> CountAsVisit()
+    {
+        try
+        {
+            var (_, succeed) = await RemoteHelper.GetRemoteStringAsync("https://tonx.leever.cn/api/stats/visit").ConfigureAwait(false);
+            return succeed;
+        }
+        catch (Exception ex)
+        {
+            Logger.Exception(ex, "CountAsVisit");
+            return false;
+        }
+    }
+    public static async void UpdateVisitCount()
+    {
+        visit_count = await GetVisitCount();
+        new LateTask(() => // 利用LateTask使UI相关操作在主线程进行
+        {
+            var shower = VersionShowerStartPatch.VersionShower;
+            if (!shower) return;
+            shower.text.text += "\n" + $"{(visit_count > 0
+                ? string.Format(GetString("TONXVisitorCount"), Main.ModColor, visit_count)
+                : GetString("ConnectToTONXServerFailed"))}";
+        }, 0f, "UpdateVisitCount");
+    }
+    private static async Task<int> GetVisitCount()
+    {
+        try
+        {
+            var (count, success) = await RemoteHelper.GetRemoteStringAsync("https://tonx.leever.cn/api/stats/visitor").ConfigureAwait(false);
+            return success ? int.Parse(count) : 0;
+        }
+        catch (Exception ex)
+        {
+            Logger.Exception(ex, "GetVisitCount");
+            return 0;
+        }
+    }
 }
