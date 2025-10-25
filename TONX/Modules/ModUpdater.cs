@@ -88,8 +88,8 @@ public class ModUpdater
     }
     public static async void CheckForUpdate()
     {
-#if Windows
         isChecked = false;
+#if Windows
         DeleteOldFiles();
 
         foreach (var url in GetInfoFileUrlList())
@@ -135,8 +135,8 @@ public class ModUpdater
 
             SetUpdateButtonStatus();
         }, 0f, "CheckForUpdate");
-
 #elif Android
+        await Task.CompletedTask;
         isChecked = true;
         new LateTask(() => // 利用LateTask使UI相关操作在主线程进行
         {
