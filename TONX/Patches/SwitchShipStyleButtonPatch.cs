@@ -17,7 +17,7 @@ public class SwitchShipStyleButtonPatch
         if (ShipStyles.Count == 0) return;
         var pos = Main.NormalOptions.MapId switch
         {
-            0 => AprilFoolsModePatch.FlipSkeld ? new Vector3(9.57f, -5.36f, -1.00f) : new Vector3(-9.57f, -5.36f, -1.00f), // 食堂
+            0 => AprilFoolsModePatch.FlipSkeld ? new Vector3(9.57f, -5.36f, -1.00f) : new Vector3(-9.57f, -5.36f, -1.00f), // The Skeld 保安室
             1 => new Vector3(3.10f, 0.60f, 0.00f), // Mira HQ 食堂
             2 => new Vector3(1.00f, 0.10f, 0.00f), // Polus 办公室
             4 => new Vector3(-10.08f, -21.53f, 0.00f), // The Airship 引擎室
