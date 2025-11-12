@@ -3,11 +3,11 @@ name: CI
 on:
   push:
     branches:
-      - TONX-unofficial
+      - main
   pull_request:
     types: [opened, ready_for_review]
     branches:
-      - TONX-unofficial
+      - main
 
 jobs:
   build:
