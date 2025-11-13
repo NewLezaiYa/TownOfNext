@@ -1,6 +1,7 @@
 using UnityEngine;
 using TONX.Roles.GameMode;
 using TMPro;
+using System.Text;
 
 namespace TONX.GameModes;
 
@@ -55,11 +56,10 @@ public sealed class SoloKombat : GameModeBase
         RoundTime = KB_GameTime.GetInt() + 8;
     }
     public override bool ShouldAssignAddons() => false;
-    public override bool SelectCustomRoles(ref Dictionary<PlayerControl, CustomRoles> RoleResult)
+    public override void SelectCustomRoles(ref Dictionary<PlayerControl, CustomRoles> RoleResult)
     {
         foreach (var pc in Main.AllAlivePlayerControls)
             RoleResult.Add(pc, pc.PlayerId == 0 && Options.EnableGM.GetBool() ? CustomRoles.GM : CustomRoles.KB_Normal);
-        return true;
     }
 
     public override string GetLobbyUpperTag() => $"<color=#f55252><size=1.7>{GetString("ModeSoloKombat")}</size></color>";
@@ -82,7 +82,7 @@ public sealed class SoloKombat : GameModeBase
         RoundTime--;
     }
 
-    public override bool EditTaskText(TaskPanelBehaviour taskPanel, ref string AllText)
+    public override void EditTaskText(TaskPanelBehaviour taskPanel, ref string AllText)
     {
         var lpc = PlayerControl.LocalPlayer;
         var kb_Normal = lpc.GetRoleClass() as KB_Normal;
@@ -113,9 +113,8 @@ public sealed class SoloKombat : GameModeBase
         foreach (var id in list.Where(x => SummaryText.ContainsKey(x.Item2))) AllText += "\r\n" + SummaryText[id.Item2];
 
         AllText = $"<size=80%>{AllText}</size>";
-        return false;
     }
-    public override bool EditIntroFormat(ref IntroCutscene intro)
+    public override void EditIntroFormat(ref IntroCutscene intro)
     {
         CustomRoles role = PlayerControl.LocalPlayer.GetCustomRole();
         var color = ColorUtility.TryParseHtmlString("#f55252", out var c) ? c : new(255, 255, 255, 255);
@@ -125,9 +124,8 @@ public sealed class SoloKombat : GameModeBase
         intro.ImpostorText.text = GetString("ModeSoloKombat");
         intro.BackgroundBar.material.color = color;
         PlayerControl.LocalPlayer.Data.Role.IntroSound = DestroyableSingleton<HnSImpostorScreamSfx>.Instance.HnSOtherImpostorTransformSfx;
-        return false;
     }
-    public override bool EditOutroFormat(ref EndGameManager outro, ref TextMeshPro winnerText)
+    public override void EditOutroFormat(ref EndGameManager outro, ref TextMeshPro winnerText, ref string cwt, ref StringBuilder awt, ref string cwc)
     {
         var winnerId = CustomWinnerHolder.WinnerIds.FirstOrDefault();
         outro.WinText.text = Main.AllPlayerNames[winnerId] + GetString("Win");
@@ -136,10 +134,9 @@ public sealed class SoloKombat : GameModeBase
         outro.BackgroundBar.material.color = new Color32(245, 82, 82, 255);
         winnerText.text = $"<color=#f55252>{GetString("ModeSoloKombat")}</color>";
         winnerText.color = Color.red;
-        return false;
     }
 
-    public override bool AfterCheckForGameEnd(GameOverReason reason, ref GameEndPredicate predicate)
+    public override void AfterCheckForGameEnd(GameOverReason reason, ref GameEndPredicate predicate)
     {
         if (CustomWinnerHolder.WinnerIds.Count > 0 || CustomWinnerHolder.WinnerTeam != CustomWinner.Default)
         {
@@ -147,7 +144,6 @@ public sealed class SoloKombat : GameModeBase
             GameEndChecker.StartEndGame(reason);
             predicate = null;
         }
-        return false;
     }
     public override GameEndPredicate Predicate() => new SoloKombatGameEndPredicate();
     class SoloKombatGameEndPredicate : GameEndPredicate

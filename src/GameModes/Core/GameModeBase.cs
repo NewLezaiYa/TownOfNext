@@ -1,4 +1,5 @@
 using TMPro;
+using System.Text;
 
 namespace TONX.GameModes.Core;
 
@@ -21,8 +22,8 @@ public abstract class GameModeBase
     /// 用于特殊模式分配主职业
     /// </summary>
     /// <param name="RoleResult">职业分配字典</param>
-    /// <returns>返回false进行标准模式职业分配</returns>
-    public virtual bool SelectCustomRoles(ref Dictionary<PlayerControl, CustomRoles> RoleResult) => false;
+    public virtual void SelectCustomRoles(ref Dictionary<PlayerControl, CustomRoles> RoleResult)
+        => GameModeStandard.SelectCustomRoles(ref RoleResult);
     /// <summary>
     /// 用于判断特殊模式是否分配附加职业
     /// </summary>
@@ -33,15 +34,14 @@ public abstract class GameModeBase
     /// <summary>
     /// 游戏结束的判断
     /// </summary>
-    /// <returns>返回null则使用标准模式判断</returns>
-    public virtual GameEndPredicate Predicate() => null;
+    public virtual GameEndPredicate Predicate() => new GameModeStandard.NormalGameEndPredicate();
     /// <summary>
     /// 判断游戏是否结束时调用
     /// </summary>
     /// <param name="reason">游戏结束原因</param>
     /// <param name="predicate">游戏结束判断，可进行修改</param>
-    /// <returns>返回false则不进行后续标准模式游戏结束过程</returns>
-    public virtual bool AfterCheckForGameEnd(GameOverReason reason, ref GameEndPredicate predicate) => true;
+    public virtual void AfterCheckForGameEnd(GameOverReason reason, ref GameEndPredicate predicate)
+        => GameModeStandard.AfterCheckForGameEnd(reason, ref predicate);
 
     // == 游戏过程相关 ==
     /// <summary>
@@ -94,7 +94,7 @@ public abstract class GameModeBase
     /// </summary>
     public virtual string GetLobbyUpperTag() => $"<color=#87cefa>{Main.PluginVersion}</color>";
     /// <summary>
-    /// 职业设置显示的内容
+    /// 查看职业设置时显示的内容
     /// </summary>
     /// <param name="input">输入内容</param>
     /// <param name="playerId">玩家id</param>
@@ -113,9 +113,6 @@ public abstract class GameModeBase
     public virtual (bool, bool, bool, float) GetSummaryTextContent() => (true, true, true, 0f);
 
     // == 编辑UI相关 ==
-    // =====================================================
-    // ***通常来讲，这些函数在修改完相关UI后，你应该返回false***
-    // =====================================================
     /// <summary>
     /// 设置任务栏文字时调用<br/>
     /// 用于修改任务栏文字<br/>
@@ -123,21 +120,24 @@ public abstract class GameModeBase
     /// </summary>
     /// <param name="taskPanel">任务栏实例</param>
     /// <param name="AllText">需要修改的文字</param>
-    /// <returns>返回false则不继续进行后续标准模式修改代码</returns>
-    public virtual bool EditTaskText(TaskPanelBehaviour taskPanel, ref string AllText) => true;
+    public virtual void EditTaskText(TaskPanelBehaviour taskPanel, ref string AllText)
+        => GameModeStandard.EditTaskText(taskPanel, ref AllText);
     /// <summary>
     /// 修改开始界面的样式<br/>
     /// 请注意：全部模组端都会调用<br/>
     /// </summary>
     /// <param name="intro">开始界面实例</param>
-    /// <returns>返回false则不继续进行后续修改代码</returns>
-    public virtual bool EditIntroFormat(ref IntroCutscene intro) => true;
+    public virtual void EditIntroFormat(ref IntroCutscene intro)
+        => GameModeStandard.EditIntroFormat(ref intro);
     /// <summary>
     /// 修改结束界面的样式<br/>
     /// 请注意：全部模组端都会调用<br/>
     /// </summary>
     /// <param name="outro">结束界面实例</param>
-    /// <param name="winnerText">胜利阵营文字</param>
-    /// <returns>返回false则不继续进行后续修改代码</returns>
-    public virtual bool EditOutroFormat(ref EndGameManager outro, ref TextMeshPro winnerText) => true;
+    /// <param name="winnerText">胜利阵营文字实例</param>
+    /// <param name="cwText">胜利阵营文字内容</param>
+    /// <param name="awText">附加胜利文字内容</param>
+    /// <param name="cwColor">胜利阵营文字颜色</param>
+    public virtual void EditOutroFormat(ref EndGameManager outro, ref TextMeshPro winnerText, ref string cwText, ref StringBuilder awText, ref string cwColor)
+        => GameModeStandard.EditOutroFormat(ref outro, ref winnerText, ref cwText, ref awText, ref cwColor);
 }

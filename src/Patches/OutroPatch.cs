@@ -104,40 +104,8 @@ class SetEverythingUpPatch
         var AdditionalWinnerText = new StringBuilder(32);
         string CustomWinnerColor = Utils.GetRoleColorCode(CustomRoles.Crewmate);
 
-        if (CustomWinnerHolder.WinnerTeam is not CustomWinner.Error and not CustomWinner.None and not CustomWinner.Draw)
-        {
-            if (!Options.CurrentGameMode.GetModeClass().EditOutroFormat(ref __instance, ref WinnerText)) goto EndOfText;
-        }
-
-        var winnerRole = (CustomRoles)CustomWinnerHolder.WinnerTeam;
-        if (winnerRole >= 0)
-        {
-            CustomWinnerText = Utils.GetRoleName(winnerRole);
-            CustomWinnerColor = Utils.GetRoleColorCode(winnerRole);
-            if (winnerRole.IsNeutral())
-            {
-                __instance.BackgroundBar.material.color = Utils.GetRoleColor(winnerRole);
-            }
-        }
-        if (AmongUsClient.Instance.AmHost && PlayerState.GetByPlayerId(0).MainRole == CustomRoles.GM)
-        {
-            __instance.WinText.text = GetString("GameOver");
-            __instance.WinText.color = Utils.GetRoleColor(CustomRoles.GM);
-            __instance.BackgroundBar.material.color = Utils.GetRoleColor(CustomRoles.GM);
-        }
         switch (CustomWinnerHolder.WinnerTeam)
         {
-            //通常勝利
-            case CustomWinner.Crewmate:
-                CustomWinnerColor = Utils.GetRoleColorCode(CustomRoles.Engineer);
-                break;
-            //特殊勝利
-            case CustomWinner.Terrorist:
-                __instance.Foreground.material.color = Color.red;
-                break;
-            case CustomWinner.Lovers:
-                __instance.BackgroundBar.material.color = Utils.GetRoleColor(CustomRoles.Lovers);
-                break;
             //引き分け処理
             case CustomWinner.Draw:
                 __instance.WinText.text = GetString("ForceEnd");
@@ -161,20 +129,18 @@ class SetEverythingUpPatch
                 WinnerText.text = GetString("ErrorEndTextDescription");
                 WinnerText.color = Color.white;
                 break;
+            default:
+                Options.CurrentGameMode.GetModeClass().EditOutroFormat(
+                    ref __instance,
+                    ref WinnerText,
+                    ref CustomWinnerText,
+                    ref AdditionalWinnerText,
+                    ref CustomWinnerColor
+                );
+                break;
         }
 
-        foreach (var role in CustomWinnerHolder.AdditionalWinnerRoles)
-        {
-            AdditionalWinnerText.Append('＆').Append(Utils.ColorString(Utils.GetRoleColor(role), Utils.GetRoleName(role)));
-        }
-        if (CustomWinnerHolder.WinnerTeam is not CustomWinner.Draw and not CustomWinner.None and not CustomWinner.Error)
-        {
-            if (AdditionalWinnerText.Length < 1) WinnerText.text = $"<color={CustomWinnerColor}>{CustomWinnerText}{GetString("Win")}</color>";
-            else WinnerText.text = $"<color={CustomWinnerColor}>{CustomWinnerText}</color>{AdditionalWinnerText}{GetString("Win")}";
-        }
         LastWinsText = WinnerText.text.RemoveHtmlTags();
-
-    EndOfText:
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

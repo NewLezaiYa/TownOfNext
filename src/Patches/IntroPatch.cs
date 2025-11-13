@@ -168,18 +168,7 @@ public class IntroCutscenePatch
             PlayerControl.LocalPlayer.Data.Role.IntroSound = GetIntroSound(RoleTypes.Impostor);
         }
 
-        if (!Options.CurrentGameMode.GetModeClass().EditIntroFormat(ref __instance)) goto EndOfText;
-
-        if (RoleDraftManager.RoleDraftState == RoleDraftState.ReadyToDraft)
-        {
-            __instance.TeamTitle.text = GetString("RoleDraft");
-            __instance.TeamTitle.color = Color.gray;
-            __instance.ImpostorText.gameObject.SetActive(false);
-            __instance.BackgroundBar.material.color = Color.gray;
-            PlayerControl.LocalPlayer.Data.Role.IntroSound = GetIntroSound(RoleTypes.Crewmate);
-        }
-
-    EndOfText:
+        Options.CurrentGameMode.GetModeClass().EditIntroFormat(ref __instance);
 
         if (Input.GetKey(KeyCode.RightShift))
         {
