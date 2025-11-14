@@ -7,14 +7,6 @@ using UnityEngine;
 
 namespace TONX;
 
-[Flags]
-public enum CustomGameMode
-{
-    Standard = 0x01,
-    SoloKombat = 0x02,
-    All = int.MaxValue
-}
-
 [HarmonyPatch]
 public static class Options
 {

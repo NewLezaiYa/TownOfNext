@@ -10,12 +10,14 @@ public static class CustomGameModeManager
 
     public static GameModeInfo GetModeInfo(this CustomGameMode mode) => AllModesInfo.ContainsKey(mode) ? AllModesInfo[mode] : null;
     public static GameModeBase GetModeClass(this CustomGameMode mode) => AllModesClass.ContainsKey(mode) ? AllModesClass[mode] : null;
+
     // ==初始化处理 ==
     [GameModuleInitializer]
     public static void Initialize()
     {
         Options.CurrentGameMode.GetModeClass()?.Init();
     }
+
     private static Dictionary<byte, long> LastSecondsUpdate = new();
     public static void OnFixedUpdate(PlayerControl player)
     {
@@ -31,4 +33,12 @@ public static class CustomGameModeManager
             Options.CurrentGameMode.GetModeClass()?.OnFixedUpdate(player);
         }
     }
+}
+
+[Flags]
+public enum CustomGameMode
+{
+    Standard = 0x01,
+    SoloKombat = 0x02,
+    All = int.MaxValue
 }
