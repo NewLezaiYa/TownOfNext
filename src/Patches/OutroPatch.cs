@@ -130,7 +130,7 @@ class SetEverythingUpPatch
                 WinnerText.color = Color.white;
                 break;
             default:
-                Options.CurrentGameMode.GetModeClass().EditOutroFormat(
+                Options.CurrentGameMode.GetModeClass()?.EditOutroFormat(
                     ref __instance,
                     ref WinnerText,
                     ref CustomWinnerText,

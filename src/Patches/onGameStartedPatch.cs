@@ -221,7 +221,7 @@ internal class SelectRolesPatch
             }
             CustomRoleManager.CreateInstance();
 
-            if (!Options.CurrentGameMode.GetModeClass().ShouldAssignAddons()) goto EndOfSelectRolePatch;
+            if (!Options.CurrentGameMode.GetModeClass()?.ShouldAssignAddons() ?? true) goto EndOfSelectRolePatch;
 
             if (RoleDraftManager.RoleDraftState == RoleDraftState.ReadyToDraft) goto EndOfSelectRolePatch;
 

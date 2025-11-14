@@ -10,7 +10,7 @@ internal static class CustomRoleSelector
     public static void SelectCustomRoles()
     {
         RoleResult = new();
-        Options.CurrentGameMode.GetModeClass().SelectCustomRoles(ref RoleResult);
+        Options.CurrentGameMode.GetModeClass()?.SelectCustomRoles(ref RoleResult);
     }
 
     public static int addScientistNum = 0;
@@ -78,7 +78,7 @@ internal static class CustomRoleSelector
     public static List<CustomRoles> AddonRolesList = new();
     public static void SelectAddonRoles()
     {
-        if (!Options.CurrentGameMode.GetModeClass().ShouldAssignAddons()) return;
+        if (!Options.CurrentGameMode.GetModeClass()?.ShouldAssignAddons() ?? true) return;
 
         AddonRolesList = new();
         foreach (var cr in Enum.GetValues(typeof(CustomRoles)))

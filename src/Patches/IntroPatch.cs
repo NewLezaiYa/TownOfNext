@@ -168,7 +168,7 @@ public class IntroCutscenePatch
             PlayerControl.LocalPlayer.Data.Role.IntroSound = GetIntroSound(RoleTypes.Impostor);
         }
 
-        Options.CurrentGameMode.GetModeClass().EditIntroFormat(ref __instance);
+        Options.CurrentGameMode.GetModeClass()?.EditIntroFormat(ref __instance);
 
         if (Input.GetKey(KeyCode.RightShift))
         {

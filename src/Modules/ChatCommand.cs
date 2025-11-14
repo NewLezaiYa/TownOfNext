@@ -292,7 +292,7 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
     }
     public static void SendRolesInfo(string input, byte playerId)
     {
-        if (!Options.CurrentGameMode.GetModeClass().OnSendRolesInfo(input, playerId))
+        if (!Options.CurrentGameMode.GetModeClass()?.OnSendRolesInfo(input, playerId)?? false)
         {
             return;
         }
@@ -310,7 +310,7 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
     }
     public static void SpecifyRole(string input, byte playerId)
     {
-        if (!Options.CurrentGameMode.GetModeClass().OnSendRolesInfo(input, playerId))
+        if (!Options.CurrentGameMode.GetModeClass()?.OnSendRolesInfo(input, playerId) ?? false)
         {
             return;
         }

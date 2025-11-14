@@ -388,7 +388,7 @@ class ReportDeadBodyPatch
     {
         if (GameStates.IsMeeting) return false;
         if (Options.DisableMeeting.GetBool()) return false;
-        if (!Options.CurrentGameMode.GetModeClass().OnCheckReportDeadBody(__instance, target)) return false;
+        if (!Options.CurrentGameMode.GetModeClass()?.OnCheckReportDeadBody(__instance, target) ?? false) return false;
         if (!CanReport[__instance.PlayerId])
         {
             WaitReport[__instance.PlayerId].Add(target);

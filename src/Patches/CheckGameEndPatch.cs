@@ -28,7 +28,7 @@ class GameEndChecker
         predicate.CheckForEndGame(out reason);
 
         //ゲーム終了時
-        Options.CurrentGameMode.GetModeClass().AfterCheckForGameEnd(reason, ref predicate);
+        Options.CurrentGameMode.GetModeClass()?.AfterCheckForGameEnd(reason, ref predicate);
 
         return false;
     }
@@ -103,7 +103,7 @@ class GameEndChecker
     }
     private const float EndGameDelay = 0.2f;
 
-    public static void SetPredicate() => predicate = Options.CurrentGameMode.GetModeClass().Predicate();
+    public static void SetPredicate() => predicate = Options.CurrentGameMode.GetModeClass()?.Predicate();
 }
 
 public abstract class GameEndPredicate

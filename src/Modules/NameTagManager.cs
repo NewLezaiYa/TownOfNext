@@ -73,7 +73,7 @@ public static class NameTagManager
             if (GameStates.IsOnlineGame)
             {
                 var upper = $"<size=80%><color=#ffd6ec>{Main.ModName}</color><color=#baf7ca>★</color>";
-                upper += Options.CurrentGameMode.GetModeClass().GetLobbyUpperTag();
+                upper += Options.CurrentGameMode.GetModeClass()?.GetLobbyUpperTag() ?? "";
                 name = upper + "</size>\r\n" + name;
             }
         }

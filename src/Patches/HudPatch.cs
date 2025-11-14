@@ -331,7 +331,7 @@ class TaskPanelBehaviourPatch
 
             var AllText = Utils.ColorString(player.GetRoleColor(), RoleWithInfo);
 
-            Options.CurrentGameMode.GetModeClass().EditTaskText(__instance, ref AllText);
+            Options.CurrentGameMode.GetModeClass()?.EditTaskText(__instance, ref AllText);
             __instance.taskText.text = AllText;
         }
 
