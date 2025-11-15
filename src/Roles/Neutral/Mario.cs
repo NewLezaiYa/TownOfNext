@@ -13,7 +13,7 @@ public sealed class Mario : RoleBase
             CustomRoles.Mario,
             () => RoleTypes.Engineer,
             CustomRoleTypes.Neutral,
-            50850,
+            52300,
             SetupOptionItem,
             "ma|馬里奧|马力欧",
             "#ff6201",

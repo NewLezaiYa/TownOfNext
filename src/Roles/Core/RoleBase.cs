@@ -271,7 +271,14 @@ public abstract class RoleBase : IDisposable
     /// <param name="roleNumVotes">修改此值以更改票数</param>
     /// <param name="clearVote">改为 true 则将投票者视为未投票状态，允许其再次进行投票。但投票数据还是会计入，若多次投票将以最后一次投票的数据为准</param>
     /// <returns>false: 忽略本次投票，不计入数据</returns>
-    //public virtual bool OnVote(byte voterId, byte sourceVotedForId, ref byte roleVoteFor, ref int roleNumVotes, ref bool clearVote) => true;
+    // public virtual bool OnVote(byte voterId, byte sourceVotedForId, ref byte roleVoteFor, ref int roleNumVotes, ref bool clearVote) => true;
+
+    /// <summary>
+    /// 投票结束时调用<br/>
+    /// 此时你还可以对投票进行修改<br/>
+    /// </summary>
+    public virtual void OnVotingComplete()
+    { }
 
     /// <summary>
     /// 驱逐玩家后调用的函数

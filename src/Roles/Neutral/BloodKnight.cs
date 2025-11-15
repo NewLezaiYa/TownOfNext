@@ -12,7 +12,7 @@ public sealed class BloodKnight : RoleBase, IKiller
            CustomRoles.BloodKnight,
            () => RoleTypes.Impostor,
            CustomRoleTypes.Neutral,
-           50923,
+           52000,
            SetupOptionItem,
            "bn|嗜血骑士|骑士",
            "#630000",

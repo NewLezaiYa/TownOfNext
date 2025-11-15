@@ -15,7 +15,7 @@ public sealed class RoleThief : RoleBase, IKiller, IDeathReasonSeeable
             CustomRoleTypes.Neutral,
             51900,
             SetupOptionItem,
-            "swa|连环交换|连环交换师",
+            "rt|连环交换|连环交换师",
             "#696969",
             true,
             introSound: () => GetIntroSound(RoleTypes.Shapeshifter),

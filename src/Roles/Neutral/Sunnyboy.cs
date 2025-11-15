@@ -12,7 +12,7 @@ public sealed class Sunnyboy : RoleBase, IAdditionalWinner
             CustomRoles.Sunnyboy,
             () => RoleTypes.Scientist,
             CustomRoleTypes.Neutral,
-            75_1_2_1000,
+            52700,
             null,
             "sb|阳光开朗大男孩|大男孩",
             "#ff9902"

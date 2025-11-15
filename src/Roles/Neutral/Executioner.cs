@@ -12,7 +12,7 @@ public sealed class Executioner : RoleBase, IAdditionalWinner
             CustomRoles.Executioner,
             () => RoleTypes.Crewmate,
             CustomRoleTypes.Neutral,
-            50700,
+            50600,
             SetupOptionItem,
             "exe|處刑人|处刑",
             "#611c3a",

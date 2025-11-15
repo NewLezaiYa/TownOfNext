@@ -14,7 +14,7 @@ public sealed class Jackal : RoleBase, IKiller
             CustomRoles.Jackal,
             () => RoleTypes.Impostor,
             CustomRoleTypes.Neutral,
-            50900,
+            50700,
             SetupOptionItem,
             "jac|豺狼",
             "#00b4eb",
@@ -94,8 +94,8 @@ public sealed class Jackal : RoleBase, IKiller
             .SetValueFormat(OptionFormat.Seconds);
         OptionSidekickCanVent = BooleanOptionItem.Create(RoleInfo, 21, GeneralOption.CanVent, true, false, OptionCanRecruitSidekick);
         OptionSidekickCanUseSabotage = BooleanOptionItem.Create(RoleInfo, 22, GeneralOption.CanUseSabotage, false, false, OptionCanRecruitSidekick);
-        OptionSidekickHasImpostorVision = BooleanOptionItem.Create(RoleInfo, 25, GeneralOption.ImpostorVision, true, false, OptionCanRecruitSidekick);
-        OptionSidekickCanBecomeJackal = BooleanOptionItem.Create(RoleInfo, 28, OptionName.SidekickCanBecomeJackal, true, false, OptionCanRecruitSidekick);
+        OptionSidekickHasImpostorVision = BooleanOptionItem.Create(RoleInfo, 23, GeneralOption.ImpostorVision, true, false, OptionCanRecruitSidekick);
+        OptionSidekickCanBecomeJackal = BooleanOptionItem.Create(RoleInfo, 24, OptionName.SidekickCanBecomeJackal, true, false, OptionCanRecruitSidekick);
     }
     public float CalculateKillCooldown() => KillCooldown;
     public bool CanUseSabotageButton() => CanUseSabotage;

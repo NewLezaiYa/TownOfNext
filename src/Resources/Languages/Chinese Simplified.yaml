@@ -117,6 +117,7 @@ Medium: "通灵师"
 Observer: "观察者"
 DoveOfPeace: "和平之鸽"
 Collator: "校对员"
+Swapper: "换票师"
 
 ## 中立阵营 / Neutrals
 Jester: "小丑"
@@ -303,6 +304,7 @@ MediumInfo: "若君心存不甘，不妨和我谈谈"
 ObserverInfo: "亲眼所见，亦非真实"
 DoveOfPeaceInfo: "何必打打杀杀呢？"
 CollatorInfo: "提取样本"
+SwapperInfo: "交换两位玩家的票数"
 
 ## 中立阵营 / Neutral Blurbs
 ArsonistInfo: "乖乖站好！"
@@ -441,6 +443,7 @@ MediumInfoLong: "当场上有玩家被击杀，通灵师会收到提示。每次
 ObserverInfoLong: "观察者可以看到其他玩家的碎盾动画。首次会议召开前观察者的技能不会生效。"
 DoveOfPeaceInfoLong: "当和平之鸽可以通过使用通风管道进行歌颂，在场所有拥有击杀键的玩家的击杀/技能冷却时间会被重置。当和平之鸽成为叛徒时歌颂只对船员生效。"
 CollatorInfoLong: "校对员可以通过对玩家点击击杀提取样本，每轮可以提取两位玩家的样本，并在下一轮会议上得到样本的身份信息。"
+SwapperInfoLong: "换票师可以在会议上交换两位玩家的票数。\n换票指令为：/sw [玩家编号]\n您可以在玩家名字前看到该玩家的编号，或者使用/id指令查看所有玩家的编号。"
 
 ## 中立阵营 / Neutrals Descriptions
 ArsonistInfoLong: "纵火犯可以通过对玩家点击击杀按钮并跟随其数秒来完成涂油，开始涂油以及涂油成功时会显示护盾破碎的动画作为提示（仅自己可见）。当所有存活玩家都被纵火犯涂油后，纵火犯可以通过跳通风管来点火，并单独获得胜利。\n玩家名显示「△」表示涂油中\n玩家名显示「▲」表示已涂油。"
@@ -849,6 +852,7 @@ GanSheriffCanBeMadmate: "可以招募<color=#f8cd46>警长</color>"
 GanMayorCanBeMadmate: "可以招募<color=#204d42>市长</color>"
 GanNGuesserCanBeMadmate: "可以招募<color=#eede26>正义赌怪</color>"
 GanJudgeCanBeMadmate: "可以招募<color=#f8d85a>法官</color>"
+GanSwapperCanBeMadmate: "可以招募<color=#863756>换票师</color>"
 RevolutionistDrawTime: "拉拢玩家所需时间"
 RevolutionistCooldown: "拉拢玩家冷却时间"
 RevolutionistDrawCount: "需要拉拢人数"
@@ -860,6 +864,7 @@ MayorCanBeMadmate: "<color=#204d42>市长</color>可以成为<color=#ff1919>叛�
 NGuesserCanBeMadmate: "<color=#eede26>正义赌怪</color>可以成为<color=#ff1919>叛徒</color>"
 SnitchCanBeMadmate: "<color=#b8fb4f>告密者</color>可以成为<color=#ff1919>叛徒</color>"
 JudgeCanBeMadmate: "<color=#f8d85a>法官</color>可以成为<color=#ff1919>叛徒</color>"
+SwapperCanBeMadmate: "<color=#863756>换票师</color>可以成为<color=#ff1919>叛徒</color>"
 MadSnitchTasks: "背叛的告密者的任务数"
 MedicCooldown: "发放护盾冷却时间"
 MedicSkillLimit: "发放护盾次数上限"
@@ -985,6 +990,8 @@ RoleThiefSkillCooldown: "交换冷却时间"
 CollatorSampleCooldown: "样本提取冷却时间"
 CollatorCollateLimit: "校对次数上限"
 MadTeamType: "叛徒被视为"
+OptionSwapLimit: "换票次数上限"
+OptionSwapperCanUseButton: "可以召开紧急会议"
 
 # 随机出生点 / Random Spawn Locations
 Junction: "三岔路"
@@ -1221,6 +1228,13 @@ CollatorCheckMatch: "您校对的两位玩家身份"
 CollatorMatched: "匹配"
 CollatorUnmatched: "不匹配"
 VoteBasedSkillGiveUpNotice: "您放弃了本次发动技能的机会。"
+SwapperSwapMax: "您已达到换票次数上限\n不能再换票啦！"
+SwapUsed: "您已经使用了本次会议的换票技能\n不能再换票啦！"
+TargetAlreadySwapped: "目标已经被您选择过了，请重新选择一个"
+SwapperDead: "很抱歉，死亡后不能进行换票"
+SwapHelp: "指令格式：/sw [玩家编号]\n您可以在玩家的名字前看到该玩家的编号\n或者使用/id查看玩家编号列表"
+SwapNull: "请选择一个在场的存活角色进行换票"
+SwapVote: "玩家【{0}】和【{1}】被换票师换票了"
 
 # 信息 / Messages
 Message.SetToSeconds: "信息发送冷却时间为【{0}】秒"
@@ -1334,6 +1348,7 @@ MorticianCheckTitle: "【 ★ 尸体检查 ★ 】"
 MediumshipTitle: "【 ★ 冥界之声 ★ 】"
 MafiaRevengeTitle: "【 ★ 特供情报 ★ 】"
 OnPlayerJoinMsgTitle: "【 ★ {0} 您好！★ 】"
+SwapVoteTitle: "【 ★ 换票师 ★ 】"
 
 # 单位 / Units
 Format.Players: "{0}人"

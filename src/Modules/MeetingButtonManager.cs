@@ -63,6 +63,8 @@ public class MeetingButtonManager
 
         //销毁死亡玩家身上的技能按钮
         ClearMeetingButton(__instance);
+
+        meetingButton.OnUpdateButton(__instance);
     }
     public static void CreateMeetingButton(MeetingHud __instance, IMeetingButton meetingButton)
     {

@@ -12,7 +12,7 @@ public sealed class Collector : RoleBase
             CustomRoles.Collector,
             () => RoleTypes.Scientist,
             CustomRoleTypes.Neutral,
-            75_1_2_1200,
+            52100,
             SetupOptionItem,
             "colle|集票者|集票",
             "#9d8892"

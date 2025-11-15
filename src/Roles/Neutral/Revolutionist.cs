@@ -12,7 +12,7 @@ public sealed class Revolutionist : RoleBase
             CustomRoles.Revolutionist,
             () => RoleTypes.Impostor,
             CustomRoleTypes.Neutral,
-            75_1_3_0100,
+            52500,
             SetupOptionItem,
             "re|革命|改个",
             "#ba4d06",

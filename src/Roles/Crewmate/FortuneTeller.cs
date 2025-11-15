@@ -144,7 +144,8 @@ public sealed class FortuneTeller : RoleBase
                 CustomRoles.QuickShooter or
                 CustomRoles.Medium or
                 CustomRoles.Judge or
-                CustomRoles.BloodKnight
+                CustomRoles.BloodKnight or
+                CustomRoles.Swapper
                 => "Strong",
 
                 CustomRoles.Witch or

@@ -30,6 +30,7 @@ public sealed class Gangster : RoleBase, IImpostor
     static OptionItem OptionMayorCanBeMadmate;
     static OptionItem OptionNGuesserCanBeMadmate;
     static OptionItem OptionJudgeCanBeMadmate;
+    static OptionItem OptionSwapperCanBeMadmate;
     enum OptionName
     {
         GangsterRecruitCooldown,
@@ -38,6 +39,7 @@ public sealed class Gangster : RoleBase, IImpostor
         GanMayorCanBeMadmate,
         GanNGuesserCanBeMadmate,
         GanJudgeCanBeMadmate,
+        GanSwapperCanBeMadmate
     }
 
     private int RecruitLimit;
@@ -52,7 +54,7 @@ public sealed class Gangster : RoleBase, IImpostor
         OptionMayorCanBeMadmate = BooleanOptionItem.Create(RoleInfo, 13, OptionName.GanMayorCanBeMadmate, false, false);
         OptionNGuesserCanBeMadmate = BooleanOptionItem.Create(RoleInfo, 14, OptionName.GanNGuesserCanBeMadmate, false, false);
         OptionJudgeCanBeMadmate = BooleanOptionItem.Create(RoleInfo, 15, OptionName.GanJudgeCanBeMadmate, false, false);
-
+        OptionSwapperCanBeMadmate = BooleanOptionItem.Create(RoleInfo, 16, OptionName.GanSwapperCanBeMadmate, false, false);
     }
     public override void Add()
     {
@@ -118,6 +120,7 @@ public sealed class Gangster : RoleBase, IImpostor
             (pc.Is(CustomRoles.Mayor) && !OptionMayorCanBeMadmate.GetBool()) ||
             (pc.Is(CustomRoles.NiceGuesser) && !OptionNGuesserCanBeMadmate.GetBool()) ||
             (pc.Is(CustomRoles.Judge) && !OptionJudgeCanBeMadmate.GetBool()) ||
+            (pc.Is(CustomRoles.Swapper) && !OptionSwapperCanBeMadmate.GetBool()) ||
             pc.Is(CustomRoles.Snitch) ||
             pc.Is(CustomRoles.LazyGuy) ||
             pc.Is(CustomRoles.Celebrity) ||

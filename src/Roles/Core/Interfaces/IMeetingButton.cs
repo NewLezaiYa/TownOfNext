@@ -32,7 +32,14 @@ public interface IMeetingButton
     /// 玩家按下按钮的事件
     /// 该事件只会在按下按钮的客户端调用
     /// </summary>
-    /// <param name="target"></param>
+    /// <param name="target">目标玩家</param>
     /// <returns>false：不继续调用 Host 的 OnClickButton 函数</returns>
     public bool OnClickButtonLocal(PlayerControl target) => true;
+
+    /// <summary>
+    /// 帧 Task 处理函数<br/>
+    /// 请注意：全部模组端都会调用<br/>
+    /// </summary>
+    /// /// <param name="meetingHud">会议界面实例</param>
+    public void OnUpdateButton(MeetingHud meetingHud) { }
 }

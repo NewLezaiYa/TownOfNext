@@ -1,6 +1,7 @@
 using System.Text;
 using TONX.Modules;
 using TONX.Roles.AddOns.Common;
+using TONX.Roles.Crewmate;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -20,6 +21,30 @@ public static class MeetingHudPatch
             MeetingVoteManager.Instance?.CheckAndEndMeeting();
             return false;
         }
+    }
+    [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.PopulateResults))]
+    class PopulateResultsPatch
+    {
+        public static void Prefix(MeetingHud __instance)
+        {
+            foreach (var pc in Main.AllPlayerControls)
+            {
+                if (pc.GetRoleClass() is not Swapper swapper) continue;
+                AnimateSwapVote(__instance, swapper);
+            }
+        }
+    }
+    public static void AnimateSwapVote(MeetingHud __instance, Swapper swapper)
+    {
+        if (swapper.Targets.Count != 2) return;
+        if ((Utils.GetPlayerById(swapper.Targets[0])?.Data?.IsDead ?? true) || (Utils.GetPlayerById(swapper.Targets[1])?.Data?.IsDead ?? true)) return;
+
+        var pva1 = __instance.playerStates.FirstOrDefault(p => p.TargetPlayerId == swapper.Targets[0]);
+        var pva2 = __instance.playerStates.FirstOrDefault(p => p.TargetPlayerId == swapper.Targets[1]);
+        if (pva1 == null || pva2 == null) return;
+
+        __instance.StartCoroutine(Effects.Slide3D(pva1.transform, pva1.transform.localPosition, pva2.transform.localPosition, 1.5f));
+        __instance.StartCoroutine(Effects.Slide3D(pva2.transform, pva2.transform.localPosition, pva1.transform.localPosition, 1.5f));
     }
     [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.CastVote))]
     public static class CastVotePatch

@@ -13,7 +13,7 @@ public sealed class Provocateur : RoleBase, IAdditionalWinner
             CustomRoles.Provocateur,
             () => RoleTypes.Impostor,
             CustomRoleTypes.Neutral,
-            75_1_2_0900,
+            52400,
             null,
             "prov|自爆卡车",
             "#74ba43",

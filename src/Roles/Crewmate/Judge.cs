@@ -132,8 +132,8 @@ public sealed class Judge : RoleBase, IMeetingButton
 
         int operate; // 1:ID 2:猜测
         msg = msg.ToLower().TrimStart().TrimEnd();
-        if (MatchCommond(ref msg, "id|guesslist|gl编号|玩家编号|玩家id|id列表|玩家列表|列表|所有id|全部id")) operate = 1;
-        else if (MatchCommond(ref msg, "shoot|guess|bet|st|gs|bt|猜|赌|sp|jj|tl|trial|审判|判|审", false)) operate = 2;
+        if (GuesserHelper.MatchCommand(ref msg, "id|guesslist|gl编号|玩家编号|玩家id|id列表|玩家列表|列表|所有id|全部id")) operate = 1;
+        else if (GuesserHelper.MatchCommand(ref msg, "sp|jj|tl|trial|审判|判|审", false)) operate = 2;
         else return false;
 
         if (!pc.IsAlive())
@@ -200,25 +200,5 @@ public sealed class Judge : RoleBase, IMeetingButton
 
         error = string.Empty;
         return true;
-    }
-    public static bool MatchCommond(ref string msg, string command, bool exact = true)
-    {
-        var comList = command.Split('|');
-        for (int i = 0; i < comList.Length; i++)
-        {
-            if (exact)
-            {
-                if (msg == "/" + comList[i]) return true;
-            }
-            else
-            {
-                if (msg.StartsWith("/" + comList[i]))
-                {
-                    msg = msg.Replace("/" + comList[i], string.Empty);
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 }

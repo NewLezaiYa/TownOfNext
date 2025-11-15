@@ -12,7 +12,7 @@ public sealed class Innocent : RoleBase
             CustomRoles.Innocent,
             () => RoleTypes.Impostor ,
             CustomRoleTypes.Neutral,
-            75_1_2_0800,
+            52200,
             null,
             "inno|冤罪师|冤罪",
             "#8f815e",
