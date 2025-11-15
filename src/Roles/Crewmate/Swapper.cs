@@ -110,10 +110,20 @@ public sealed class Swapper : RoleBase, IMeetingButton
             return false;
         }
 
+        string Name = target.GetRealName();
+
         if (Targets.Count == 1) SwapLimit--;
 
         Targets.Add(target.PlayerId);
-        if (Targets.Count == 2) SendRpc();
+        SendRpc();
+
+        _ = new LateTask (() =>
+        {
+            Utils.SendMessage(
+                string.Format(GetString("SwapSkill"), Name),
+                Player.PlayerId,
+                Utils.ColorString(Utils.GetRoleColor(CustomRoles.Swapper), GetString("SwapVoteTitle")));
+        }, 0.8f, "Swap Skill");
 
         return true;
     }
@@ -198,10 +208,10 @@ public sealed class Swapper : RoleBase, IMeetingButton
     {
         if ((Utils.GetPlayerById(Targets[0])?.Data?.IsDead ?? true) || (Utils.GetPlayerById(Targets[1])?.Data?.IsDead ?? true)) return;
 
-        foreach (var vd in MeetingVoteManager.Instance.AllVotes)
+        foreach (var kvp in MeetingVoteManager.Instance.AllVotes)
         {
-            if (vd.Value.VotedFor == Targets[0]) MeetingVoteManager.Instance?.SetVote(vd.Key, Targets[1]);
-            else if (vd.Value.VotedFor == Targets[1]) MeetingVoteManager.Instance?.SetVote(vd.Key, Targets[0]);
+            if (kvp.Value.VotedFor == Targets[0]) MeetingVoteManager.Instance?.SetVote(kvp.Key, Targets[1]);
+            else if (kvp.Value.VotedFor == Targets[1]) MeetingVoteManager.Instance?.SetVote(kvp.Key, Targets[0]);
         }
 
         Logger.Info($"{Player.GetNameWithRole()} => Swap {Utils.GetPlayerById(Targets[0])?.Data?.PlayerName} with {Utils.GetPlayerById(Targets[1])?.Data?.PlayerName}", "Swapper");

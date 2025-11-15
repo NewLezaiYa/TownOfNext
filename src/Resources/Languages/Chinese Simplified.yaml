@@ -1235,6 +1235,7 @@ SwapperDead: "很抱歉，死亡后不能进行换票"
 SwapHelp: "指令格式：/sw [玩家编号]\n您可以在玩家的名字前看到该玩家的编号\n或者使用/id查看玩家编号列表"
 SwapNull: "请选择一个在场的存活角色进行换票"
 SwapVote: "玩家【{0}】和【{1}】被换票师换票了"
+SwapSkill: "你选中了【{0}】"
 
 # 信息 / Messages
 Message.SetToSeconds: "信息发送冷却时间为【{0}】秒"

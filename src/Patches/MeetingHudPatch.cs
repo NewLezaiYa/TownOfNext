@@ -3,7 +3,6 @@ using System.Text;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using TONX.Modules;
 using TONX.Roles.AddOns.Common;
-using TONX.Roles.Crewmate;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -29,7 +28,7 @@ public static class MeetingHudPatch
     {
         public static void Prefix(MeetingHud __instance)
         {
-            __instance.StartCoroutine(CoAnimateSwapVote(__instance).WrapToIl2Cpp());
+            __instance.StartCoroutine(CoAnimateSwapVote(__instance).WrapToIl2Cpp()); // 换票动画
         }
     }
     public static IEnumerator CoAnimateSwapVote(MeetingHud __instance)

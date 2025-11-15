@@ -100,7 +100,13 @@ public class MeetingVoteManager
             vote.DoVote(voteFor, numVotes);
         }
     }
+    /// <summary>
+    /// 换票师换票记录
+    /// </summary>
     public static List<Swapper> Swappers = new();
+    /// <summary>
+    /// 执行换票操作
+    /// </summary>
     public static void SwapVotes()
     {
         foreach (var swapper in Swappers) swapper?.SwapVote();
@@ -255,6 +261,7 @@ public class MeetingVoteManager
     public void Destroy()
     {
         _instance = null;
+        Swappers = new();
     }
 
     public static string GetVoteName(byte num)
