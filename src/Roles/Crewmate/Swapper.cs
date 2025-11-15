@@ -200,7 +200,7 @@ public sealed class Swapper : RoleBase, IMeetingButton
             else if (pva.VotedFor == Targets[1]) MeetingVoteManager.Instance?.SetVote(pva.TargetPlayerId, Targets[0]);
         }
 
-        Logger.Info($"{Player.GetNameWithRole()} => Swap {Utils.GetPlayerById(Targets[0])?.Data?.name} with {Utils.GetPlayerById(Targets[1])?.Data?.name}", "Swapper");
+        Logger.Info($"{Player.GetNameWithRole()} => Swap {Utils.GetPlayerById(Targets[0])?.Data?.PlayerName} with {Utils.GetPlayerById(Targets[1])?.Data?.PlayerName}", "Swapper");
         Utils.SendMessage(
             string.Format(GetString("SwapVote"), Utils.GetPlayerById(Targets[0]).GetRealName(), Utils.GetPlayerById(Targets[1]).GetRealName()),
             255,
