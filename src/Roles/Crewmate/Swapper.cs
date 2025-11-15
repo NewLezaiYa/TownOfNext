@@ -54,7 +54,11 @@ public sealed class Swapper : RoleBase, IMeetingButton
         }
         return true;
     }
-    public override void OnStartMeeting() => Targets.Clear();
+    public override void OnStartMeeting()
+    {
+        Targets.Clear();
+        SendRpc();
+    }
     public override void OverrideNameAsSeer(PlayerControl seen, ref string nameText, bool isForMeeting = false)
     {
         if (Player.IsAlive() && seen.IsAlive() && isForMeeting)
@@ -190,14 +194,14 @@ public sealed class Swapper : RoleBase, IMeetingButton
         error = string.Empty;
         return true;
     }
-    public void SwapVote(MeetingHud meetingHud)
+    public void SwapVote()
     {
         if ((Utils.GetPlayerById(Targets[0])?.Data?.IsDead ?? true) || (Utils.GetPlayerById(Targets[1])?.Data?.IsDead ?? true)) return;
 
-        foreach (var pva in meetingHud.playerStates.ToArray())
+        foreach (var vd in MeetingVoteManager.Instance.AllVotes)
         {
-            if (pva.VotedFor == Targets[0]) MeetingVoteManager.Instance?.SetVote(pva.TargetPlayerId, Targets[1]);
-            else if (pva.VotedFor == Targets[1]) MeetingVoteManager.Instance?.SetVote(pva.TargetPlayerId, Targets[0]);
+            if (vd.Value.VotedFor == Targets[0]) MeetingVoteManager.Instance?.SetVote(vd.Key, Targets[1]);
+            else if (vd.Value.VotedFor == Targets[1]) MeetingVoteManager.Instance?.SetVote(vd.Key, Targets[0]);
         }
 
         Logger.Info($"{Player.GetNameWithRole()} => Swap {Utils.GetPlayerById(Targets[0])?.Data?.PlayerName} with {Utils.GetPlayerById(Targets[1])?.Data?.PlayerName}", "Swapper");
@@ -212,13 +216,13 @@ public sealed class Swapper : RoleBase, IMeetingButton
         using var sender = CreateSender();
         sender.Writer.Write(Targets.Count);
         foreach (var target in Targets) sender.Writer.Write(target);
-        MeetingVoteManager.Swappers.Add(this);
+        if (Targets.Count == 2) MeetingVoteManager.Swappers.Add(this);
     }
     public override void ReceiveRPC(MessageReader reader)
     {
         Targets = new();
         var num = reader.ReadInt32();
         for (var i = 0; i < num; i++) Targets.Add(reader.ReadByte());
-        MeetingVoteManager.Swappers.Add(this);
+        if (Targets.Count == 2) MeetingVoteManager.Swappers.Add(this);
     }
 }

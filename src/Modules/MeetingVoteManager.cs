@@ -101,9 +101,9 @@ public class MeetingVoteManager
         }
     }
     public static List<Swapper> Swappers = new();
-    public static void SwapVotes(MeetingHud meetingHud)
+    public static void SwapVotes()
     {
-        foreach (var swapper in Swappers) swapper?.SwapVote(meetingHud);
+        foreach (var swapper in Swappers) swapper?.SwapVote();
     }
     /// <summary>
     /// 如果会议时间耗尽或每个人都已投票，则结束会议
@@ -121,7 +121,7 @@ public class MeetingVoteManager
     /// <param name="applyVoteMode">是否应用投票的设置</param>
     public void EndMeeting(bool applyVoteMode = true)
     {
-        SwapVotes(MeetingHud.Instance);
+        SwapVotes();
         var result = CountVotes(applyVoteMode);
         var logName = result.Exiled == null ? (result.IsTie ? "平票" : "跳过") : result.Exiled.Object.GetNameWithRole();
         logger.Info($"会议结束，结果：{logName}");
