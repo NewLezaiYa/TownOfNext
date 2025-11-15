@@ -43,4 +43,4 @@
 
 ## New Role
 - Neutral: Sidekick
-- Neutral: Swapper (Experimental)
+- Neutral: Role Thief (Experimental)

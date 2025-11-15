@@ -144,7 +144,7 @@ Succubus: "魅魔"
 SchrodingerCat: "薛定谔的猫"
 PlagueDoctor: "疫医"
 Sunnyboy: "阳光开朗大男孩"
-Swapper: "连环交换师"
+RoleThief: "连环交换师"
 
 ## 附加职业 / Add-ons
 LastImpostor: "绝境者"
@@ -330,7 +330,7 @@ SuccubusInfo: "没事的啦，姐姐会护着您的~"
 SchrodingerCatInfo: "喵~"
 PlagueDoctorInfo: "你看着病得不轻啊"
 SunnyboyInfo: "这个角色的建立究竟有什么意义"
-SwapperInfo: "职业没喽，职业回来喽"
+RoleThiefInfo: "职业没喽，职业回来喽"
 
 ## 附加职业 / Add-ons Blurbs
 LoversInfo: "最重要的是，记得照顾好您的另一半"
@@ -467,7 +467,7 @@ SuccubusInfoLong: "仅剩魅魔阵营与船员阵营且魅魔阵营人数大于�
 SchrodingerCatInfoLong: "薛定谔的猫被击杀后会加入凶手的阵营，并跟随凶手胜利。"
 PlagueDoctorInfoLong: "疫医的目标是感染所有活着的玩家。疫医首先选择一名玩家来感染，之后任何在受感染玩家范围内停留一定时间的人都会被感染。感染进度是累积的，且不会因距离或会议重置。"
 SunnyboyInfoLong: "阳光开朗大男孩可以通过生命面板查看他人的生命状态。阳光开朗大男孩在场时游戏不会因人数优势结束（例如内鬼人数大于船员或没有存活内鬼），游戏结束时若阳光开朗大男孩死亡，则阳光开朗大男孩跟随胜利阵营一起胜利。"
-SwapperInfoLong: "交换师可以通过对玩家点击击杀按钮进行职业交换，交换技能在下一轮会议结束后生效。请注意：交换师无法获胜。"
+RoleThiefInfoLong: "交换师可以通过对玩家点击击杀按钮进行职业交换，交换技能在下一轮会议结束后生效。请注意：交换师无法获胜。"
 
 ## 附加职业 / Add-ons Descriptions
 LastImpostorInfoLong: "这个效果在内鬼仅剩一人时赋予该内鬼。使其击杀冷却缩短。"
@@ -981,7 +981,7 @@ CanBeforeSchrodingerCatWinTheCrewmate: "无阵营时可以跟随<color=#8cffff>�
 SchrodingerCatExiledTeamChanges: "被票出时变为随机阵营"
 SchrodingerCatCanSeeKillableTeammate: "可以看见具有击杀能力的队友"
 SchrodingerCatChangeToSpecficImpostorRole: "被<color=#ff1919>内鬼</color>击杀时变为凶手职业"
-SwapperSkillCooldown: "交换冷却时间"
+RoleThiefSkillCooldown: "交换冷却时间"
 CollatorSampleCooldown: "样本提取冷却时间"
 CollatorCollateLimit: "校对次数上限"
 MadTeamType: "叛徒被视为"
@@ -1401,7 +1401,7 @@ EscapistTeleportButtonText: "传送"
 EscapistMarkButtonText: "标记"
 BoobyTrapKillButtonText: "设陷"
 PenguinKillButtonText: "拖拽"
-SwapperButtonText: "交换"
+RoleThiefKillButtonText: "交换"
 CollatorButtonText: "提取"
 
 # 作弊 / EAC

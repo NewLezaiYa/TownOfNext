@@ -4,13 +4,13 @@ using TONX.Roles.Core.Interfaces;
 
 namespace TONX.Roles.Neutral;
 
-public sealed class Swapper : RoleBase, IKiller, IDeathReasonSeeable
+public sealed class RoleThief : RoleBase, IKiller, IDeathReasonSeeable
 {
     public static readonly SimpleRoleInfo RoleInfo =
         SimpleRoleInfo.Create(
-            typeof(Swapper),
-            player => new Swapper(player),
-            CustomRoles.Swapper,
+            typeof(RoleThief),
+            player => new RoleThief(player),
+            CustomRoles.RoleThief,
             () => RoleTypes.Impostor,
             CustomRoleTypes.Neutral,
             51900,
@@ -21,7 +21,7 @@ public sealed class Swapper : RoleBase, IKiller, IDeathReasonSeeable
             introSound: () => GetIntroSound(RoleTypes.Shapeshifter),
             experimental: true
         );
-    public Swapper(PlayerControl player)
+    public RoleThief(PlayerControl player)
     : base(
         RoleInfo,
         player
@@ -32,12 +32,12 @@ public sealed class Swapper : RoleBase, IKiller, IDeathReasonSeeable
     private static OptionItem OptionSwapCooldown;
     enum OptionName
     {
-        SwapperSkillCooldown,
+        RoleThiefSkillCooldown,
     }
     private byte TargetPlayer;
     public static void SetupOptionItem()
     {
-        OptionSwapCooldown = FloatOptionItem.Create(RoleInfo, 10, OptionName.SwapperSkillCooldown, new(2.5f, 180f, 2.5f), 20f, false)
+        OptionSwapCooldown = FloatOptionItem.Create(RoleInfo, 10, OptionName.RoleThiefSkillCooldown, new(2.5f, 180f, 2.5f), 20f, false)
             .SetValueFormat(OptionFormat.Seconds);
     }
     public float CalculateKillCooldown() => CanUseKillButton() ? OptionSwapCooldown.GetFloat() : 255f;
@@ -47,7 +47,7 @@ public sealed class Swapper : RoleBase, IKiller, IDeathReasonSeeable
     public override void ApplyGameOptions(IGameOptions opt) => opt.SetVision(false);
     public bool OverrideKillButtonText(out string text)
     {
-        text = GetString("SwapperButtonText");
+        text = GetString("RoleThiefKillButtonText");
         return true;
     }
     public bool OnCheckMurderAsKiller(MurderInfo info)
@@ -68,8 +68,8 @@ public sealed class Swapper : RoleBase, IKiller, IDeathReasonSeeable
         var player = Player;
 
         player.RpcChangeRole(target.GetCustomRole());
-        target.RpcChangeRole(CustomRoles.Swapper);
-        Logger.Info($"连环交换师{player?.Data?.PlayerName}与{target?.Data?.PlayerName}交换了职业", "Swapper");
+        target.RpcChangeRole(CustomRoles.RoleThief);
+        Logger.Info($"连环交换师{player?.Data?.PlayerName}与{target?.Data?.PlayerName}交换了职业", "RoleThief");
         Utils.NotifyRoles();
     }
     private void SendRPC()
