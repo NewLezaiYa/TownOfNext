@@ -264,7 +264,7 @@ internal class SelectRolesPatch
             pc.Data.MarkDirty();
             AmongUsClient.Instance.SendAllStreamedObjects();
         }
-        Logger.Info("Set Disconnected", "CoAssignForSelf");
+        Logger.Info("Set Disconnected", "CoEndAssign");
         yield return new WaitForSeconds(1.0f);
 
         foreach (var (player, role) in RoleResult) // 给玩家自己注册职业
@@ -277,7 +277,7 @@ internal class SelectRolesPatch
             if (player.PlayerId == 0) player.SetRole(RoleTypes.Crewmate, true);
             else player.RpcSetRoleDesync(RoleTypes.Crewmate, player.GetClientId());
         }
-        Logger.Info("Assign Self", "CoAssignForSelf");
+        Logger.Info("Assign Self", "CoEndAssign");
         yield return new WaitForSeconds(0.5f);
 
         foreach (var pc in Main.AllPlayerControls)
@@ -290,7 +290,7 @@ internal class SelectRolesPatch
                 AmongUsClient.Instance.SendAllStreamedObjects();
             }
         }
-        Logger.Info("Restore Disconnect Data", "CoAssignForSelf");
+        Logger.Info("Restore Disconnect Data", "CoEndAssign");
         yield return new WaitForSeconds(1.0f);
 
         GameOptionsSender.AllSenders.Clear();

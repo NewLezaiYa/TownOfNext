@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Text;
+using BepInEx.Unity.IL2CPP.Utils.Collections;
 using TONX.Modules;
 using TONX.Roles.AddOns.Common;
 using TONX.Roles.Crewmate;
@@ -27,24 +29,24 @@ public static class MeetingHudPatch
     {
         public static void Prefix(MeetingHud __instance)
         {
-            foreach (var pc in Main.AllPlayerControls)
-            {
-                if (pc.GetRoleClass() is not Swapper swapper) continue;
-                AnimateSwapVote(__instance, swapper);
-            }
+            __instance.StartCoroutine(CoAnimateSwapVote(__instance).WrapToIl2Cpp());
         }
     }
-    public static void AnimateSwapVote(MeetingHud __instance, Swapper swapper)
+    public static IEnumerator CoAnimateSwapVote(MeetingHud __instance)
     {
-        if (swapper.Targets.Count != 2) return;
-        if ((Utils.GetPlayerById(swapper.Targets[0])?.Data?.IsDead ?? true) || (Utils.GetPlayerById(swapper.Targets[1])?.Data?.IsDead ?? true)) return;
+        foreach (var swapper in MeetingVoteManager.Swappers)
+        {
+            if ((Utils.GetPlayerById(swapper.Targets[0])?.Data?.IsDead ?? true) || (Utils.GetPlayerById(swapper.Targets[1])?.Data?.IsDead ?? true)) continue;
 
-        var pva1 = __instance.playerStates.FirstOrDefault(p => p.TargetPlayerId == swapper.Targets[0]);
-        var pva2 = __instance.playerStates.FirstOrDefault(p => p.TargetPlayerId == swapper.Targets[1]);
-        if (pva1 == null || pva2 == null) return;
+            var pva1 = __instance.playerStates.FirstOrDefault(p => p.TargetPlayerId == swapper.Targets[0]);
+            var pva2 = __instance.playerStates.FirstOrDefault(p => p.TargetPlayerId == swapper.Targets[1]);
+            if (pva1 == null || pva2 == null) continue;
 
-        __instance.StartCoroutine(Effects.Slide3D(pva1.transform, pva1.transform.localPosition, pva2.transform.localPosition, 1.5f));
-        __instance.StartCoroutine(Effects.Slide3D(pva2.transform, pva2.transform.localPosition, pva1.transform.localPosition, 1.5f));
+            var time = 1.5f / MeetingVoteManager.Swappers.Count;
+            __instance.StartCoroutine(Effects.Slide3D(pva1.transform, pva1.transform.localPosition, pva2.transform.localPosition, time));
+            __instance.StartCoroutine(Effects.Slide3D(pva2.transform, pva2.transform.localPosition, pva1.transform.localPosition, time));
+            yield return new WaitForSeconds(time);
+        }
     }
     [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.CastVote))]
     public static class CastVotePatch

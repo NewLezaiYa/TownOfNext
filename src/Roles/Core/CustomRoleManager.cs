@@ -278,11 +278,6 @@ public static class CustomRoleManager
         return !cancel;
     }
 
-    public static void OnVotingComplete()
-    {
-        foreach (var roleClass in AllActiveRoles.Values) roleClass.OnVotingComplete();
-    }
-
     // ==初始化处理 ==
     [GameModuleInitializer]
     public static void Initialize()

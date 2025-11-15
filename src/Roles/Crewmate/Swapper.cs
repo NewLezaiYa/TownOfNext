@@ -64,7 +64,7 @@ public sealed class Swapper : RoleBase, IMeetingButton
     }
     public string ButtonName { get; private set; } = "Swapper";
     public bool ShouldShowButton() => Player.IsAlive();
-    public bool ShouldShowButtonFor(PlayerControl target) => target.IsAlive() && !Targets.Contains(target.PlayerId);
+    public bool ShouldShowButtonFor(PlayerControl target) => target.IsAlive();
     public override bool OnSendMessage(string msg, out MsgRecallMode recallMode)
     {
         bool isCommand = SwapMsg(Player, msg, out bool spam);
@@ -83,7 +83,7 @@ public sealed class Swapper : RoleBase, IMeetingButton
             var btn = pva?.transform?.FindChild("Custom Meeting Button")?.gameObject;
             if (!btn) continue;
             if (Targets.Contains(pva.TargetPlayerId)) btn.GetComponent<SpriteRenderer>().color = Color.green;
-            else btn.GetComponent<SpriteRenderer>().color = Color.red;
+            else btn.GetComponent<SpriteRenderer>().color = Targets.Count == 2 ? Color.gray : Color.red;
         }
     }
     private bool Swap(PlayerControl target, out string reason)
@@ -109,7 +109,7 @@ public sealed class Swapper : RoleBase, IMeetingButton
         if (Targets.Count == 1) SwapLimit--;
 
         Targets.Add(target.PlayerId);
-        SendRpc();
+        if (Targets.Count == 2) SendRpc();
 
         return true;
     }
@@ -190,17 +190,17 @@ public sealed class Swapper : RoleBase, IMeetingButton
         error = string.Empty;
         return true;
     }
-    public override void OnVotingComplete()
+    public void SwapVote(MeetingHud meetingHud)
     {
-        if (Targets.Count != 2) return;
         if ((Utils.GetPlayerById(Targets[0])?.Data?.IsDead ?? true) || (Utils.GetPlayerById(Targets[1])?.Data?.IsDead ?? true)) return;
-        if (MeetingHud.Instance == null) return;
 
-        foreach (var pva in MeetingHud.Instance.playerStates.ToArray())
+        foreach (var pva in meetingHud.playerStates.ToArray())
         {
             if (pva.VotedFor == Targets[0]) MeetingVoteManager.Instance?.SetVote(pva.TargetPlayerId, Targets[1]);
             else if (pva.VotedFor == Targets[1]) MeetingVoteManager.Instance?.SetVote(pva.TargetPlayerId, Targets[0]);
         }
+
+        Logger.Info($"{Player.GetNameWithRole()} => Swap {Utils.GetPlayerById(Targets[0])?.Data?.name} with {Utils.GetPlayerById(Targets[1])?.Data?.name}", "Swapper");
         Utils.SendMessage(
             string.Format(GetString("SwapVote"), Utils.GetPlayerById(Targets[0]).GetRealName(), Utils.GetPlayerById(Targets[1]).GetRealName()),
             255,
@@ -212,11 +212,13 @@ public sealed class Swapper : RoleBase, IMeetingButton
         using var sender = CreateSender();
         sender.Writer.Write(Targets.Count);
         foreach (var target in Targets) sender.Writer.Write(target);
+        MeetingVoteManager.Swappers.Add(this);
     }
     public override void ReceiveRPC(MessageReader reader)
     {
         Targets = new();
         var num = reader.ReadInt32();
         for (var i = 0; i < num; i++) Targets.Add(reader.ReadByte());
+        MeetingVoteManager.Swappers.Add(this);
     }
 }

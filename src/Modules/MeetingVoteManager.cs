@@ -2,6 +2,7 @@
 using System.Linq;
 using TONX.Roles.AddOns.Common;
 using TONX.Roles.AddOns.Impostor;
+using TONX.Roles.Crewmate;
 
 namespace TONX.Modules;
 
@@ -24,6 +25,7 @@ public class MeetingVoteManager
     public static void Start()
     {
         _instance = new();
+        Swappers = new();
     }
 
     /// <summary>
@@ -98,6 +100,11 @@ public class MeetingVoteManager
             vote.DoVote(voteFor, numVotes);
         }
     }
+    public static List<Swapper> Swappers = new();
+    public static void SwapVotes(MeetingHud meetingHud)
+    {
+        foreach (var swapper in Swappers) swapper?.SwapVote(meetingHud);
+    }
     /// <summary>
     /// 如果会议时间耗尽或每个人都已投票，则结束会议
     /// </summary>
@@ -114,7 +121,7 @@ public class MeetingVoteManager
     /// <param name="applyVoteMode">是否应用投票的设置</param>
     public void EndMeeting(bool applyVoteMode = true)
     {
-        CustomRoleManager.OnVotingComplete();
+        SwapVotes(MeetingHud.Instance);
         var result = CountVotes(applyVoteMode);
         var logName = result.Exiled == null ? (result.IsTie ? "平票" : "跳过") : result.Exiled.Object.GetNameWithRole();
         logger.Info($"会议结束，结果：{logName}");

@@ -1128,7 +1128,7 @@ FireworksWaitPhase: "Aguarde..."
 FireworksReadyFirePhase: "Fogo!"
 EnterVentWinCountDown: "Entre na ventilação em {0} segundos para ganhar!"
 #信息 / Messages
-Message.SetToSeconds: "Definir para [{0] segundos."
+Message.SetToSeconds: "Definir para [{0}] segundos."
 Message.MessageWaitHelp: "Especifique o primeiro argumento em segundos."
 Message.TemplateNotFoundHost: "Nenhum modelo correspondente a [{0}] foi encontrado"
 Message.TemplateNotFoundClient: "O anfitrião não tem um modelo chamado [{0}]"

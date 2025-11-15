@@ -274,13 +274,6 @@ public abstract class RoleBase : IDisposable
     // public virtual bool OnVote(byte voterId, byte sourceVotedForId, ref byte roleVoteFor, ref int roleNumVotes, ref bool clearVote) => true;
 
     /// <summary>
-    /// 投票结束时调用<br/>
-    /// 此时你还可以对投票进行修改<br/>
-    /// </summary>
-    public virtual void OnVotingComplete()
-    { }
-
-    /// <summary>
     /// 驱逐玩家后调用的函数
     /// </summary>
     /// <param name="exiled">被驱逐的玩家</param>
