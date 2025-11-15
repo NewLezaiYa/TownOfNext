@@ -15,7 +15,7 @@
 
 ## What You Need to Know
 - This update involves numerous code modifications and there may be a large number of bugs.
--  If possible, please report bugs in time and attach logs.
+- If possible, please report bugs in time and attach logs.
 
 ## Fix
 - Fix a bug where roles can not be assigned multiple times

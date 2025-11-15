@@ -20,7 +20,7 @@ public class ModUpdater
         "file:///D:/Desktop/TONX/info.json",
         "file:///D:/Desktop/info.json",
 #else
-        "https://raw.githubusercontent.com/TownOfNext/TownOfNext/TONX-unofficial/info.json",
+        "https://raw.githubusercontent.com/TownOfNext/TownOfNext/main/info.json",
         "https://cdn.jsdelivr.net/gh/TownOfNext/TownOfNext/info.json",
         "https://tonx.leever.cn/api/version.json",
 #endif

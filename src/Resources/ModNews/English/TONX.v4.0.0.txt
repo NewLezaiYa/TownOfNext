@@ -1,0 +1,27 @@
+﻿#Number:100051
+#Title:TownOfNext v4.0.0
+#SubTitle:★★★★TO The Next★★★★
+#ShortTitle:★TONX v4.0.0
+#Date:2025-11-31T00:00:00Z
+#-----------------------------
+
+## Base
+- Base on AmongUs v17.0.1
+- Base on TOH v5.1.14
+
+## Warning
+- Create/join public lobbies is temporarily unavailable
+- This change is due to a server-side update that makes modded public lobbies unavailable for vanilla. Private lobbies are not affected.
+
+## What You Need to Know
+- We refactored codes related to custom game modes
+- TONX may have a lot of bugs. If possible, please report bugs in time and attach logs.
+
+## Fix
+- Fix a bug where the Collator's skill cooldown is not reset correctly
+
+## Changing
+- Modded clients now use the laptop during games to switch ship styles
+
+## New Feature
+- Option: Enable Vanilla Impostors Amount Limit

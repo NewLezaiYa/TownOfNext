@@ -12,7 +12,8 @@ public abstract class GameModeBase
 
     // == 初始化相关 ==
     /// <summary>
-    /// 游戏开始初始化时调用
+    /// 游戏开始初始化时调用<br/>
+    /// 所有动态变量都应使用该函数在游戏开始时重置<br/>
     /// </summary>
     public virtual void Init()
     { }

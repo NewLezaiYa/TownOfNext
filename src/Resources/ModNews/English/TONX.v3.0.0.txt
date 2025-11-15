@@ -14,7 +14,7 @@
 - This change is due to a server-side update that makes modded public lobbies unavailable for vanilla. Private lobbies are not affected.
 - Currently, this change is NOT permanent.
 
-## You know what
+## What You Need to Know
 - We completely reconstructed TOHE based on the new Base after TOH v5.0.0, so all 113 roles were rewritten.
 - TONX may have a lot of bugs. If possible, please report bugs in time and attach logs.
 - In addition, according to the logic of the new Base, some roles conflicts in the original version may be changed from not triggering to mandatory execution.
