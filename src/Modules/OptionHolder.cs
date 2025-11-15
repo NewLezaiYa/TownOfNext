@@ -87,6 +87,7 @@ public static class Options
     public static OptionItem DoubleTriggerThreshold;
     public static OptionItem DefaultShapeshiftCooldown;
 
+    public static OptionItem ImpRolesLimitEnabled;
     public static OptionItem DeadImpCantSabotage;
     public static OptionItem ImpKnowAlliesRole;
     public static OptionItem ImpKnowWhosMadmate;
@@ -485,46 +486,50 @@ public static class Options
         var sortedRoleInfo = CustomRoleManager.AllRolesInfo.Values.Where(role => role.Hidden == null).OrderBy(role => role.ConfigId);
 
         // 各职业的总体设定
-        ImpKnowAlliesRole = BooleanOptionItem.Create(1_000_001, "ImpKnowAlliesRole", true, TabGroup.ImpostorRoles, false)
+        ImpRolesLimitEnabled = BooleanOptionItem.Create(1_000_001, "ImpRolesLimitEnabled", false, TabGroup.ImpostorRoles, false)
             .SetGameMode(CustomGameMode.Standard)
             .SetHeader(true);
-        ImpKnowWhosMadmate = BooleanOptionItem.Create(1_000_002, "ImpKnowWhosMadmate", false, TabGroup.ImpostorRoles, false)
+
+        ImpKnowAlliesRole = BooleanOptionItem.Create(1_001_001, "ImpKnowAlliesRole", true, TabGroup.ImpostorRoles, false)
+            .SetGameMode(CustomGameMode.Standard)
+            .SetHeader(true);
+        ImpKnowWhosMadmate = BooleanOptionItem.Create(1_001_002, "ImpKnowWhosMadmate", false, TabGroup.ImpostorRoles, false)
             .SetGameMode(CustomGameMode.Standard);
-        ImpCanKillMadmate = BooleanOptionItem.Create(1_000_003, "ImpCanKillMadmate", true, TabGroup.ImpostorRoles, false)
+        ImpCanKillMadmate = BooleanOptionItem.Create(1_001_003, "ImpCanKillMadmate", true, TabGroup.ImpostorRoles, false)
             .SetGameMode(CustomGameMode.Standard);
 
-        MadmateKnowWhosMadmate = BooleanOptionItem.Create(1_001_001, "MadmateKnowWhosMadmate", false, TabGroup.ImpostorRoles, false)
+        MadmateKnowWhosMadmate = BooleanOptionItem.Create(1_002_001, "MadmateKnowWhosMadmate", false, TabGroup.ImpostorRoles, false)
             .SetHeader(true)
             .SetGameMode(CustomGameMode.Standard);
-        MadmateKnowWhosImp = BooleanOptionItem.Create(1_001_002, "MadmateKnowWhosImp", true, TabGroup.ImpostorRoles, false)
+        MadmateKnowWhosImp = BooleanOptionItem.Create(1_002_002, "MadmateKnowWhosImp", true, TabGroup.ImpostorRoles, false)
             .SetGameMode(CustomGameMode.Standard);
-        MadmateCanKillImp = BooleanOptionItem.Create(1_001_003, "MadmateCanKillImp", true, TabGroup.ImpostorRoles, false)
+        MadmateCanKillImp = BooleanOptionItem.Create(1_002_003, "MadmateCanKillImp", true, TabGroup.ImpostorRoles, false)
             .SetGameMode(CustomGameMode.Standard);
 
-        DoubleTriggerThreshold = FloatOptionItem.Create(1_002_001, "DoubleTriggerThreshold", new(0.3f, 1f, 0.1f), 0.5f, TabGroup.ImpostorRoles, false)
+        DoubleTriggerThreshold = FloatOptionItem.Create(1_003_001, "DoubleTriggerThreshold", new(0.3f, 1f, 0.1f), 0.5f, TabGroup.ImpostorRoles, false)
             .SetGameMode(CustomGameMode.Standard)
             .SetHeader(true)
             .SetValueFormat(OptionFormat.Seconds);
-        DefaultShapeshiftCooldown = FloatOptionItem.Create(1_002_002, "DefaultShapeshiftCooldown", new(5f, 999f, 5f), 15f, TabGroup.ImpostorRoles, false)
+        DefaultShapeshiftCooldown = FloatOptionItem.Create(1_003_002, "DefaultShapeshiftCooldown", new(5f, 999f, 5f), 15f, TabGroup.ImpostorRoles, false)
             .SetGameMode(CustomGameMode.Standard)
             .SetValueFormat(OptionFormat.Seconds);
-        DeadImpCantSabotage = BooleanOptionItem.Create(1_002_003, "DeadImpCantSabotage", false, TabGroup.ImpostorRoles, false)
+        DeadImpCantSabotage = BooleanOptionItem.Create(1_003_003, "DeadImpCantSabotage", false, TabGroup.ImpostorRoles, false)
             .SetGameMode(CustomGameMode.Standard);
 
-        NeutralRolesMinPlayer = IntegerOptionItem.Create(1_003_001, "NeutralRolesMinPlayer", new(0, 15, 1), 0, TabGroup.NeutralRoles, false)
+        NeutralRolesMinPlayer = IntegerOptionItem.Create(1_004_001, "NeutralRolesMinPlayer", new(0, 15, 1), 0, TabGroup.NeutralRoles, false)
             .SetGameMode(CustomGameMode.Standard)
             .SetHeader(true)
             .SetValueFormat(OptionFormat.Players);
-        NeutralRolesMaxPlayer = IntegerOptionItem.Create(1_003_002, "NeutralRolesMaxPlayer", new(0, 15, 1), 0, TabGroup.NeutralRoles, false)
+        NeutralRolesMaxPlayer = IntegerOptionItem.Create(1_004_002, "NeutralRolesMaxPlayer", new(0, 15, 1), 0, TabGroup.NeutralRoles, false)
             .SetGameMode(CustomGameMode.Standard)
             .SetValueFormat(OptionFormat.Players);
-        NeutralRoleWinTogether = BooleanOptionItem.Create(1_003_003, "NeutralRoleWinTogether", false, TabGroup.NeutralRoles, false)
+        NeutralRoleWinTogether = BooleanOptionItem.Create(1_004_003, "NeutralRoleWinTogether", false, TabGroup.NeutralRoles, false)
             .SetGameMode(CustomGameMode.Standard)
             .SetHeader(true);
-        NeutralWinTogether = BooleanOptionItem.Create(1_003_004, "NeutralWinTogether", false, TabGroup.NeutralRoles, false).SetParent(NeutralRoleWinTogether)
+        NeutralWinTogether = BooleanOptionItem.Create(1_004_004, "NeutralWinTogether", false, TabGroup.NeutralRoles, false).SetParent(NeutralRoleWinTogether)
             .SetGameMode(CustomGameMode.Standard);
 
-        AddonsNumLimit = IntegerOptionItem.Create(1_003_005, "AddonsNumLimit", new(0, 99, 1), 1, TabGroup.Addons, false)
+        AddonsNumLimit = IntegerOptionItem.Create(1_004_005, "AddonsNumLimit", new(0, 99, 1), 1, TabGroup.Addons, false)
             .SetGameMode(CustomGameMode.Standard)
             .SetHeader(true);
 

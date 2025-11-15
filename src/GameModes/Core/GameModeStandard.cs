@@ -19,6 +19,19 @@ internal static class GameModeStandard
         var rd = IRandom.Instance;
         int playerCount = Main.AllAlivePlayerControls.Count();
         int optImpNum = Main.RealOptionsData.GetInt(Int32OptionNames.NumImpostors);
+        if (Options.ImpRolesLimitEnabled.GetBool())
+            switch (playerCount)
+            {
+                case < 4 when optImpNum > 0:
+                    optImpNum = 0;
+                    break;
+                case > 3 and < 7 when optImpNum > 1:
+                    optImpNum = 1;
+                    break;
+                case > 6 and < 9 when optImpNum > 2:
+                    optImpNum = 2;
+                    break;
+            }
         int optNeutralNum = 0;
         if (Options.NeutralRolesMaxPlayer.GetInt() > 0 && Options.NeutralRolesMaxPlayer.GetInt() >= Options.NeutralRolesMinPlayer.GetInt())
             optNeutralNum = rd.Next(Options.NeutralRolesMinPlayer.GetInt(), Options.NeutralRolesMaxPlayer.GetInt() + 1);
