@@ -9,24 +9,17 @@
   </br>
 
   <h1>:fire: 𝓐𝓷𝓷𝓸𝓾𝓷𝓬𝓮𝓶𝓮𝓷𝓽 :fire:</h1>
-  <p>The TOHE project ceased development on May 20, 2023, with its final release being <a href="https://github.com/KARPED1EM/TownOfNext/releases/tag/v2.3.6">v2.3.6</a>.</p>
-  <p>With the aim of continuing TOHE's legacy and providing a foundation for other forks, we rebuilt the project based on the new TOH base and renamed it to TONX. However, due to limited resources, TONX official development has also been discontinued after version <a href="https://github.com/KARPED1EM/TownOfNext/releases/tag/v3.0.1">v3.0.1</a>.</p>
-  <p>We may provide some of the unofficial releases, and may review and accept certain compatibility-focused pull requests, but will only ensure their security aspects.</p>
+  <p>The TOHE project, developed and maintained by <a href="https://github.com/KARPED1EM">KARPED1EM</a>, ceased development on May 20, 2023, with its final release being <a href="https://github.com/TownOfNext/TownOfNext/releases/tag/v2.3.6">v2.3.6</a>. The source code is preserved in the <a href="https://github.com/TownOfNext/TownOfNext/tree/tohe">tohe</a> branch.</p>
+  <p><a href="https://github.com/SHAAARKY">SHAAARKY</a> subsequently rebuilt the project from the ground up using a new base and renamed it to TONX, continuing development until <a href="https://github.com/TownOfNext/TownOfNext/releases/tag/v3.0.1">v3.0.1</a> before discontinuing maintenance. This phase's code is preserved in the <a href="https://github.com/TownOfNext/TownOfNext/tree/legacy">legacy</a> branch.</p>
+  <p>The project is now maintained by <a href="https://github.com/Sand-and-Beans">Sand-and-Beans</a>, with ongoing development based on the <a href="https://github.com/TownOfNext/TownOfNext/tree/main">main</a> branch.</p>
 
   </br></br>
 
   <h1>:memo: 𝓣𝓻𝓪𝓷𝓼𝓵𝓪𝓽𝓲𝓸𝓷𝓼 :memo:</h1>
 
-  <p>We are sorry that there are no translators at present, so part of the translations cannot be maintained.</p>
-  <p>Supported languages are shown below.</p>
-  
-  | Language Name      | Progress             | Status                |
-  | :----------------: | :------------------: | :-------------------: |
-  | English            | Fully Translated     | Not Maintained        |
-  | Português (Brasil) | Fully Translated     | Not Maintained        |
-  | Pусский            | Partially Translated | Not Maintained        |
-  | 简体中文           | Fully Translated     | Maintaining (Default) |
-  | 繁體中文           | Fully Translated     | Not Maintained        |
+  <p>The development language for this project is Simplified Chinese.</p>
+  <p>The following languages have incomplete translations and are no longer maintained:</p>
+  <p>English, Portuguese, Russian, Traditional Chinese.</p>
 
   </br></br>
 
@@ -60,3 +53,4 @@
   <p>This mod is not affiliated with Among Us or Innersloth LLC, and the content contained therein is not endorsed or otherwise sponsored by Innersloth LLC. Portions of the materials contained herein are property of Innersloth LLC. © Innersloth LLC.</p>
 
 </div>
+

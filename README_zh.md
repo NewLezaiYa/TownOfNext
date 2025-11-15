@@ -9,24 +9,17 @@
   </br>
 
   <h1>:fire: 公告 :fire:</h1>
-  <p>TOHE 项目已于2023年5月20日停止开发，最终版本为 <a href="https://github.com/KARPED1EM/TownOfNext/releases/tag/v2.3.6">v2.3.6</a>。</p>
-  <p>为了延续 TOHE 的香火并为其他分支项目提供基础，我们基于新的 TOH 基础重建了项目并将其更名为 TONX。但由于资源有限，TONX 官方版本在发布 <a href="https://github.com/KARPED1EM/TownOfNext/releases/tag/v3.0.1">v3.0.1</a> 版本后也已停止开发。</p>
-  <p>我们可能会继续提供部分非官方版本，并可能会审查和接受某些以兼容性为重点的拉取请求，但仅确保其安全性。</p>
+  <p><a href="https://github.com/KARPED1EM">KARPED1EM</a> 开发并维护的 TOHE 项目已于2023年5月20日停止开发，最终版本为 <a href="https://github.com/TownOfNext/TownOfNext/releases/tag/v2.3.6">v2.3.6</a>，源代码保留于 <a href="https://github.com/TownOfNext/TownOfNext/tree/tohe">tohe</a> 分支。</p>
+  <p><a href="https://github.com/SHAAARKY">SHAAARKY</a> 随后基于新 Base 对项目进行完全重构并更名为 TONX，持续迭代至 <a href="https://github.com/TownOfNext/TownOfNext/releases/tag/v3.0.1">v3.0.1</a> 后停止维护，该阶段代码保留于 <a href="https://github.com/TownOfNext/TownOfNext/tree/legacy">legacy</a> 分支。</p>
+  <p>项目现由 <a href="https://github.com/Sand-and-Beans">Sand-and-Beans</a> 接手，基于 <a href="https://github.com/TownOfNext/TownOfNext/tree/main">main</a> 分支持续开发与维护。</p>
 
   </br></br>
 
   <h1>:memo: 翻译 :memo:</h1>
 
-  <p>我们很抱歉，当前没有翻译人员，部分翻译无法被维护。</p>
-  <p>本模组支持的语言如下表所示。</p>
-  
-  | 语言名称           | 翻译进度 | 状态         |
-  | :----------------: | :-----: | :---------: |
-  | English            | 完全翻译 | 停止维护     |
-  | Português (Brasil) | 完全翻译 | 停止维护     |
-  | Pусский            | 部分翻译 | 停止维护     |
-  | 简体中文           | 完全翻译 | 维护中 (默认) |
-  | 繁體中文           | 完全翻译 | 停止维护     |
+  <p>本项目开发语言为简体中文。</p>
+  <p>以下语言存在翻译缺失且不再维护：</p>
+  <p>英语、葡萄牙语、俄语、繁体中文。</p>
 
   </br></br>
 
