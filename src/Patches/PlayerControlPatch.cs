@@ -782,6 +782,7 @@ class CoEnterVentPatch
             _ = new LateTask(() =>
             {
                 if (!GameStates.IsMeeting && user.inVent) playerPhysics.RpcBootFromVent(id);
+                if (user.AmOwner) user.walkingToVent = false;
             }, 0.5f, "Cancel Vent");
         }
         return true;

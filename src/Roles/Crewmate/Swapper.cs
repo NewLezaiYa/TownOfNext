@@ -6,7 +6,7 @@ using TONX.Roles.Core.Interfaces;
 using UnityEngine;
 
 namespace TONX.Roles.Crewmate;
-public sealed class Swapper : RoleBase, IMeetingButton
+public sealed class Swapper : RoleBase, IMeetingButton, IVoteModifier
 {
     public static readonly SimpleRoleInfo RoleInfo =
         SimpleRoleInfo.Create(
@@ -39,6 +39,7 @@ public sealed class Swapper : RoleBase, IMeetingButton
 
     public int SwapLimit;
     public List<byte> Targets = new();
+    public int ModifyPriority { get; set; }
 
     private static void SetupOptionItem()
     {
@@ -204,14 +205,18 @@ public sealed class Swapper : RoleBase, IMeetingButton
         error = string.Empty;
         return true;
     }
-    public void SwapVote()
+    public void ModifyVoteAfterVoting()
+    {
+        SwapVote();
+    }
+    private void SwapVote()
     {
         if ((Utils.GetPlayerById(Targets[0])?.Data?.IsDead ?? true) || (Utils.GetPlayerById(Targets[1])?.Data?.IsDead ?? true)) return;
 
         foreach (var kvp in MeetingVoteManager.Instance.AllVotes)
         {
-            if (kvp.Value.VotedFor == Targets[0]) MeetingVoteManager.Instance?.SetVote(kvp.Key, Targets[1]);
-            else if (kvp.Value.VotedFor == Targets[1]) MeetingVoteManager.Instance?.SetVote(kvp.Key, Targets[0]);
+            if (kvp.Value.VotedFor == Targets[0]) MeetingVoteManager.Instance?.SetVote(kvp.Key, Targets[1], kvp.Value.NumVotes);
+            else if (kvp.Value.VotedFor == Targets[1]) MeetingVoteManager.Instance?.SetVote(kvp.Key, Targets[0], kvp.Value.NumVotes);
         }
 
         Logger.Info($"{Player.GetNameWithRole()} => Swap {Utils.GetPlayerById(Targets[0])?.Data?.PlayerName} with {Utils.GetPlayerById(Targets[1])?.Data?.PlayerName}", "Swapper");
@@ -226,7 +231,11 @@ public sealed class Swapper : RoleBase, IMeetingButton
         using var sender = CreateSender();
         sender.Writer.Write(Targets.Count);
         foreach (var target in Targets) sender.Writer.Write(target);
-        if (Targets.Count == 2) MeetingVoteManager.Swappers.Add(this);
+        if (Targets.Count == 2)
+        {
+            MeetingVoteManager.Swappers.Add(this);
+            ModifyPriority = MeetingVoteManager.Swappers.Count;
+        }
     }
     public override void ReceiveRPC(MessageReader reader)
     {
