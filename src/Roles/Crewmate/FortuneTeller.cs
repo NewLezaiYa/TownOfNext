@@ -158,7 +158,7 @@ public sealed class FortuneTeller : RoleBase
                 CustomRoles.Workaholic or
                 CustomRoles.Provocateur or
                 CustomRoles.SchrodingerCat or
-                CustomRoles.RoleThief
+                CustomRoles.Shifter
                 => "Incomprehensible",
 
                 CustomRoles.Fireworker or

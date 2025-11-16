@@ -136,7 +136,7 @@ public sealed class Swapper : RoleBase, IMeetingButton
         int operate; // 1:ID 2:交换
         msg = msg.ToLower().TrimStart().TrimEnd();
         if (GuesserHelper.MatchCommand(ref msg, "id|guesslist|gl编号|玩家编号|玩家id|id列表|玩家列表|列表|所有id|全部id")) operate = 1;
-        else if (GuesserHelper.MatchCommand(ref msg, "sw|swap|换票|换", false)) operate = 2;
+        else if (GuesserHelper.MatchCommand(ref msg, "sw|swa|swap|换票|换", false)) operate = 2;
         else return false;
 
         if (!pc.IsAlive())
