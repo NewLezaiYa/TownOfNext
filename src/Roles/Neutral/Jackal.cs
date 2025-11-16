@@ -116,11 +116,8 @@ public sealed class Jackal : RoleBase, IKiller
         {
             _ = new LateTask(() =>
             {
-                if (GameStates.IsInTask)
-                {
-                    target.RpcShapeshift(target, false);
-                    target.RpcChangeRole(CustomRoles.Sidekick);
-                }
+                if (GameStates.IsInTask) target.RpcShapeshift(target, false);
+                target.RpcChangeRole(CustomRoles.Sidekick);
             },
             1.5f, "RevertShapeshift");
         }
