@@ -286,7 +286,8 @@ internal class RPCHandlerPatch
                 break;
             case CustomRPC.OnClickMeetingButton:
                 var target = Utils.GetPlayerById(reader.ReadByte());
-                if (AmongUsClient.Instance.AmHost && __instance.GetRoleClass() is IMeetingButton meetingButton) meetingButton.OnClickButton(target);
+                if (AmongUsClient.Instance.AmHost && (GameStates.IsDiscussing || GameStates.IsVoting))
+                    if (__instance.GetRoleClass() is IMeetingButton meetingButton) meetingButton.OnClickButton(target);
                 break;
             case CustomRPC.Guess:
                 GuesserHelper.ReceiveRPC(reader, __instance);

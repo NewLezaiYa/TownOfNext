@@ -42,7 +42,7 @@ public class MeetingButtonManager
         if (PlayerControl.LocalPlayer.GetRoleClass() is not IMeetingButton meetingButton) return;
 
         //投票结束时销毁全部技能按钮
-        if (!GameStates.IsVoting && __instance.lastSecond < 1)
+        if (GameStates.IsVotingComplete)
         {
             if (GameObject.Find("Custom Meeting Button") != null) ClearMeetingButton(__instance, true);
             return;
