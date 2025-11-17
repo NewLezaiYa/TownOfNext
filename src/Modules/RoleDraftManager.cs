@@ -228,7 +228,7 @@ public class RoleDraftManager
         Main.AllPlayerControls.Do(x => PlayerState.GetByPlayerId(x.PlayerId).InitTask(x));
         GameData.Instance.RecomputeTaskCounts();
         TaskState.InitialTotalTasks = GameData.Instance.TotalTasks;
-        Utils.CanRecord = true;
+        Main.CanRecord = true;
         foreach (var pc in Main.AllPlayerControls) Utils.RecordPlayerRoles(pc.PlayerId);
         RolesToAssign.Clear();
         OptRoleNum.Clear();

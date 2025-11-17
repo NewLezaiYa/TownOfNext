@@ -89,6 +89,8 @@ public class Main : BasePlugin
     public static Dictionary<byte, Color32> PlayerColors = new();
     public static Dictionary<byte, CustomDeathReason> AfterMeetingDeathPlayers = new();
     public static Dictionary<CustomRoles, string> roleColors;
+    public static Dictionary<byte, string> RolesRecord = new();
+    public static bool CanRecord = false;
     public static List<byte> winnerList = new();
     public static List<string> winnerNameList = new();
     public static List<int> clientIdList = new();

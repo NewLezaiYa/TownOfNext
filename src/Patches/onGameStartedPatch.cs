@@ -52,8 +52,8 @@ internal class ChangeRoleSettings
 
             Main.LastNotifyNames = new();
 
-            Utils.RolesRecord = new();
-            Utils.CanRecord = false;
+            Main.RolesRecord = new();
+            Main.CanRecord = false;
 
             Main.PlayerColors = new();
             //名前の記録
@@ -242,8 +242,8 @@ internal class SelectRolesPatch
             }
 
             GameEndChecker.SetPredicate();
-            Utils.CanRecord = RoleDraftManager.RoleDraftState == RoleDraftState.None;
-            if (Utils.CanRecord) foreach (var pc in Main.AllPlayerControls) Utils.RecordPlayerRoles(pc.PlayerId);
+            Main.CanRecord = RoleDraftManager.RoleDraftState == RoleDraftState.None;
+            if (Main.CanRecord) foreach (var pc in Main.AllPlayerControls) Utils.RecordPlayerRoles(pc.PlayerId);
             AmongUsClient.Instance.StartCoroutine(CoEndAssign().WrapToIl2Cpp()); // 准备进入IntroCutscene
         }
         catch (Exception ex)
