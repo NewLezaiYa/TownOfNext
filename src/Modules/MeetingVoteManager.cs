@@ -26,7 +26,6 @@ public class MeetingVoteManager
     public static void Start()
     {
         _instance = new();
-        Swappers = new();
     }
 
     /// <summary>
@@ -102,9 +101,39 @@ public class MeetingVoteManager
         }
     }
     /// <summary>
-    /// 换票师换票记录
+    /// 换票记录<br/>
+    /// (被换玩家1, 被换玩家2, 是否显示动画)<br/>
     /// </summary>
-    public static List<Swapper> Swappers = new();
+    public List<(byte, byte, bool)> SwappedPlayers = new();
+    /// <summary>
+    /// 记录被换票的玩家
+    /// </summary>
+    /// <param name="target1">被换玩家1</param>
+    /// <param name="target2">被换玩家2</param>
+    /// <param name="shouldAnimate">是否显示动画</param>
+    public void SetSwappedPlayers(byte target1, byte target2, bool shouldAnimate) => SwappedPlayers.Add((target1, target2, shouldAnimate));
+    /// <summary>
+    /// 实行换票
+    /// </summary>
+    /// <param name="target1">被换玩家1</param>
+    /// <param name="target2">被换玩家2</param>
+    private void SwapVote(byte target1, byte target2)
+    {
+        if ((Utils.GetPlayerById(target1)?.Data?.IsDead ?? true) || (Utils.GetPlayerById(target2)?.Data?.IsDead ?? true)) return;
+
+        foreach (var kvp in AllVotes)
+        {
+            if (kvp.Value.VotedFor == target1) SetVote(kvp.Key, target2, kvp.Value.NumVotes);
+            else if (kvp.Value.VotedFor == target2) SetVote(kvp.Key, target1, kvp.Value.NumVotes);
+        }
+
+        logger.Info($"Swap {Utils.GetPlayerById(target1)?.Data?.PlayerName} with {Utils.GetPlayerById(target2)?.Data?.PlayerName}");
+        Utils.SendMessage(
+            string.Format(GetString("SwapVote"), Utils.GetPlayerById(target1).GetRealName(), Utils.GetPlayerById(target2).GetRealName()),
+            255,
+            Utils.ColorString(Utils.GetRoleColor(CustomRoles.Swapper), GetString("SwapVoteTitle"))
+        );
+    }
     /// <summary>
     /// 如果会议时间耗尽或每个人都已投票，则结束会议
     /// </summary>
@@ -121,7 +150,7 @@ public class MeetingVoteManager
     /// <param name="applyVoteMode">是否应用投票的设置</param>
     public void EndMeeting(bool applyVoteMode = true)
     {
-        CustomRoleManager.AllActiveRoles.Values.OfType<IVoteModifier>().OrderBy(m => m.ModifyPriority).ToList().Do(p => p.ModifyVoteAfterVoting());
+        SwappedPlayers.ForEach(swapped => SwapVote(swapped.Item1, swapped.Item2));
         var result = CountVotes(applyVoteMode);
         var logName = result.Exiled == null ? (result.IsTie ? "平票" : "跳过") : result.Exiled.Object.GetNameWithRole();
         logger.Info($"会议结束，结果：{logName}");
@@ -255,7 +284,6 @@ public class MeetingVoteManager
     public void Destroy()
     {
         _instance = null;
-        Swappers = new();
     }
 
     public static string GetVoteName(byte num)

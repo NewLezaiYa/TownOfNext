@@ -6,7 +6,7 @@ using TONX.Roles.Core.Interfaces;
 using UnityEngine;
 
 namespace TONX.Roles.Crewmate;
-public sealed class Swapper : RoleBase, IMeetingButton, IVoteModifier
+public sealed class Swapper : RoleBase, IMeetingButton
 {
     public static readonly SimpleRoleInfo RoleInfo =
         SimpleRoleInfo.Create(
@@ -39,7 +39,6 @@ public sealed class Swapper : RoleBase, IMeetingButton, IVoteModifier
 
     public int SwapLimit;
     public List<byte> Targets = new();
-    public int ModifyPriority { get; set; }
 
     private static void SetupOptionItem()
     {
@@ -88,7 +87,7 @@ public sealed class Swapper : RoleBase, IMeetingButton, IVoteModifier
             var btn = pva?.transform?.FindChild("Custom Meeting Button")?.gameObject;
             if (!btn) continue;
             if (Targets.Contains(pva.TargetPlayerId)) btn.GetComponent<SpriteRenderer>().color = Color.green;
-            else btn.GetComponent<SpriteRenderer>().color = Targets.Count == 2 ? Color.gray : Color.red;
+            else btn.GetComponent<SpriteRenderer>().color = Targets.Count == 2 ? Color.gray : Color.white;
         }
     }
     private bool Swap(PlayerControl target, out string reason)
@@ -113,10 +112,13 @@ public sealed class Swapper : RoleBase, IMeetingButton, IVoteModifier
 
         string Name = target.GetRealName();
 
-        if (Targets.Count == 1) SwapLimit--;
-
         Targets.Add(target.PlayerId);
-        SendRpc();
+        if (Targets.Count == 2)
+        {
+            SendRpc();
+            SwapLimit--;
+            Logger.Info($"{Player.GetNameWithRole()} => Swap {Utils.GetPlayerById(Targets[0])?.Data?.PlayerName} with {Utils.GetPlayerById(Targets[1])?.Data?.PlayerName}", "Swapper");
+        }
 
         _ = new LateTask (() =>
         {
@@ -205,43 +207,18 @@ public sealed class Swapper : RoleBase, IMeetingButton, IVoteModifier
         error = string.Empty;
         return true;
     }
-    public void ModifyVoteAfterVoting()
-    {
-        SwapVote();
-    }
-    private void SwapVote()
-    {
-        if ((Utils.GetPlayerById(Targets[0])?.Data?.IsDead ?? true) || (Utils.GetPlayerById(Targets[1])?.Data?.IsDead ?? true)) return;
-
-        foreach (var kvp in MeetingVoteManager.Instance.AllVotes)
-        {
-            if (kvp.Value.VotedFor == Targets[0]) MeetingVoteManager.Instance?.SetVote(kvp.Key, Targets[1], kvp.Value.NumVotes);
-            else if (kvp.Value.VotedFor == Targets[1]) MeetingVoteManager.Instance?.SetVote(kvp.Key, Targets[0], kvp.Value.NumVotes);
-        }
-
-        Logger.Info($"{Player.GetNameWithRole()} => Swap {Utils.GetPlayerById(Targets[0])?.Data?.PlayerName} with {Utils.GetPlayerById(Targets[1])?.Data?.PlayerName}", "Swapper");
-        Utils.SendMessage(
-            string.Format(GetString("SwapVote"), Utils.GetPlayerById(Targets[0]).GetRealName(), Utils.GetPlayerById(Targets[1]).GetRealName()),
-            255,
-            Utils.ColorString(Utils.GetRoleColor(CustomRoles.Swapper), GetString("SwapVoteTitle"))
-        );
-    }
     private void SendRpc()
     {
         using var sender = CreateSender();
         sender.Writer.Write(Targets.Count);
         foreach (var target in Targets) sender.Writer.Write(target);
-        if (Targets.Count == 2)
-        {
-            MeetingVoteManager.Swappers.Add(this);
-            ModifyPriority = MeetingVoteManager.Swappers.Count;
-        }
+        if (Targets.Count == 2) MeetingVoteManager.Instance?.SetSwappedPlayers(Targets[0], Targets[1], true);
     }
     public override void ReceiveRPC(MessageReader reader)
     {
         Targets = new();
         var num = reader.ReadInt32();
         for (var i = 0; i < num; i++) Targets.Add(reader.ReadByte());
-        if (Targets.Count == 2) MeetingVoteManager.Swappers.Add(this);
+        if (Targets.Count == 2) MeetingVoteManager.Instance?.SetSwappedPlayers(Targets[0], Targets[1], true);
     }
 }

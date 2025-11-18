@@ -33,15 +33,20 @@ public static class MeetingHudPatch
     }
     public static IEnumerator CoAnimateSwapVote(MeetingHud __instance)
     {
-        foreach (var swapper in MeetingVoteManager.Swappers)
-        {
-            if ((Utils.GetPlayerById(swapper.Targets[0])?.Data?.IsDead ?? true) || (Utils.GetPlayerById(swapper.Targets[1])?.Data?.IsDead ?? true)) continue;
+        var meetingVoteManager = MeetingVoteManager.Instance;
+        if (meetingVoteManager == null) yield break;
 
-            var pva1 = __instance.playerStates.FirstOrDefault(p => p.TargetPlayerId == swapper.Targets[0]);
-            var pva2 = __instance.playerStates.FirstOrDefault(p => p.TargetPlayerId == swapper.Targets[1]);
+        var swappedPlayers = meetingVoteManager.SwappedPlayers.ToList();
+        foreach (var data in swappedPlayers)
+        {
+            if (!data.Item3) continue;
+            if ((Utils.GetPlayerById(data.Item1)?.Data?.IsDead ?? true) || (Utils.GetPlayerById(data.Item2)?.Data?.IsDead ?? true)) continue;
+
+            var pva1 = __instance.playerStates.FirstOrDefault(p => p.TargetPlayerId == data.Item1);
+            var pva2 = __instance.playerStates.FirstOrDefault(p => p.TargetPlayerId == data.Item2);
             if (pva1 == null || pva2 == null) continue;
 
-            var time = 1.5f / MeetingVoteManager.Swappers.Count;
+            var time = 1.5f / swappedPlayers.Select(p => p.Item3).Count();
             __instance.StartCoroutine(Effects.Slide3D(pva1.transform, pva1.transform.localPosition, pva2.transform.localPosition, time));
             __instance.StartCoroutine(Effects.Slide3D(pva2.transform, pva2.transform.localPosition, pva1.transform.localPosition, time));
             yield return new WaitForSeconds(time);

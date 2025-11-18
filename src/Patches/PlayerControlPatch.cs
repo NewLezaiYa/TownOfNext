@@ -388,7 +388,6 @@ class ReportDeadBodyPatch
     {
         if (GameStates.IsMeeting) return false;
         if (Options.DisableMeeting.GetBool()) return false;
-        if (!Options.CurrentGameMode.GetModeClass()?.OnCheckReportDeadBody(__instance, target) ?? false) return false;
         if (!CanReport[__instance.PlayerId])
         {
             WaitReport[__instance.PlayerId].Add(target);
@@ -397,6 +396,8 @@ class ReportDeadBodyPatch
         }
         Logger.Info($"{__instance.GetNameWithRole()} => {target?.Object?.GetNameWithRole() ?? "null"}", "ReportDeadBody");
         if (!AmongUsClient.Instance.AmHost) return true;
+
+        if (!Options.CurrentGameMode.GetModeClass()?.OnCheckReportDeadBody(__instance, target) ?? false) return false;
 
         //通報者が死んでいる場合、本処理で会議がキャンセルされるのでここで止める
         if (__instance.Data.IsDead) return false;
