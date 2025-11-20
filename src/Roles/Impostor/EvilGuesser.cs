@@ -4,7 +4,7 @@ using TONX.Roles.Core.Interfaces;
 using static TONX.GuesserHelper;
 
 namespace TONX.Roles.Impostor;
-public sealed class EvilGuesser : RoleBase, IImpostor, IMeetingButton
+public sealed class EvilGuesser : RoleBase, IImpostor, IMeetingButton, IGuesser
 {
     public static readonly SimpleRoleInfo RoleInfo =
         SimpleRoleInfo.Create(
@@ -38,7 +38,10 @@ public sealed class EvilGuesser : RoleBase, IImpostor, IMeetingButton
         EGCanGuessTaskDoneSnitch,
     }
 
-    public int GuessLimit;
+    public int GuessLimit { get; set; }
+    public string GuessMaxMsg { get; set; } = "EGGuessMax";
+    public bool CanGuessAddons => OptionCanGuessAddons.GetBool();
+    public bool CanGuessVanilla => OptionCanGuessVanilla.GetBool();
     private static void SetupOptionItem()
     {
         OptionGuessNums = IntegerOptionItem.Create(RoleInfo, 10, OptionName.GuesserCanGuessTimes, new(1, 15, 1), 15, false)
@@ -72,5 +75,22 @@ public sealed class EvilGuesser : RoleBase, IImpostor, IMeetingButton
     {
         ShowGuessPanel(target.PlayerId, MeetingHud.Instance);
         return false;
+    }
+    public bool OnCheckGuessing(PlayerControl guesser, PlayerControl target, CustomRoles role, ref string reason)
+    {
+        if (target.Is(CustomRoles.Snitch) && target.AllTasksCompleted() && !OptionCanGuessTaskDoneSnitch.GetBool())
+        {
+            reason = GetString("EGGuessSnitchTaskDone");
+            return false;
+        }
+        return true;
+    }
+    public bool OnCheckSuicide(PlayerControl guesser, PlayerControl target, CustomRoles role)
+        => role.IsImpostor() && !OptionCanGuessImp.GetBool();
+    public List<CustomRoleTypes> GetCustomRoleTypesList()
+    {
+        List<CustomRoleTypes> list = new() { CustomRoleTypes.Impostor, CustomRoleTypes.Crewmate, CustomRoleTypes.Neutral, CustomRoleTypes.Addon };
+        if (OptionCanGuessImp.GetBool()) list.Remove(CustomRoleTypes.Impostor);
+        return list;
     }
 }

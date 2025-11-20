@@ -4,7 +4,7 @@ using TONX.Roles.Core.Interfaces;
 using static TONX.GuesserHelper;
 
 namespace TONX.Roles.Crewmate;
-public sealed class NiceGuesser : RoleBase, IMeetingButton
+public sealed class NiceGuesser : RoleBase, IMeetingButton, IGuesser
 {
     public static readonly SimpleRoleInfo RoleInfo =
         SimpleRoleInfo.Create(
@@ -37,7 +37,10 @@ public sealed class NiceGuesser : RoleBase, IMeetingButton
         GGCanGuessVanilla,
     }
 
-    public int GuessLimit;
+    public int GuessLimit { get; set; }
+    public string GuessMaxMsg { get; set; } = "GGGuessMax";
+    public bool CanGuessAddons => OptionCanGuessAddons.GetBool();
+    public bool CanGuessVanilla => OptionCanGuessVanilla.GetBool();
     private static void SetupOptionItem()
     {
         OptionGuessNums = IntegerOptionItem.Create(RoleInfo, 10, OptionName.GuesserCanGuessTimes, new(1, 15, 1), 15, false)
@@ -70,5 +73,13 @@ public sealed class NiceGuesser : RoleBase, IMeetingButton
     {
         ShowGuessPanel(target.PlayerId, MeetingHud.Instance);
         return false;
+    }
+    public bool OnCheckSuicide(PlayerControl guesser, PlayerControl target, CustomRoles role)
+        => role.IsCrewmate() && !OptionCanGuessCrew.GetBool() && !guesser.Is(CustomRoles.Madmate);
+    public List<CustomRoleTypes> GetCustomRoleTypesList()
+    {
+        List<CustomRoleTypes> list = new() { CustomRoleTypes.Impostor, CustomRoleTypes.Crewmate, CustomRoleTypes.Neutral, CustomRoleTypes.Addon };
+        if (!OptionCanGuessCrew.GetBool() && !PlayerControl.LocalPlayer.Is(CustomRoles.Madmate)) list.Remove(CustomRoleTypes.Crewmate);
+        return list;
     }
 }

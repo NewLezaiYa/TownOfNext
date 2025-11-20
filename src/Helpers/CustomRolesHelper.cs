@@ -17,7 +17,11 @@ static class CustomRolesHelper
         var roleInfo = role.GetRoleInfo();
         if (roleInfo != null)
             return roleInfo.CustomRoleType == CustomRoleTypes.Impostor;
-        return false;
+        return 
+            role is CustomRoles.Impostor or
+            CustomRoles.Shapeshifter or
+            CustomRoles.Phantom or
+            CustomRoles.Viper;
     }
     public static bool IsImpostorTeam(this CustomRoles role) => role.IsImpostor() || role is CustomRoles.Madmate;
     public static bool IsNeutral(this CustomRoles role)

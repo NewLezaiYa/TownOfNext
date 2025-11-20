@@ -131,7 +131,8 @@ public sealed class FortuneTeller : RoleBase
                 CustomRoles.Revolutionist or
                 CustomRoles.Demon or
                 CustomRoles.Eraser or
-                CustomRoles.PlagueDoctor
+                CustomRoles.PlagueDoctor or
+                CustomRoles.Guesser
                 => "Blockbuster",
 
                 CustomRoles.Warlock or

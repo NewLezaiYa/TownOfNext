@@ -42,7 +42,8 @@ public sealed class Swapper : RoleBase, IMeetingButton
 
     private static void SetupOptionItem()
     {
-        OptionSwapLimit = IntegerOptionItem.Create(RoleInfo, 10, OptionName.OptionSwapLimit, new(1, 99, 1), 15, false);
+        OptionSwapLimit = IntegerOptionItem.Create(RoleInfo, 10, OptionName.OptionSwapLimit, new(1, 99, 1), 15, false)
+            .SetValueFormat(OptionFormat.Times);
         OptionCanUseButton = BooleanOptionItem.Create(RoleInfo, 11, OptionName.OptionSwapperCanUseButton, true, false);
     }
     public override bool OnCheckReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo target)
@@ -212,13 +213,17 @@ public sealed class Swapper : RoleBase, IMeetingButton
         using var sender = CreateSender();
         sender.Writer.Write(Targets.Count);
         foreach (var target in Targets) sender.Writer.Write(target);
-        if (Targets.Count == 2) MeetingVoteManager.Instance?.SetSwappedPlayers(Targets[0], Targets[1], true);
+        SetTargets();
     }
     public override void ReceiveRPC(MessageReader reader)
     {
         Targets = new();
         var num = reader.ReadInt32();
         for (var i = 0; i < num; i++) Targets.Add(reader.ReadByte());
+        SetTargets();
+    }
+    private void SetTargets()
+    {
         if (Targets.Count == 2) MeetingVoteManager.Instance?.SetSwappedPlayers(Targets[0], Targets[1], true);
     }
 }
