@@ -52,12 +52,16 @@ public sealed class Shifter : RoleBase, IKiller, IDeathReasonSeeable
     }
     public bool OnCheckMurderAsKiller(MurderInfo info)
     {
-        var target = info.AttemptTarget;
+        var (killer, target) = (info.AttemptKiller, info.AttemptTarget);
         if (TargetPlayer == byte.MaxValue)
         {
             TargetPlayer = target.PlayerId;
             SendRPC();
         }
+
+        killer.ResetKillCooldown();
+        killer.SetKillCooldownV2();
+
         return false;
     }
     public override void AfterMeetingTasks()

@@ -1,24 +1,23 @@
 ﻿using AmongUs.GameOptions;
-using Rewired;
 using TONX.Modules;
 using TONX.Roles.Core.Interfaces;
 using static TONX.GuesserHelper;
 
 namespace TONX.Roles.Neutral;
-public sealed class Guesser : RoleBase, IKiller, IMeetingButton, IGuesser
+public sealed class Doomsayer : RoleBase, IKiller, IMeetingButton, IGuesser
 {
     public static readonly SimpleRoleInfo RoleInfo =
         SimpleRoleInfo.Create(
-            typeof(Guesser),
-            player => new Guesser(player),
-            CustomRoles.Guesser,
+            typeof(Doomsayer),
+            player => new Doomsayer(player),
+            CustomRoles.Doomsayer,
             () => RoleTypes.Impostor,
             CustomRoleTypes.Neutral,
             52800,
             SetupOptionItem,
-            "gs|賭怪|赌怪|赌"
+            "ds|末日预言家|末日"
         );
-    public Guesser(PlayerControl player)
+    public Doomsayer(PlayerControl player)
     : base(
         RoleInfo,
         player
@@ -31,33 +30,42 @@ public sealed class Guesser : RoleBase, IKiller, IMeetingButton, IGuesser
     public static OptionItem OptionGuessNumsToWin;
     public static OptionItem OptionSuicideIfGuessWrong;
     public static OptionItem OptionForbidGuessIfWrongThisMeeting;
+    public static OptionItem OptionHintCooldown;
+    public static OptionItem OptionHintNums;
     enum OptionName
     {
         GuesserCanGuessTimes,
-        GCanGuessAdt,
-        GCanGuessVanilla,
-        GGuessNumsToWin,
-        GSuicideIfGuessWrong,
-        GForbidGuessIfWrongThisMeeting
+        DSCanGuessAdt,
+        DSCanGuessVanilla,
+        DSGuessNumsToWin,
+        DSSuicideIfGuessWrong,
+        DSForbidGuessIfWrongThisMeeting,
+        DSHintCooldown,
+        DSHintNums
     }
 
     public int GuessLimit { get; set; }
-    public string GuessMaxMsg { get; set; } = "GGuessMax";
+    public string GuessMaxMsg { get; set; } = "DSGuessMax";
     public bool CanGuessAddons => OptionCanGuessAddons.GetBool();
     public bool CanGuessVanilla => OptionCanGuessVanilla.GetBool();
     private byte Target;
     public bool HasWrongGuess;
     private int CorrectGuesses;
+    private int HintLimit;
     private static void SetupOptionItem()
     {
         OptionGuessNums = IntegerOptionItem.Create(RoleInfo, 10, OptionName.GuesserCanGuessTimes, new(1, 15, 1), 15, false)
             .SetValueFormat(OptionFormat.Times);
-        OptionCanGuessAddons = BooleanOptionItem.Create(RoleInfo, 11, OptionName.GCanGuessAdt, false, false);
-        OptionCanGuessVanilla = BooleanOptionItem.Create(RoleInfo, 12, OptionName.GCanGuessVanilla, true, false);
-        OptionGuessNumsToWin = IntegerOptionItem.Create(RoleInfo, 13, OptionName.GGuessNumsToWin, new(1, 15, 1), 3, false)
+        OptionCanGuessAddons = BooleanOptionItem.Create(RoleInfo, 11, OptionName.DSCanGuessAdt, false, false);
+        OptionCanGuessVanilla = BooleanOptionItem.Create(RoleInfo, 12, OptionName.DSCanGuessVanilla, true, false);
+        OptionGuessNumsToWin = IntegerOptionItem.Create(RoleInfo, 13, OptionName.DSGuessNumsToWin, new(1, 15, 1), 3, false)
             .SetValueFormat(OptionFormat.Times);
-        OptionSuicideIfGuessWrong = BooleanOptionItem.Create(RoleInfo, 14, OptionName.GSuicideIfGuessWrong, false, false);
-        OptionForbidGuessIfWrongThisMeeting = BooleanOptionItem.Create(RoleInfo, 15, OptionName.GForbidGuessIfWrongThisMeeting, true, false);
+        OptionSuicideIfGuessWrong = BooleanOptionItem.Create(RoleInfo, 14, OptionName.DSSuicideIfGuessWrong, false, false);
+        OptionForbidGuessIfWrongThisMeeting = BooleanOptionItem.Create(RoleInfo, 15, OptionName.DSForbidGuessIfWrongThisMeeting, true, false);
+        OptionHintCooldown = FloatOptionItem.Create(RoleInfo, 16, OptionName.DSHintCooldown, new(2.5f, 180f, 2.5f), 20f, false)
+            .SetValueFormat(OptionFormat.Seconds);
+        OptionHintNums = IntegerOptionItem.Create(RoleInfo, 17, OptionName.DSHintNums, new(1, 15, 1), 3, false)
+            .SetValueFormat(OptionFormat.Times);
     }
     public override void Add()
     {
@@ -65,14 +73,17 @@ public sealed class Guesser : RoleBase, IKiller, IMeetingButton, IGuesser
         Target = byte.MaxValue;
         HasWrongGuess = false;
         CorrectGuesses = 0;
+        HintLimit = OptionHintNums.GetInt();
     }
+    public float CalculateKillCooldown() => CanUseKillButton() ? OptionHintCooldown.GetFloat() : 255f;
+    public bool CanUseKillButton() => Target == byte.MaxValue && HintLimit > 0;
     public bool CanUseSabotageButton() => false;
     public bool CanUseImpostorVentButton() => false;
     public override void OverrideNameAsSeer(PlayerControl seen, ref string nameText, bool isForMeeting = false)
     {
         if (Player.IsAlive() && seen.IsAlive() && isForMeeting)
         {
-            nameText = Utils.ColorString(Utils.GetRoleColor(CustomRoles.Guesser), seen.PlayerId.ToString()) + " " + nameText;
+            nameText = Utils.ColorString(Utils.GetRoleColor(CustomRoles.Doomsayer), seen.PlayerId.ToString()) + " " + nameText;
         }
     }
     public override void OnStartMeeting()
@@ -82,17 +93,25 @@ public sealed class Guesser : RoleBase, IKiller, IMeetingButton, IGuesser
     public bool OnCheckMurderAsKiller(MurderInfo info)
     {
         var (killer, target) = (info.AttemptKiller, info.AttemptTarget);
-        if (killer == null || target == null) return false;
+        if (killer == null || target == null || Target != byte.MaxValue || HintLimit < 1) return false;
+
         Target = target.PlayerId;
+        HintLimit--;
+
+        killer.ResetKillCooldown();
+        killer.SetKillCooldownV2();
+
         return false;
     }
     public override void NotifyOnMeetingStart(ref List<(string, byte, string)> msgToSend)
     {
         if (Target == byte.MaxValue || (Utils.GetPlayerById(Target)?.Data.IsDead ?? true)) return;
-        List<CustomRoles> Suspects = new();
-        void AddSuspectedRoles(List<CustomRoles> roles)
+        List<CustomRoles> Suspects = new() { Utils.GetPlayerById(Target).GetCustomRole() };
+
+        void AddSuspectedRoles(CustomRoleTypes customRoleTypes)
         {
-            for (int i = 0; i < 3; i++)
+            var roles = CustomRolesHelper.AllRoles.Where(r => r.GetCustomRoleTypes() == customRoleTypes && r.IsEnable()).ToList();
+            for (int i = 0; i < 3 - Suspects.Where(r => r.GetCustomRoleTypes() == customRoleTypes).Count(); i++)
             {
                 if (roles.Count == 0) break;
                 var role = roles[IRandom.Instance.Next(roles.Count)];
@@ -100,14 +119,24 @@ public sealed class Guesser : RoleBase, IKiller, IMeetingButton, IGuesser
                 roles.Remove(role);
             }
         }
-        AddSuspectedRoles(CustomRolesHelper.AllRoles.Where(r => r.IsImpostor() && r.IsEnable()).ToList());
-        AddSuspectedRoles(CustomRolesHelper.AllRoles.Where(r => r.IsCrewmate() && r.IsEnable()).ToList());
-        AddSuspectedRoles(CustomRolesHelper.AllRoles.Where(r => r.IsNeutral() && r.IsEnable()).ToList());
-        msgToSend.Add((
-            string.Format(GetString("GusserSuspectRoles"), Suspects.Select(r => Utils.ColorString(Utils.GetRoleColor(r), Utils.GetRoleName(r))).ToList()),
-            Player.PlayerId,
-            "<color=#aaaaff>" + GetString("DefaultSystemMessageTitle") + "</color>"
-        ));
+        AddSuspectedRoles(CustomRoleTypes.Impostor);
+        AddSuspectedRoles(CustomRoleTypes.Crewmate);
+        AddSuspectedRoles(CustomRoleTypes.Neutral);
+
+        Suspects.OrderBy(_ => IRandom.Instance.Next(Suspects.Count));
+
+        string SuspectedRoles = string.Empty;
+        if (Suspects.Count > 0)
+        {
+            SuspectedRoles = Utils.ColorString(Utils.GetRoleColor(Suspects[0]), Utils.GetRoleName(Suspects[0]));
+            for (int j = 1; j < Suspects.Count; j++)
+            {
+                SuspectedRoles += ", " + Utils.ColorString(Utils.GetRoleColor(Suspects[j]), Utils.GetRoleName(Suspects[j]));
+            }
+        }
+        else SuspectedRoles = GetString("DoomsayerHintBlank");
+
+        msgToSend.Add((string.Format(GetString("DoomsayerSuspectRoles"), SuspectedRoles), Player.PlayerId, "<color=#aaaaff>" + GetString("DefaultSystemMessageTitle") + "</color>"));
     }
     public override void AfterMeetingTasks()
     {
@@ -131,16 +160,21 @@ public sealed class Guesser : RoleBase, IKiller, IMeetingButton, IGuesser
     {
         if (HasWrongGuess)
         {
-            reason = GetString("GGuessForbidden");
+            reason = GetString("DoomsayerGuessForbidden");
             return false;
         }
         return true;
     }
-    public void OnGuessing(PlayerControl guesser, PlayerControl target, CustomRoles role, ref bool guesserSuicide)
+    public bool OnGuessing(PlayerControl guesser, PlayerControl target, CustomRoles role, bool guesserSuicide, ref string reason)
     {
         if (guesserSuicide) HasWrongGuess = true;
         else CorrectGuesses++;
-        if (!OptionSuicideIfGuessWrong.GetBool()) guesserSuicide = false;
+        if (!OptionSuicideIfGuessWrong.GetBool())
+        {
+            reason = GetString("DoomsayerWrongGuess");
+            return false;
+        }
+        return true;
     }
     public void AfterGuessing(PlayerControl guesser)
     {

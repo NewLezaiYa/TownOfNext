@@ -146,7 +146,7 @@ public static class GuesserHelper
 
         Logger.Info($"{guesser.GetNameWithRole()} 猜测了 {target.GetNameWithRole()}", "Guesser");
 
-        gc.OnGuessing(guesser, target, role, ref guesserSuicide);
+        if (!gc.OnGuessing(guesser, target, role, guesserSuicide, ref reason)) return false;
 
         var dp = guesserSuicide ? guesser : target;
         target = dp;
