@@ -169,7 +169,7 @@ public sealed class Doomsayer : RoleBase, IKiller, IMeetingButton, IGuesser
     {
         if (guesserSuicide) HasWrongGuess = true;
         else CorrectGuesses++;
-        if (!OptionSuicideIfGuessWrong.GetBool())
+        if (!OptionSuicideIfGuessWrong.GetBool() && HasWrongGuess)
         {
             reason = GetString("DoomsayerWrongGuess");
             return false;
