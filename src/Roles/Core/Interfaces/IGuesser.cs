@@ -62,6 +62,8 @@ public interface IGuesser
     /// <param name="target">目标</param>
     /// <param name="role">猜测职业</param>
     /// <param name="guesserSuicide">是否自杀</param>
+    /// <param name="reason">失败原因</param>
+    /// <returns>返回false取消本次猜测</returns>
     public bool OnGuessing(PlayerControl guesser, PlayerControl target, CustomRoles role, bool guesserSuicide, ref string reason) => true;
     /// <summary>
     /// 猜测结束后调用
