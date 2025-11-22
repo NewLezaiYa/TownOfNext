@@ -5,17 +5,6 @@
 /// </summary>
 public interface IGuesser
 {
-    public static string GetFormatString()
-    {
-        string text = GetString("PlayerIdList");
-        foreach (var pc in Main.AllAlivePlayerControls)
-        {
-            string id = pc.PlayerId.ToString();
-            string name = pc.GetRealName();
-            text += $"\n{id} → {name}";
-        }
-        return text;
-    }
     /// <summary>
     /// 猜测次数限制
     /// </summary>

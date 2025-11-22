@@ -8,14 +8,15 @@ using UnityEngine;
 namespace TONX;
 public static class GuesserHelper
 {
-    public static string GetFormatString()
+    public static string GetFormatString(bool withRole = false)
     {
         string text = GetString("PlayerIdList");
         foreach (var pc in Main.AllAlivePlayerControls)
         {
             string id = pc.PlayerId.ToString();
             string name = pc.GetRealName();
-            text += $"\n{id} → {name}";
+            string role = withRole ? $"({Utils.GetTrueRoleName(pc.PlayerId, false)}) " : "";
+            text += $"\n{id} → {role}{name}";
         }
         return text;
     }
@@ -63,15 +64,15 @@ public static class GuesserHelper
     public static readonly List<(int, string)> SeparatedColorNames = new Func<List<(int, string)>>(() =>
     {
         List<(int, string)> names = new();
-        ColorNames.Do(kvp => kvp.Value.Split('|').ToList().Do(n => names.Add((kvp.Key, n)))); // 加入颜色名称缩写
-        for (int i = 0; i < Palette.ColorNames.Length; i++) names.Add((i, GetString(Palette.ColorNames[i]))); // 加入翻译文件中的颜色名称
+        ColorNames.Do(kvp => kvp.Value.Split('|').ToList().Do(n => names.Add((kvp.Key, n.Trim().ToLower())))); // 加入颜色名称缩写
+        for (int i = 0; i < Palette.ColorNames.Length; i++) names.Add((i, GetString(Palette.ColorNames[i]).Trim().ToLower())); // 加入翻译文件中的颜色名称
         return names.OrderByDescending(n => n.Item2.Length).ToList(); // 按名称长度倒序排列
     })();
     public static int GetColorFromMsg(ref string msg)
     {
         foreach (var (id, color) in SeparatedColorNames)
         {
-            if (ComfirmIncludeMsg(msg, color))
+            if (msg.Contains(color))
             {
                 msg = msg.Replace(color, string.Empty);
                 return id;
@@ -79,7 +80,6 @@ public static class GuesserHelper
         }
         return -1;
     }
-    private static bool ComfirmIncludeMsg(string msg, string key) => key.Split('|').Any(msg.Contains);
     public static bool GuesserMsg(PlayerControl pc, string msg, out bool spam)
     {
         spam = false;
@@ -198,10 +198,9 @@ public static class GuesserHelper
     }
     public static TextMeshPro nameText(this PlayerControl p) => p.cosmetics.nameText;
     public static TextMeshPro NameText(this PoolablePlayer p) => p.cosmetics.nameText;
-    private static bool MsgToPlayerAndRole(string msg, out byte id, out CustomRoles role, out string error)
+    public static byte GetPlayerIdFromMsg(ref string msg, ref string error, string NullMsg, string MultipleMsg)
     {
-        id = byte.MaxValue;
-        role = new();
+        byte id = byte.MaxValue;
 
         if (msg.StartsWith("/")) msg = msg.Replace("/", string.Empty);
 
@@ -219,18 +218,17 @@ public static class GuesserHelper
             //并不是玩家编号，判断是否颜色
             int color = GetColorFromMsg(ref msg);
             List<PlayerControl> list = Main.AllAlivePlayerControls.Where(p => p.cosmetics.ColorId == color).ToList();
-            if (list.Count < 1)
-            {
-                error = GetString("GuessNull");
-                return false;
-            }
-            if (list.Count != 1)
-            {
-                error = GetString("GuessMultipleColor");
-                return false;
-            }
-            id = list.FirstOrDefault().PlayerId;
+            if (list.Count < 1) error = GetString(NullMsg);
+            else if (list.Count > 1) error = GetString(MultipleMsg);
+            else id = list.FirstOrDefault().PlayerId;
         }
+        return id;
+    }
+    private static bool MsgToPlayerAndRole(string msg, out byte id, out CustomRoles role, out string error)
+    {
+        error = string.Empty;
+        id = GetPlayerIdFromMsg(ref msg, ref error, "GuessNull", "GuessMultipleColor");
+        role = new();
 
         //判断选择的玩家是否合理
         PlayerControl target = Utils.GetPlayerById(id);
@@ -246,7 +244,6 @@ public static class GuesserHelper
             return false;
         }
 
-        error = string.Empty;
         return true;
     }
 

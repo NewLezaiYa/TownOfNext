@@ -149,7 +149,7 @@ static class CustomRolesHelper
         }
         return Options.GetRoleChance(role);
     }
-    public static bool IsEnable(this CustomRoles role) => role.GetCount() > 0;
+    public static bool IsEnable(this CustomRoles role) => role.GetCount() > 0 && !(role.IsVanilla() && Options.DisableVanillaRoles.GetBool());
     public static CustomRoles GetCustomRoleTypes(this RoleTypes role)
     {
         return role switch

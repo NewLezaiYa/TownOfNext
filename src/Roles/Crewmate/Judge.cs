@@ -130,7 +130,7 @@ public sealed class Judge : RoleBase, IMeetingButton
         if (!GameStates.IsInGame || pc == null) return false;
         if (!pc.Is(CustomRoles.Judge)) return false;
 
-        int operate; // 1:ID 2:猜测
+        int operate; // 1:ID 2:审判
         msg = msg.ToLower().TrimStart().TrimEnd();
         if (GuesserHelper.MatchCommand(ref msg, "id|guesslist|gl编号|玩家编号|玩家id|id列表|玩家列表|列表|所有id|全部id")) operate = 1;
         else if (GuesserHelper.MatchCommand(ref msg, "sp|jj|tl|trial|审判|判|审", false)) operate = 2;
@@ -166,36 +166,8 @@ public sealed class Judge : RoleBase, IMeetingButton
     }
     private static bool MsgToPlayer(string msg, out byte id, out string error)
     {
-        id = byte.MaxValue;
-
-        if (msg.StartsWith("/")) msg = msg.Replace("/", string.Empty);
-
-        Regex r = new("\\d+");
-        MatchCollection mc = r.Matches(msg);
-        string result = string.Empty;
-        mc.Do(m => result += m); // 匹配结果是完整的数字，此处可以不做拼接的
-
-        if (int.TryParse(result, out int num))
-        {
-            id = Convert.ToByte(num);
-        }
-        else
-        {
-            //并不是玩家编号，判断是否颜色
-            int color = GuesserHelper.GetColorFromMsg(ref msg);
-            List<PlayerControl> list = Main.AllAlivePlayerControls.Where(p => p.cosmetics.ColorId == color).ToList();
-            if (list.Count < 1)
-            {
-                error = GetString("TrialNull");
-                return false;
-            }
-            if (list.Count != 1)
-            {
-                error = GetString("GuessMultipleColor");
-                return false;
-            }
-            id = list.FirstOrDefault().PlayerId;
-        }
+        error = string.Empty;
+        id = GuesserHelper.GetPlayerIdFromMsg(ref msg, ref error, "TrialNull", "TrialMultipleColor");
 
         //判断选择的玩家是否合理
         PlayerControl target = Utils.GetPlayerById(id);
@@ -204,8 +176,6 @@ public sealed class Judge : RoleBase, IMeetingButton
             error = GetString("TrialNull");
             return false;
         }
-
-        error = string.Empty;
         return true;
     }
 }

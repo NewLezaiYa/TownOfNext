@@ -1,5 +1,5 @@
 using AmongUs.GameOptions;
-
+using System.Text.RegularExpressions;
 using TONX.Modules;
 using TONX.Roles.Core.Interfaces;
 
@@ -54,75 +54,22 @@ public sealed class Mafia : RoleBase, IImpostor, IMeetingButton
 
         return livingImpostorsNum <= 0;
     }
+    public string ButtonName { get; private set; } = "Target";
+    public bool ShouldShowButton() => !Player.IsAlive();
+    public bool ShouldShowButtonFor(PlayerControl target) => target.IsAlive();
     public override bool OnSendMessage(string msg, out MsgRecallMode recallMode)
     {
+        bool isCommand = RevengeMsg(Player, msg);
         recallMode = MsgRecallMode.None;
-
-        if (!GameStates.IsInGame) return false;
-
-        msg = msg.Trim().ToLower();
-        if (msg.Length < 3 || msg[..3] != "/rv") return false;
-
-        if (!AmongUsClient.Instance.AmHost) return true;
-
-        if (msg == "/rv")
-        {
-            string text = GetString("PlayerIdList");
-            foreach (var npc in Main.AllAlivePlayerControls)
-                text += "\n" + npc.PlayerId.ToString() + " → (" + Utils.GetTrueRoleName(npc.PlayerId, false) + ") " + npc.GetRealName();
-            Utils.SendMessage(text, Player.PlayerId);
-            return true;
-        }
-
-        int targetId;
-        PlayerControl target;
-        try
-        {
-            targetId = int.Parse(msg.Replace("/rv", string.Empty));
-            target = Utils.GetPlayerById(targetId);
-        }
-        catch
-        {
-            Utils.SendMessage(GetString("MafiaKillDead"), Player.PlayerId);
-            return true;
-        }
-
-        if (!CanRevenge(target, out var reason))
-        {
-            Utils.SendMessage(reason, Player.PlayerId);
-            return true;
-        }
-
-        RevengeLimit--;
-        RevengeKill(Player, target);
-
-        return true;
+        return isCommand;
     }
-    private static void RevengeKill(PlayerControl killer, PlayerControl target)
+    public void OnClickButton(PlayerControl target)
     {
-        Logger.Info($"{killer.GetNameWithRole()} 复仇了 {target.GetNameWithRole()}", "Mafia");
-        CustomSoundsManager.RPCPlayCustomSoundAll("AWP");
-        string Name = target.GetRealName();
-        _ = new LateTask(() =>
-        {
-            var state = PlayerState.GetByPlayerId(target.PlayerId);
-            state.DeathReason = CustomDeathReason.Revenge;
-            target.SetRealKiller(killer);
-            if (GameStates.IsMeeting)
-            {
-                target.RpcSuicideWithAnime();
-                //死者检查
-                Utils.NotifyRoles(isForMeeting: true, NoCache: true);
-            }
-            else
-            {
-                target.RpcMurderPlayer(target);
-                state.SetDead();
-            }
-            _ = new LateTask(() => { Utils.SendMessage(string.Format(GetString("MafiaKillSucceed"), Name), 255, Utils.ColorString(Utils.GetRoleColor(CustomRoles.Mafia), GetString("MafiaRevengeTitle"))); }, 0.6f, "Mafia Kill");
-        }, 0.2f, "Mafia Kill");
+        Logger.Msg($"Click: ID {target.GetNameWithRole()}", "Mafia UI");
+        if (!Revenge(target, out var reason, true))
+            Player.ShowPopUp(reason);
     }
-    private bool CanRevenge(PlayerControl target, out string reason)
+    private bool Revenge(PlayerControl target, out string reason, bool isUi = false)
     {
         reason = string.Empty;
 
@@ -136,36 +83,85 @@ public sealed class Mafia : RoleBase, IImpostor, IMeetingButton
             reason = GetString("MafiaAliveKill");
             return false;
         }
-        if (RevengeLimit <= 0)
+        if (RevengeLimit < 1)
         {
             reason = GetString("MafiaKillMax");
             return false;
         }
+
+        Logger.Info($"{Player.GetNameWithRole()} 复仇了 {target.GetNameWithRole()}", "Mafia");
+        
+
+        string Name = target.GetRealName();
+
+        RevengeLimit--;
+        CustomSoundsManager.RPCPlayCustomSoundAll("AWP");
+
+        _ = new LateTask(() =>
+        {
+            var state = PlayerState.GetByPlayerId(target.PlayerId);
+            state.DeathReason = CustomDeathReason.Revenge;
+            target.SetRealKiller(Player);
+            if (GameStates.IsMeeting)
+            {
+                target.RpcSuicideWithAnime();
+                //死者检查
+                Utils.NotifyRoles(isForMeeting: true, NoCache: true);
+            }
+            else
+            {
+                target.RpcMurderPlayer(target);
+                state.SetDead();
+            }
+            _ = new LateTask(() => { Utils.SendMessage(string.Format(GetString("MafiaKillSucceed"), Name), 255, Utils.ColorString(Utils.GetRoleColor(CustomRoles.Mafia), GetString("MafiaRevengeTitle"))); }, 0.6f, "Mafia Kill");
+        }, 0.2f, "Mafia Kill");
+
+        return true;
+    }
+    public bool RevengeMsg(PlayerControl pc, string msg)
+    {
+        if (!GameStates.IsInGame || pc == null) return false;
+        if (!pc.Is(CustomRoles.Mafia)) return false;
+
+        int operate; // 1:ID 2:复仇
+        msg = msg.ToLower().TrimStart().TrimEnd();
+        if (GuesserHelper.MatchCommand(ref msg, "id|guesslist|gl编号|玩家编号|玩家id|id列表|玩家列表|列表|所有id|全部id")) operate = 1;
+        else if (GuesserHelper.MatchCommand(ref msg, "rv|revenge|复仇", false)) operate = 2;
+        else return false;
+
+        if (operate == 1)
+        {
+            Utils.SendMessage(GuesserHelper.GetFormatString(true), pc.PlayerId);
+            return true;
+        }
+        if (operate == 2)
+        {
+            if (!AmongUsClient.Instance.AmHost) return true;
+
+            if (!MsgToPlayer(msg, out byte targetId, out string error))
+            {
+                Utils.SendMessage(error, pc.PlayerId);
+                return true;
+            }
+
+            var target = Utils.GetPlayerById(targetId);
+            if (!Revenge(target, out var reason))
+                Utils.SendMessage(reason, pc.PlayerId);
+        }
+        return true;
+    }
+    private static bool MsgToPlayer(string msg, out byte id, out string error)
+    {
+        error = string.Empty;
+        id = GuesserHelper.GetPlayerIdFromMsg(ref msg, ref error, "MafiaKillDead", "RevengeMultipleColor");
+
+        //判断选择的玩家是否合理
+        PlayerControl target = Utils.GetPlayerById(id);
         if (target == null || target.Data.IsDead)
         {
-            reason = GetString("MafiaKillDead");
+            error = GetString("MafiaKillDead");
             return false;
         }
         return true;
     }
-
-    private void MafiaOnClick(PlayerControl target)
-    {
-        Logger.Msg($"Click: ID {target.GetNameWithRole()}", "Mafia UI");
-        if (target == null || !target.IsAlive() || !GameStates.IsVoting) return;
-
-        if (!CanRevenge(target, out var reason))
-        {
-            PlayerControl.LocalPlayer.ShowPopUp(reason);
-            return;
-        }
-
-        RevengeLimit--;
-        RevengeKill(PlayerControl.LocalPlayer, target);
-    }
-
-    public string ButtonName { get; private set; } = "Target";
-    public bool ShouldShowButton() => !Player.IsAlive();
-    public bool ShouldShowButtonFor(PlayerControl target) => target.IsAlive();
-    public void OnClickButton(PlayerControl target) => MafiaOnClick(target);
 }
