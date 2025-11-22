@@ -1,7 +1,9 @@
 ﻿using AmongUs.GameOptions;
+using UnityEngine;
 using TONX.Modules;
 using TONX.Roles.Core.Interfaces;
 using static TONX.GuesserHelper;
+using Hazel;
 
 namespace TONX.Roles.Neutral;
 public sealed class Doomsayer : RoleBase, IKiller, IMeetingButton, IGuesser
@@ -15,7 +17,9 @@ public sealed class Doomsayer : RoleBase, IKiller, IMeetingButton, IGuesser
             CustomRoleTypes.Neutral,
             52800,
             SetupOptionItem,
-            "ds|末日预言家|末日"
+            "ds|末日预言家|末日赌怪|末日",
+            "#14f786",
+            true
         );
     public Doomsayer(PlayerControl player)
     : base(
@@ -64,7 +68,7 @@ public sealed class Doomsayer : RoleBase, IKiller, IMeetingButton, IGuesser
         OptionForbidGuessIfWrongThisMeeting = BooleanOptionItem.Create(RoleInfo, 15, OptionName.DSForbidGuessIfWrongThisMeeting, true, false);
         OptionHintCooldown = FloatOptionItem.Create(RoleInfo, 16, OptionName.DSHintCooldown, new(2.5f, 180f, 2.5f), 20f, false)
             .SetValueFormat(OptionFormat.Seconds);
-        OptionHintNums = IntegerOptionItem.Create(RoleInfo, 17, OptionName.DSHintNums, new(1, 15, 1), 3, false)
+        OptionHintNums = IntegerOptionItem.Create(RoleInfo, 17, OptionName.DSHintNums, new(0, 14, 1), 3, false)
             .SetValueFormat(OptionFormat.Times);
     }
     public override void Add()
@@ -75,10 +79,23 @@ public sealed class Doomsayer : RoleBase, IKiller, IMeetingButton, IGuesser
         CorrectGuesses = 0;
         HintLimit = OptionHintNums.GetInt();
     }
+    private void SendRPC()
+    {
+        using var sender = CreateSender();
+        sender.Writer.Write(HintLimit);
+    }
+    public override void ReceiveRPC(MessageReader reader)
+    {
+        HintLimit = reader.ReadInt32();
+    }
+
     public float CalculateKillCooldown() => CanUseKillButton() ? OptionHintCooldown.GetFloat() : 255f;
     public bool CanUseKillButton() => Target == byte.MaxValue && HintLimit > 0;
     public bool CanUseSabotageButton() => false;
     public bool CanUseImpostorVentButton() => false;
+    public override void ApplyGameOptions(IGameOptions opt) => opt.SetVision(false);
+
+    public override string GetProgressText(bool comms = false) => Utils.ColorString(CanUseKillButton() ? RoleInfo.RoleColor : Color.gray, $"({HintLimit})");
     public override void OverrideNameAsSeer(PlayerControl seen, ref string nameText, bool isForMeeting = false)
     {
         if (Player.IsAlive() && seen.IsAlive() && isForMeeting)
@@ -86,6 +103,12 @@ public sealed class Doomsayer : RoleBase, IKiller, IMeetingButton, IGuesser
             nameText = Utils.ColorString(Utils.GetRoleColor(CustomRoles.Doomsayer), seen.PlayerId.ToString()) + " " + nameText;
         }
     }
+    public bool OverrideKillButtonText(out string text)
+    {
+        text = GetString("DoomsayerKillButtonText");
+        return true;
+    }
+
     public override void OnStartMeeting()
     {
         HasWrongGuess = false;
@@ -97,6 +120,7 @@ public sealed class Doomsayer : RoleBase, IKiller, IMeetingButton, IGuesser
 
         Target = target.PlayerId;
         HintLimit--;
+        SendRPC();
 
         killer.ResetKillCooldown();
         killer.SetKillCooldownV2();
@@ -142,6 +166,7 @@ public sealed class Doomsayer : RoleBase, IKiller, IMeetingButton, IGuesser
     {
         Target = byte.MaxValue;
     }
+
     public string ButtonName { get; private set; } = "Target";
     public bool ShouldShowButton() => Player.IsAlive();
     public bool ShouldShowButtonFor(PlayerControl target) => target.IsAlive();
@@ -169,6 +194,11 @@ public sealed class Doomsayer : RoleBase, IKiller, IMeetingButton, IGuesser
     {
         if (guesserSuicide) HasWrongGuess = true;
         else CorrectGuesses++;
+        if (!OptionSuicideIfGuessWrong.GetBool() && guesser == target)
+        {
+            reason = GetString("DoomsayerGuessSelf");
+            return false;
+        }
         if (!OptionSuicideIfGuessWrong.GetBool() && HasWrongGuess)
         {
             reason = GetString("DoomsayerWrongGuess");

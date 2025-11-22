@@ -90,7 +90,7 @@ public sealed class EvilGuesser : RoleBase, IImpostor, IMeetingButton, IGuesser
     public List<CustomRoleTypes> GetCustomRoleTypesList()
     {
         List<CustomRoleTypes> list = new() { CustomRoleTypes.Impostor, CustomRoleTypes.Crewmate, CustomRoleTypes.Neutral, CustomRoleTypes.Addon };
-        if (OptionCanGuessImp.GetBool()) list.Remove(CustomRoleTypes.Impostor);
+        if (!OptionCanGuessImp.GetBool()) list.Remove(CustomRoleTypes.Impostor);
         return list;
     }
 }

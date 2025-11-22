@@ -611,7 +611,7 @@ public enum CustomRoles
     SpeedBooster,
     Dictator,
     Doctor,
-    ModDetective,
+    DetectiveTONX,
     Vigilante,
     NiceGuesser,
     Transporter,

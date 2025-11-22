@@ -68,6 +68,7 @@ public sealed class Deceiver : RoleBase, IKiller
     public float CalculateKillCooldown() => CanUseKillButton() ? OptionSellCooldown.GetFloat() : 255f;
     public bool CanUseKillButton() => Player.IsAlive() && SellLimit >= 1;
     public bool CanUseSabotageButton() => false;
+    public bool CanUseImpostorVentButton() => false;
     public override void ApplyGameOptions(IGameOptions opt) => opt.SetVision(false);
     public bool OverrideKillButtonText(out string text)
     {

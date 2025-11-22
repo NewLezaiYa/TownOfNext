@@ -39,26 +39,44 @@ public static class GuesserHelper
         }
         return false;
     }
-    public static int GetColorFromMsg(string msg)
+    public static readonly Dictionary<int, string> ColorNames = new()
     {
-        if (ComfirmIncludeMsg(msg, "红|紅|red")) return 0;
-        if (ComfirmIncludeMsg(msg, "蓝|藍|深蓝|blue")) return 1;
-        if (ComfirmIncludeMsg(msg, "绿|綠|深绿|green")) return 2;
-        if (ComfirmIncludeMsg(msg, "粉红|粉紅|深粉|pink")) return 3;
-        if (ComfirmIncludeMsg(msg, "橘|橘|orange")) return 4;
-        if (ComfirmIncludeMsg(msg, "黄|黃|yellow")) return 5;
-        if (ComfirmIncludeMsg(msg, "黑|黑|black")) return 6;
-        if (ComfirmIncludeMsg(msg, "白|白|white")) return 7;
-        if (ComfirmIncludeMsg(msg, "紫|紫|perple")) return 8;
-        if (ComfirmIncludeMsg(msg, "棕|棕|brown")) return 9;
-        if (ComfirmIncludeMsg(msg, "青|青|cyan")) return 10;
-        if (ComfirmIncludeMsg(msg, "黄绿|黃綠|浅绿|淡绿|lime")) return 11;
-        if (ComfirmIncludeMsg(msg, "红褐|紅褐|深红|maroon")) return 12;
-        if (ComfirmIncludeMsg(msg, "玫红|玫紅|浅粉|淡粉|rose")) return 13;
-        if (ComfirmIncludeMsg(msg, "焦黄|焦黃|浅黄|淡黄|banana")) return 14;
-        if (ComfirmIncludeMsg(msg, "灰|灰|gray")) return 15;
-        if (ComfirmIncludeMsg(msg, "茶|茶|tan")) return 16;
-        if (ComfirmIncludeMsg(msg, "珊瑚|珊瑚|coral")) return 17;
+        { 0, "红|紅|red" },
+        { 1, "蓝|藍|深蓝|blue" },
+        { 2, "绿|綠|深绿|green" },
+        { 3, "粉红|粉紅|深粉|pink" },
+        { 4, "橘|橘|orange" },
+        { 5, "黄|黃|yellow" },
+        { 6, "黑|黑|black" },
+        { 7, "白|白|white" },
+        { 8, "紫|紫|purple" },
+        { 9, "棕|棕|brown" },
+        { 10, "青|青|cyan" },
+        { 11, "黄绿|黃綠|浅绿|淡绿|lime" },
+        { 12, "红褐|紅褐|深红|maroon" },
+        { 13, "玫红|玫紅|浅粉|淡粉|rose" },
+        { 14, "焦黄|焦黃|浅黄|淡黄|banana" },
+        { 15, "灰|灰|gray" },
+        { 16, "茶|茶|tan" },
+        { 17, "珊瑚|珊瑚|coral" }
+    };
+    public static readonly List<(int, string)> SeparatedColorNames = new Func<List<(int, string)>>(() =>
+    {
+        List<(int, string)> names = new();
+        ColorNames.Do(kvp => kvp.Value.Split('|').ToList().Do(n => names.Add((kvp.Key, n)))); // 加入颜色名称缩写
+        for (int i = 0; i < Palette.ColorNames.Length; i++) names.Add((i, GetString(Palette.ColorNames[i]))); // 加入翻译文件中的颜色名称
+        return names.OrderByDescending(n => n.Item2.Length).ToList(); // 按名称长度倒序排列
+    })();
+    public static int GetColorFromMsg(ref string msg)
+    {
+        foreach (var (id, color) in SeparatedColorNames)
+        {
+            if (ComfirmIncludeMsg(msg, color))
+            {
+                msg = msg.Replace(color, string.Empty);
+                return id;
+            }
+        }
         return -1;
     }
     private static bool ComfirmIncludeMsg(string msg, string key) => key.Split('|').Any(msg.Contains);
@@ -67,7 +85,7 @@ public static class GuesserHelper
         spam = false;
 
         if (!GameStates.IsInGame || pc == null) return false;
-        if (!pc.Is(CustomRoles.NiceGuesser) && !pc.Is(CustomRoles.EvilGuesser)) return false;
+        if (pc.GetRoleClass() is not IGuesser) return false;
 
         int operate; // 1:ID 2:猜测
         msg = msg.ToLower().Trim();
@@ -198,9 +216,8 @@ public static class GuesserHelper
         }
         else
         {
-            //FIXME: 指令中包含颜色后无法正确匹配职业名
             //并不是玩家编号，判断是否颜色
-            int color = GetColorFromMsg(msg);
+            int color = GetColorFromMsg(ref msg);
             List<PlayerControl> list = Main.AllAlivePlayerControls.Where(p => p.cosmetics.ColorId == color).ToList();
             if (list.Count < 1)
             {

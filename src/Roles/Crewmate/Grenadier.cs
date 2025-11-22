@@ -36,7 +36,7 @@ public sealed class Grenadier : RoleBase
     }
 
     private long BlindingStartTime;
-    private bool IsMadGrenadier;
+    private bool IsMadGrenadier => Player.Is(CustomRoles.Madmate);
     private static void SetupOptionItem()
     {
         OptionSkillCooldown = FloatOptionItem.Create(RoleInfo, 10, OptionName.GrenadierSkillCooldown, new(2.5f, 180f, 2.5f), 20f, false)
@@ -50,7 +50,6 @@ public sealed class Grenadier : RoleBase
     public override void Add()
     {
         BlindingStartTime = 0;
-        IsMadGrenadier = false;
     }
     public override void ApplyGameOptions(IGameOptions opt)
     {
@@ -67,7 +66,6 @@ public sealed class Grenadier : RoleBase
     {
         if (BlindingStartTime != 0) return false;
         BlindingStartTime = Utils.GetTimeStamp();
-        IsMadGrenadier = Player.Is(CustomRoles.Madmate);
         if (IsMadGrenadier)
         {
             Main.AllPlayerControls.Where(x => x.IsModClient()).Where(x => !x.IsImp() && !x.Is(CustomRoles.Madmate)).Do(x => x.RPCPlayCustomSound("FlashBang"));

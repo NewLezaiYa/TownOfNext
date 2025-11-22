@@ -33,8 +33,8 @@ public sealed class Swapper : RoleBase, IMeetingButton
     private static OptionItem OptionCanUseButton;
     enum OptionName
     {
-        OptionSwapLimit,
-        OptionSwapperCanUseButton
+        SwapperSwapLimit,
+        SwapperCanUseButton
     }
 
     public int SwapLimit;
@@ -42,9 +42,9 @@ public sealed class Swapper : RoleBase, IMeetingButton
 
     private static void SetupOptionItem()
     {
-        OptionSwapLimit = IntegerOptionItem.Create(RoleInfo, 10, OptionName.OptionSwapLimit, new(1, 99, 1), 15, false)
+        OptionSwapLimit = IntegerOptionItem.Create(RoleInfo, 10, OptionName.SwapperSwapLimit, new(1, 99, 1), 15, false)
             .SetValueFormat(OptionFormat.Times);
-        OptionCanUseButton = BooleanOptionItem.Create(RoleInfo, 11, OptionName.OptionSwapperCanUseButton, true, false);
+        OptionCanUseButton = BooleanOptionItem.Create(RoleInfo, 11, OptionName.SwapperCanUseButton, true, false);
     }
     public override bool OnCheckReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo target)
     {
@@ -173,15 +173,14 @@ public sealed class Swapper : RoleBase, IMeetingButton
     }
     private static bool MsgToPlayer(string msg, out byte id, out string error)
     {
+        id = byte.MaxValue;
+
         if (msg.StartsWith("/")) msg = msg.Replace("/", string.Empty);
 
         Regex r = new("\\d+");
         MatchCollection mc = r.Matches(msg);
         string result = string.Empty;
-        for (int i = 0; i < mc.Count; i++)
-        {
-            result += mc[i];//匹配结果是完整的数字，此处可以不做拼接的
-        }
+        mc.Do(m => result += m); // 匹配结果是完整的数字，此处可以不做拼接的
 
         if (int.TryParse(result, out int num))
         {
@@ -190,11 +189,19 @@ public sealed class Swapper : RoleBase, IMeetingButton
         else
         {
             //并不是玩家编号，判断是否颜色
-            //byte color = GetColorFromMsg(msg);
-            //好吧我不知道怎么取某位玩家的颜色，等会了的时候再来把这里补上
-            id = byte.MaxValue;
-            error = GetString("SwapHelp");
-            return false;
+            int color = GuesserHelper.GetColorFromMsg(ref msg);
+            List<PlayerControl> list = Main.AllAlivePlayerControls.Where(p => p.cosmetics.ColorId == color).ToList();
+            if (list.Count < 1)
+            {
+                error = GetString("SwapNull");
+                return false;
+            }
+            if (list.Count != 1)
+            {
+                error = GetString("GuessMultipleColor");
+                return false;
+            }
+            id = list.FirstOrDefault().PlayerId;
         }
 
         //判断选择的玩家是否合理
