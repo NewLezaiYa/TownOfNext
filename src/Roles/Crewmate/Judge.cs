@@ -132,8 +132,8 @@ public sealed class Judge : RoleBase, IMeetingButton
 
         int operate; // 1:ID 2:审判
         msg = msg.ToLower().TrimStart().TrimEnd();
-        if (GuesserHelper.MatchCommand(ref msg, "id|guesslist|gl编号|玩家编号|玩家id|id列表|玩家列表|列表|所有id|全部id")) operate = 1;
-        else if (GuesserHelper.MatchCommand(ref msg, "sp|jj|tl|trial|审判|判|审", false)) operate = 2;
+        if (ChatCommand.MatchCommand(ref msg, "id|guesslist|gl编号|玩家编号|玩家id|id列表|玩家列表|列表|所有id|全部id")) operate = 1;
+        else if (ChatCommand.MatchCommand(ref msg, "sp|jj|tl|trial|审判|判|审", false)) operate = 2;
         else return false;
 
         if (!pc.IsAlive())
@@ -144,7 +144,7 @@ public sealed class Judge : RoleBase, IMeetingButton
 
         if (operate == 1)
         {
-            Utils.SendMessage(GuesserHelper.GetFormatString(), pc.PlayerId);
+            Utils.SendMessage(ChatCommand.GetFormatString(), pc.PlayerId);
             return true;
         }
         if (operate == 2)
@@ -167,7 +167,7 @@ public sealed class Judge : RoleBase, IMeetingButton
     private static bool MsgToPlayer(string msg, out byte id, out string error)
     {
         error = string.Empty;
-        id = GuesserHelper.GetPlayerIdFromMsg(ref msg, ref error, "TrialNull", "TrialMultipleColor");
+        id = ChatCommand.GetPlayerIdFromMsg(ref msg, ref error, "TrialNull", "TrialMultipleColor");
 
         //判断选择的玩家是否合理
         PlayerControl target = Utils.GetPlayerById(id);

@@ -181,7 +181,7 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
                 }
                 return (MsgRecallMode.Block, text);
             }),
-            new(["color", "colour"], Options.PlayerCanSetColor.GetBool() ?CommandAccess.All : CommandAccess.Host, mc =>
+            new(["color", "colour"], Options.PlayerCanSetColor.GetBool() ? CommandAccess.All : CommandAccess.Host, mc =>
             {
                 string text = GetString("Message.OnlyCanUseInLobby");
                 if (GameStates.IsLobby )
@@ -218,9 +218,7 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
             }),
             new(["id"], CommandAccess.All, mc =>
             {
-                string text = GetString("PlayerIdList");
-                foreach (var pc in Main.AllPlayerControls)
-                    text += "\n" + pc.PlayerId.ToString() + " → " + Main.AllPlayerNames[pc.PlayerId];
+                string text = GetFormatString(containDeadPlayers: true);
                 return (MsgRecallMode.Block, text);
             }),
             new(["end", "endgame"], CommandAccess.Host, mc =>
@@ -386,6 +384,77 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
             }
         }
         return false;
+    }
+    public static string GetFormatString(bool withRole = false, bool containDeadPlayers = false)
+    {
+        string text = GetString("PlayerIdList");
+        var list = containDeadPlayers ? Main.AllPlayerControls : Main.AllAlivePlayerControls;
+        foreach (var pc in list)
+        {
+            string id = pc.PlayerId.ToString();
+            string name = pc.GetRealName();
+            string role = withRole ? $"({Utils.GetTrueRoleName(pc.PlayerId, false)}) " : "";
+            text += $"\n{id} → {role}{name}";
+        }
+        return text;
+    }
+    public static bool MatchCommand(ref string msg, string command, bool exact = true)
+    {
+        var comList = command.Split('|');
+        for (int i = 0; i < comList.Length; i++)
+        {
+            if (exact)
+            {
+                if (msg == "/" + comList[i]) return true;
+            }
+            else
+            {
+                if (msg.StartsWith("/" + comList[i]))
+                {
+                    msg = msg.Replace("/" + comList[i], string.Empty);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    public static int GetColorByInputName(ref string msg)
+    {
+        foreach (var (id, color) in Utils.SeparatedColorNames)
+        {
+            if (msg.Contains(color))
+            {
+                msg = msg.Replace(color, string.Empty);
+                return id;
+            }
+        }
+        return -1;
+    }
+    public static byte GetPlayerIdFromMsg(ref string msg, ref string error, string NullMsg, string MultipleMsg)
+    {
+        byte id = byte.MaxValue;
+
+        if (msg.StartsWith("/")) msg = msg.Replace("/", string.Empty);
+
+        Regex r = new("\\d+");
+        MatchCollection mc = r.Matches(msg);
+        string result = string.Empty;
+        mc.Do(m => result += m);
+
+        if (int.TryParse(result, out int num))
+        {
+            id = Convert.ToByte(num);
+        }
+        else
+        {
+            //并不是玩家编号，判断是否颜色
+            int color = GetColorByInputName(ref msg);
+            List<PlayerControl> list = Main.AllAlivePlayerControls.Where(p => p.cosmetics.ColorId == color).ToList();
+            if (list.Count < 1) error = GetString(NullMsg);
+            else if (list.Count > 1) error = GetString(MultipleMsg);
+            else id = list.FirstOrDefault().PlayerId;
+        }
+        return id;
     }
 }
 

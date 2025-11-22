@@ -125,13 +125,13 @@ public sealed class Mafia : RoleBase, IImpostor, IMeetingButton
 
         int operate; // 1:ID 2:复仇
         msg = msg.ToLower().TrimStart().TrimEnd();
-        if (GuesserHelper.MatchCommand(ref msg, "id|guesslist|gl编号|玩家编号|玩家id|id列表|玩家列表|列表|所有id|全部id")) operate = 1;
-        else if (GuesserHelper.MatchCommand(ref msg, "rv|revenge|复仇", false)) operate = 2;
+        if (ChatCommand.MatchCommand(ref msg, "id|guesslist|gl编号|玩家编号|玩家id|id列表|玩家列表|列表|所有id|全部id")) operate = 1;
+        else if (ChatCommand.MatchCommand(ref msg, "rv|revenge|复仇", false)) operate = 2;
         else return false;
 
         if (operate == 1)
         {
-            Utils.SendMessage(GuesserHelper.GetFormatString(true), pc.PlayerId);
+            Utils.SendMessage(ChatCommand.GetFormatString(true), pc.PlayerId);
             return true;
         }
         if (operate == 2)
@@ -153,7 +153,7 @@ public sealed class Mafia : RoleBase, IImpostor, IMeetingButton
     private static bool MsgToPlayer(string msg, out byte id, out string error)
     {
         error = string.Empty;
-        id = GuesserHelper.GetPlayerIdFromMsg(ref msg, ref error, "MafiaKillDead", "RevengeMultipleColor");
+        id = ChatCommand.GetPlayerIdFromMsg(ref msg, ref error, "MafiaKillDead", "RevengeMultipleColor");
 
         //判断选择的玩家是否合理
         PlayerControl target = Utils.GetPlayerById(id);

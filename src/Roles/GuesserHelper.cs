@@ -8,78 +8,6 @@ using UnityEngine;
 namespace TONX;
 public static class GuesserHelper
 {
-    public static string GetFormatString(bool withRole = false)
-    {
-        string text = GetString("PlayerIdList");
-        foreach (var pc in Main.AllAlivePlayerControls)
-        {
-            string id = pc.PlayerId.ToString();
-            string name = pc.GetRealName();
-            string role = withRole ? $"({Utils.GetTrueRoleName(pc.PlayerId, false)}) " : "";
-            text += $"\n{id} → {role}{name}";
-        }
-        return text;
-    }
-    public static bool MatchCommand(ref string msg, string command, bool exact = true)
-    {
-        var comList = command.Split('|');
-        for (int i = 0; i < comList.Length; i++)
-        {
-            if (exact)
-            {
-                if (msg == "/" + comList[i]) return true;
-            }
-            else
-            {
-                if (msg.StartsWith("/" + comList[i]))
-                {
-                    msg = msg.Replace("/" + comList[i], string.Empty);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    public static readonly Dictionary<int, string> ColorNames = new()
-    {
-        { 0, "红|紅|red" },
-        { 1, "蓝|藍|深蓝|blue" },
-        { 2, "绿|綠|深绿|green" },
-        { 3, "粉红|粉紅|深粉|pink" },
-        { 4, "橘|橘|orange" },
-        { 5, "黄|黃|yellow" },
-        { 6, "黑|黑|black" },
-        { 7, "白|白|white" },
-        { 8, "紫|紫|purple" },
-        { 9, "棕|棕|brown" },
-        { 10, "青|青|cyan" },
-        { 11, "黄绿|黃綠|浅绿|淡绿|lime" },
-        { 12, "红褐|紅褐|深红|maroon" },
-        { 13, "玫红|玫紅|浅粉|淡粉|rose" },
-        { 14, "焦黄|焦黃|浅黄|淡黄|banana" },
-        { 15, "灰|灰|gray" },
-        { 16, "茶|茶|tan" },
-        { 17, "珊瑚|珊瑚|coral" }
-    };
-    public static readonly List<(int, string)> SeparatedColorNames = new Func<List<(int, string)>>(() =>
-    {
-        List<(int, string)> names = new();
-        ColorNames.Do(kvp => kvp.Value.Split('|').ToList().Do(n => names.Add((kvp.Key, n.Trim().ToLower())))); // 加入颜色名称缩写
-        for (int i = 0; i < Palette.ColorNames.Length; i++) names.Add((i, GetString(Palette.ColorNames[i]).Trim().ToLower())); // 加入翻译文件中的颜色名称
-        return names.OrderByDescending(n => n.Item2.Length).ToList(); // 按名称长度倒序排列
-    })();
-    public static int GetColorFromMsg(ref string msg)
-    {
-        foreach (var (id, color) in SeparatedColorNames)
-        {
-            if (msg.Contains(color))
-            {
-                msg = msg.Replace(color, string.Empty);
-                return id;
-            }
-        }
-        return -1;
-    }
     public static bool GuesserMsg(PlayerControl pc, string msg, out bool spam)
     {
         spam = false;
@@ -89,8 +17,8 @@ public static class GuesserHelper
 
         int operate; // 1:ID 2:猜测
         msg = msg.ToLower().Trim();
-        if (MatchCommand(ref msg, "id|guesslist|gl编号|玩家编号|玩家id|id列表|玩家列表|列表|所有id|全部id")) operate = 1;
-        else if (MatchCommand(ref msg, "shoot|guess|bet|st|gs|bt|猜|赌", false)) operate = 2;
+        if (ChatCommand.MatchCommand(ref msg, "id|guesslist|gl编号|玩家编号|玩家id|id列表|玩家列表|列表|所有id|全部id")) operate = 1;
+        else if (ChatCommand.MatchCommand(ref msg, "shoot|guess|bet|st|gs|bt|猜|赌", false)) operate = 2;
         else return false;
 
         if (!pc.IsAlive())
@@ -101,7 +29,7 @@ public static class GuesserHelper
 
         if (operate == 1)
         {
-            Utils.SendMessage(GetFormatString(), pc.PlayerId);
+            Utils.SendMessage(ChatCommand.GetFormatString(), pc.PlayerId);
             return true;
         }
         if (operate == 2)
@@ -198,36 +126,10 @@ public static class GuesserHelper
     }
     public static TextMeshPro nameText(this PlayerControl p) => p.cosmetics.nameText;
     public static TextMeshPro NameText(this PoolablePlayer p) => p.cosmetics.nameText;
-    public static byte GetPlayerIdFromMsg(ref string msg, ref string error, string NullMsg, string MultipleMsg)
-    {
-        byte id = byte.MaxValue;
-
-        if (msg.StartsWith("/")) msg = msg.Replace("/", string.Empty);
-
-        Regex r = new("\\d+");
-        MatchCollection mc = r.Matches(msg);
-        string result = string.Empty;
-        mc.Do(m => result += m);
-
-        if (int.TryParse(result, out int num))
-        {
-            id = Convert.ToByte(num);
-        }
-        else
-        {
-            //并不是玩家编号，判断是否颜色
-            int color = GetColorFromMsg(ref msg);
-            List<PlayerControl> list = Main.AllAlivePlayerControls.Where(p => p.cosmetics.ColorId == color).ToList();
-            if (list.Count < 1) error = GetString(NullMsg);
-            else if (list.Count > 1) error = GetString(MultipleMsg);
-            else id = list.FirstOrDefault().PlayerId;
-        }
-        return id;
-    }
     private static bool MsgToPlayerAndRole(string msg, out byte id, out CustomRoles role, out string error)
     {
         error = string.Empty;
-        id = GetPlayerIdFromMsg(ref msg, ref error, "GuessNull", "GuessMultipleColor");
+        id = ChatCommand.GetPlayerIdFromMsg(ref msg, ref error, "GuessNull", "GuessMultipleColor");
         role = new();
 
         //判断选择的玩家是否合理

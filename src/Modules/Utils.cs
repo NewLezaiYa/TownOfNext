@@ -802,34 +802,47 @@ public static class Utils
 
         return sb.ToString();
     }
-
+    public static readonly Dictionary<int, string> ColorNames = new()
+    {
+        { 0, "红|紅|red" },
+        { 1, "蓝|藍|深蓝|blue" },
+        { 2, "绿|綠|深绿|green" },
+        { 3, "粉红|粉紅|深粉|pink" },
+        { 4, "橘|orange" },
+        { 5, "黄|黃|yellow" },
+        { 6, "黑|black" },
+        { 7, "白|white" },
+        { 8, "紫|purple" },
+        { 9, "棕|brown" },
+        { 10, "青|cyan" },
+        { 11, "黄绿|黃綠|浅绿|淡绿|lime" },
+        { 12, "红褐|紅褐|深红|maroon" },
+        { 13, "玫红|玫紅|浅粉|淡粉|rose" },
+        { 14, "焦黄|焦黃|浅黄|淡黄|banana" },
+        { 15, "灰|gray" },
+        { 16, "茶|tan" },
+        { 17, "珊瑚|coral" }
+    };
+    public static readonly List<(int, string)> SeparatedColorNames = new Func<List<(int, string)>>(() =>
+    {
+        List<(int, string)> names = new();
+        ColorNames.Do(kvp => kvp.Value.Split('|').ToList().Do(n => names.Add((kvp.Key, n.Trim().ToLower())))); // 加入颜色名称缩写
+        for (int i = 0; i < Palette.ColorNames.Length; i++) names.Add((i, GetString(Palette.ColorNames[i]).Trim().ToLower())); // 加入翻译文件中的颜色名称
+        return names.OrderByDescending(n => n.Item2.Length).ToList(); // 按名称长度倒序排列
+    })();
     public static byte MsgToColor(string text, bool isHost = false)
     {
         text = text.ToLowerInvariant();
-        text = text.Replace("色", string.Empty);
+        // text = text.Replace("色", string.Empty);
         int color;
-        try { color = int.Parse(text); } catch { color = -1; }
-        switch (text)
+        if (int.TryParse(text, out int num)) color = num;
+        else color = ChatCommand.GetColorByInputName(ref text);
+        if (color == -1)
         {
-            case "0": case "红": case "紅": case "red": color = 0; break;
-            case "1": case "蓝": case "藍": case "深蓝": case "blue": color = 1; break;
-            case "2": case "绿": case "綠": case "深绿": case "green": color = 2; break;
-            case "3": case "粉红": case "pink": color = 3; break;
-            case "4": case "橘": case "orange": color = 4; break;
-            case "5": case "黄": case "黃": case "yellow": color = 5; break;
-            case "6": case "黑": case "black": color = 6; break;
-            case "7": case "白": case "white": color = 7; break;
-            case "8": case "紫": case "purple": color = 8; break;
-            case "9": case "棕": case "brown": color = 9; break;
-            case "10": case "青": case "cyan": color = 10; break;
-            case "11": case "黄绿": case "黃綠": case "浅绿": case "lime": color = 11; break;
-            case "12": case "红褐": case "紅褐": case "深红": case "maroon": color = 12; break;
-            case "13": case "玫红": case "玫紅": case "浅粉": case "rose": color = 13; break;
-            case "14": case "焦黄": case "焦黃": case "淡黄": case "banana": color = 14; break;
-            case "15": case "灰": case "gray": color = 15; break;
-            case "16": case "茶": case "tan": color = 16; break;
-            case "17": case "珊瑚": case "coral": color = 17; break;
-            case "18": case "隐藏": case "?": color = 18; break;
+            switch (text)
+            {
+                case "18": case "隐藏": case "?": color = 18; break;
+            }
         }
         return !isHost && color == 18 ? byte.MaxValue : color is < 0 or > 18 ? byte.MaxValue : Convert.ToByte(color);
     }
