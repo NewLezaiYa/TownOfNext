@@ -263,6 +263,7 @@ public static class GuesserHelper
 
                 static void CreateTeamButton(Transform Teambutton, CustomRoleTypes type)
                 {
+                    Teambutton.GetComponent<PassiveButton>().OnClick = new();
                     Teambutton.GetComponent<PassiveButton>().OnClick.AddListener((UnityEngine.Events.UnityAction)(() =>
                     {
                         if (type != currentTeamType)
@@ -315,6 +316,7 @@ public static class GuesserHelper
                 Pagelabel.transform.localScale *= 1.6f;
                 Pagelabel.autoSizeTextContainer = true;
                 if (!IsNext && Page <= 1) Pagebutton.GetComponent<SpriteRenderer>().color = new(1, 1, 1, 0.1f);
+                Pagebutton.GetComponent<PassiveButton>().OnClick = new();
                 Pagebutton.GetComponent<PassiveButton>().OnClick.AddListener((Action)(() => ClickEvent()));
                 void ClickEvent()
                 {
