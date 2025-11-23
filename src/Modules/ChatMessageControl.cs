@@ -41,7 +41,7 @@ public class MessageControl
             // Not a role command, check for command list
             foreach (var command in ChatCommand.AllCommands)
             {
-                if (command.Access switch
+                if (command.Access.Invoke() switch
                 {
                     CommandAccess.All => false,
                     CommandAccess.LocalMod => !IsFromSelf,

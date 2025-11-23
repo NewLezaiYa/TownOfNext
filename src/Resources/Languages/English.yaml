@@ -1199,6 +1199,7 @@ SwapHelp: "Command: /sw [player ID]\nYou can see the players' IDs before the pla
 SwapNull: "Please choose living players to swap"
 SwapVote: "Player [{0}] and [{1}] are swapped."
 SwapSkill: "You chose [{0}]."
+SwapSkillCancelled: "You cancelled swapping [{0}]."
 DSGuessMax: "You've reached the limit of maximum guesses, you can't guess anymore!"
 DoomsayerHintBlank: "None"
 DoomsayerSuspectRoles: "The player investigated is one of the below: {0}"

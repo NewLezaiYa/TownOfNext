@@ -66,6 +66,11 @@ public sealed class Swapper : RoleBase, IMeetingButton
             nameText = Utils.ColorString(RoleInfo.RoleColor, seen.PlayerId.ToString()) + " " + nameText;
         }
     }
+    public override void AfterMeetingTasks()
+    {
+        if (Targets.Count == 2) SwapLimit--;
+    }
+
     public string ButtonName { get; private set; } = "Swapper";
     public bool ShouldShowButton() => Player.IsAlive();
     public bool ShouldShowButtonFor(PlayerControl target) => target.IsAlive();
@@ -94,39 +99,50 @@ public sealed class Swapper : RoleBase, IMeetingButton
     {
         reason = string.Empty;
 
-        if (Targets.Contains(target.PlayerId))
+        if (Targets.Remove(target.PlayerId))
         {
-            reason = GetString("TargetAlreadySwapped");
-            return false;
-        }
-        if (Targets.Count == 2)
-        {
-            reason = GetString("SwapUsed");
-            return false;
-        }
-        if (SwapLimit < 1)
-        {
-            reason = GetString("SwapperSwapMax");
-            return false;
-        }
+            string Name = target.GetRealName();
 
-        string Name = target.GetRealName();
+            Logger.Info($"{Player.GetNameWithRole()} => Cancel Swap {target.GetNameWithRole()}({Targets.Count})", "Swapper");
 
-        Targets.Add(target.PlayerId);
-        Logger.Info($"{Player.GetNameWithRole()} => Swap {target.GetNameWithRole()}({Targets.Count})", "Swapper");
-        if (Targets.Count == 2)
-        {
             SendRpc();
-            SwapLimit--;
-        }
 
-        _ = new LateTask (() =>
+            _ = new LateTask (() =>
+            {
+                Utils.SendMessage(
+                    string.Format(GetString("SwapSkillCancelled"), Name),
+                    Player.PlayerId,
+                    Utils.ColorString(Utils.GetRoleColor(CustomRoles.Swapper), GetString("SwapVoteTitle")));
+            }, 0.8f, "Swap Skill Cancelled");
+        }
+        else
         {
-            Utils.SendMessage(
-                string.Format(GetString("SwapSkill"), Name),
-                Player.PlayerId,
-                Utils.ColorString(Utils.GetRoleColor(CustomRoles.Swapper), GetString("SwapVoteTitle")));
-        }, 0.8f, "Swap Skill");
+            if (Targets.Count == 2)
+            {
+                reason = GetString("SwapUsed");
+                return false;
+            }
+            if (SwapLimit < 1)
+            {
+                reason = GetString("SwapperSwapMax");
+                return false;
+            }
+
+            string Name2 = target.GetRealName();
+
+            Targets.Add(target.PlayerId);
+            Logger.Info($"{Player.GetNameWithRole()} => Swap {target.GetNameWithRole()}({Targets.Count})", "Swapper");
+            
+            SendRpc();
+
+            _ = new LateTask (() =>
+            {
+                Utils.SendMessage(
+                    string.Format(GetString("SwapSkill"), Name2),
+                    Player.PlayerId,
+                    Utils.ColorString(Utils.GetRoleColor(CustomRoles.Swapper), GetString("SwapVoteTitle")));
+            }, 0.8f, "Swap Skill");
+        }
 
         return true;
     }
@@ -187,17 +203,18 @@ public sealed class Swapper : RoleBase, IMeetingButton
         using var sender = CreateSender();
         sender.Writer.Write(Targets.Count);
         foreach (var target in Targets) sender.Writer.Write(target);
-        SetTargets();
+        RefreshTargets();
     }
     public override void ReceiveRPC(MessageReader reader)
     {
         Targets = new();
         var num = reader.ReadInt32();
         for (var i = 0; i < num; i++) Targets.Add(reader.ReadByte());
-        SetTargets();
+        RefreshTargets();
     }
-    private void SetTargets()
+    private void RefreshTargets()
     {
-        if (Targets.Count == 2) MeetingVoteManager.Instance?.SetSwappedPlayers(Targets[0], Targets[1], true);
+        if (Targets.Count == 2) MeetingVoteManager.Instance?.AddSwappedPlayers(Player.PlayerId, Targets[0], Targets[1], true);
+        else MeetingVoteManager.Instance?.RemoveSwappedPlayers(Player.PlayerId);
     }
 }

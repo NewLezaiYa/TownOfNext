@@ -1247,6 +1247,7 @@ SwapHelp: "指令格式：/sw [玩家编号]\n您可以在玩家的名字前看�
 SwapNull: "请选择一个在场的存活角色进行换票"
 SwapVote: "玩家【{0}】和【{1}】被换票师换票了"
 SwapSkill: "你选中了【{0}】"
+SwapSkillCancelled: "你取消了对【{0}】的换票"
 DSGuessMax: "您已达到每次会议猜测次数上限\n不能再猜测啦！"
 DoomsayerHintBlank: "无"
 DoomsayerSuspectRoles: "您调查的玩家的职业为以下职业中的一个：{0}"

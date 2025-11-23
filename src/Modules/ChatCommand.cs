@@ -5,11 +5,11 @@ using UnityEngine;
 
 namespace TONX.Modules;
 
-public class ChatCommand(List<string> keywords, CommandAccess access, Func<MessageControl, (MsgRecallMode, string)> command)
+public class ChatCommand(List<string> keywords, Func<CommandAccess> access, Func<MessageControl, (MsgRecallMode, string)> command)
 {
     public List<string> KeyWords { get; set; } = keywords;
 
-    public CommandAccess Access { get; set; } = access;
+    public Func<CommandAccess> Access { get; set; } = access;
 
     public Func<MessageControl, (MsgRecallMode, string)> Command { get; set; } = command;
 
@@ -19,26 +19,26 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
     {
         AllCommands = new()
         {
-            new(["dump"], CommandAccess.LocalMod, mc =>
+            new(["dump"], () => CommandAccess.LocalMod, mc =>
             {
                 Utils.DumpLog();
                 return (MsgRecallMode.Block, null);
             }),
-            new(["v", "ver", "version"], CommandAccess.LocalMod, mc =>
+            new(["v", "ver", "version"], () => CommandAccess.LocalMod, mc =>
             {
                 StringBuilder sb = new();
                 foreach (var kvp in Main.playerVersion.OrderBy(pair => pair.Key))
                     sb.Append($"{kvp.Key}:{Main.AllPlayerNames[kvp.Key]}:{kvp.Value.forkId}/{kvp.Value.version}({kvp.Value.tag})\n");
                 return (MsgRecallMode.Block, sb.ToString());
             }),
-            new(["win", "winner"], CommandAccess.All, mc =>
+            new(["win", "winner"], () => CommandAccess.All, mc =>
             {
                 string text = GetString("NoInfoExists");
                 if (Main.winnerNameList.Any())
                     text = "Winner: " + string.Join(",", Main.winnerNameList);
                 return (MsgRecallMode.Block, text);
             }),
-            new(["level"], CommandAccess.Host, mc =>
+            new(["level"], () => CommandAccess.Host, mc =>
             {
                 string text = GetString("Message.AllowLevelRange");
                 if (int.TryParse(mc.Args, out int level) && level is >= 1 and <= 999)
@@ -48,30 +48,30 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
                 }
                 return (MsgRecallMode.Block, text);
             }),
-            new(["l", "lastresult"], CommandAccess.All, mc =>
+            new(["l", "lastresult"], () => CommandAccess.All, mc =>
             {
                 Utils.ShowKillLog(mc.Player.PlayerId);
                 Utils.ShowLastResult(mc.Player.PlayerId);
                 return (MsgRecallMode.Block, null);
             }),
-            new(["rn", "rename"], CommandAccess.Host, mc =>
+            new(["rn", "rename"], () => CommandAccess.Host, mc =>
             {
                 string text = mc.Args.Length is > 10 or < 1 ? GetString("Message.AllowNameLength") : null;
                 if (text == null) Main.HostNickName = mc.Args;
                 return (MsgRecallMode.Block, text);
             }),
-            new(["role", "r"], CommandAccess.All, mc =>
+            new(["role", "r"], () => CommandAccess.All, mc =>
             {
                 SendRolesInfo(mc.Args, mc.Player.PlayerId);
                 return (MsgRecallMode.Block, null);
             }),
-            new(["hn", "hidename"], CommandAccess.Host, mc =>
+            new(["hn", "hidename"], () => CommandAccess.Host, mc =>
             {
                 Main.HideName.Value = mc.HasValidArgs ? mc.Args : Main.HideName.DefaultValue.ToString();
                 GameStartManagerPatch.HideName.text = Main.HideName.Value;
                 return (MsgRecallMode.Block, null);
             }),
-            new(["now", "n" ], CommandAccess.All, mc =>
+            new(["now", "n" ], () => CommandAccess.All, mc =>
             {
                 switch (mc.Args)
                 {
@@ -85,7 +85,7 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
                 }
                 return (MsgRecallMode.Block, null);
             }),
-            new(["dis", "disconnect"], CommandAccess.Host, mc =>
+            new(["dis", "disconnect"], () => CommandAccess.Host, mc =>
             {
                 switch (mc.Args)
                 {
@@ -103,17 +103,17 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
                 }
                 return (MsgRecallMode.Block, null);
             }),
-            new(["up", "specify"], CommandAccess.Host, mc =>
+            new(["up", "specify"], () => CommandAccess.Host, mc =>
             {
                 SpecifyRole(mc.Args, mc.Player.PlayerId);
                 return (MsgRecallMode.Block, null);
             }),
-            new(["h", "help"], CommandAccess.All, mc =>
+            new(["h", "help"], () => CommandAccess.All, mc =>
             {
                 Utils.ShowHelp(mc.Player.PlayerId);
                 return (MsgRecallMode.Block, null);
             }),
-            new(["m", "myrole"], CommandAccess.All, mc =>
+            new(["m", "myrole"], () => CommandAccess.All, mc =>
             {
                 string text = GetString("Message.CanNotUseInLobby");
                 if (GameStates.IsInGame)
@@ -125,13 +125,13 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
                 }
                 return (MsgRecallMode.Block, text);
             }),
-            new(["t", "template"], CommandAccess.LocalMod, mc =>
+            new(["t", "template"], () => CommandAccess.LocalMod, mc =>
             {
                 if (mc.HasValidArgs) TemplateManager.SendTemplate(mc.Args);
                 else Utils.AddChatMessage($"{GetString("ForExample")}:\nt test");
                 return (MsgRecallMode.Block, null);
             }),
-            new(["mw", "messagewait"], CommandAccess.Host, mc =>
+            new(["mw", "messagewait"], () => CommandAccess.Host, mc =>
             {
                 string text = $"{GetString("Message.MessageWaitHelp")}\n{GetString("ForExample")}:\nmw 3";
                 if (int.TryParse(mc.Args, out int sec))
@@ -141,7 +141,7 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
                 }
                 return (MsgRecallMode.Block, text);
             }),
-            new(["exile"], CommandAccess.Host, mc =>
+            new(["exile"], () => CommandAccess.Host, mc =>
             {
                 string text = GetString("Message.CanNotUseInLobby");
                 if (GameStates.IsInGame)
@@ -162,7 +162,7 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
                 }
                 return (MsgRecallMode.Block, text);
             }),
-            new(["kill"], CommandAccess.Host, mc =>
+            new(["kill"], () => CommandAccess.Host, mc =>
             {
                 string text = GetString("Message.CanNotUseInLobby");
                 if (GameStates.IsInGame)
@@ -181,7 +181,7 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
                 }
                 return (MsgRecallMode.Block, text);
             }),
-            new(["color", "colour"], Options.PlayerCanSetColor.GetBool() ? CommandAccess.All : CommandAccess.Host, mc =>
+            new(["color", "colour"], () => Options.PlayerCanSetColor.GetBool() ? CommandAccess.All : CommandAccess.Host, mc =>
             {
                 string text = GetString("Message.OnlyCanUseInLobby");
                 if (GameStates.IsLobby )
@@ -196,7 +196,7 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
                 }
                 return (MsgRecallMode.Block, text);
             }),
-            new(["qt", "quit"], CommandAccess.All, mc =>
+            new(["qt", "quit"], () => CommandAccess.All, mc =>
             {
                 string text = GetString("Message.CanNotUseByHost");
                 if (!mc.IsFromSelf)
@@ -216,24 +216,24 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
                 }
                 return (MsgRecallMode.Block, text);
             }),
-            new(["id"], CommandAccess.All, mc =>
+            new(["id"], () => CommandAccess.All, mc =>
             {
                 string text = GetFormatString(containDeadPlayers: true);
                 return (MsgRecallMode.Block, text);
             }),
-            new(["end", "endgame"], CommandAccess.Host, mc =>
+            new(["end", "endgame"], () => CommandAccess.Host, mc =>
             {
                 CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Draw);
                 GameManager.Instance.LogicFlow.CheckEndCriteria();
                 return (MsgRecallMode.Block, null);
             }),
-            new(["hy", "mt", "meeting"], CommandAccess.Host, mc =>
+            new(["hy", "mt", "meeting"], () => CommandAccess.Host, mc =>
             {
                 if (GameStates.IsMeeting) MeetingHud.Instance.RpcForceEndMeeting();
                 else mc.Player.NoCheckStartMeeting(null, true);
                 return (MsgRecallMode.Block, null);
             }),
-            new(["cosid"], CommandAccess.Host, mc =>
+            new(["cosid"], () => CommandAccess.Host, mc =>
             {
                 var of =mc.Player.Data.DefaultOutfit;
                 Logger.Warn($"ColorId: {of.ColorId}", "Get Cos Id");
@@ -244,7 +244,7 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
                 Logger.Warn($"NamePlateId: {of.NamePlateId}", "Get Cos Id");
                 return (MsgRecallMode.Block, null);
             }),
-            new(["ch"], CommandAccess.All, mc =>
+            new(["ch"], () => CommandAccess.All, mc =>
             {
                 RoleDraftManager.RoleDraftMsg(mc, out bool spam);
                 return (spam ? MsgRecallMode.Spam : MsgRecallMode.None, null);
