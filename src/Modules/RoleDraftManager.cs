@@ -40,20 +40,25 @@ public class RoleDraftManager
         Main.DevRole.Clear();
         OptRoleNum = new List<int> { ic, nc };
     }
-    public static void RoleDraftMsg(MessageControl mc, out bool spam)
+    public static bool OnSendMessage(MessageControl mc, out MsgRecallMode recallMode)
     {
-        spam = IsRoleDrafting();
-        if (!spam) return;
-        _ = new LateTask(() => { OnPlayerChooseRole(mc.Player.PlayerId, mc.Args); }, 0.2f, "RoleDraftSelectRole");
+        bool isCommand = RoleDraftMsg(mc.Player, mc.Args, out bool spam);
+        recallMode = spam ? MsgRecallMode.Spam : MsgRecallMode.None;
+        return isCommand;
+    }
+    public static bool RoleDraftMsg(PlayerControl pc, string msg, out bool spam)
+    {
+        spam = false;
+        if (!IsRoleDrafting() || pc == null || IsInvalidPlayer(pc.PlayerId)) return false;
+        spam = true;
+        var playerId = pc.PlayerId;
+        if (playerId != ArrangedPlayers[CurrentAssignIndex]) _ = new LateTask(() => { Utils.SendMessage(GetString("RoleDraft.DraftAssignWait"), playerId); }, 0.2f, "RoleDraftSelectRole");
+        else _ = new LateTask(() => { OnPlayerChooseRole(playerId, msg); }, 0.2f, "RoleDraftSelectRole");
+        return true;
     }
     public static void OnPlayerChooseRole(byte playerId, string id)
     {
         if (!IsRoleDrafting()) return;
-        if (playerId != ArrangedPlayers[CurrentAssignIndex])
-        {
-            Utils.SendMessage(GetString("RoleDraft.DraftAssignWait"), playerId);
-            return;
-        }
         int roleId = id switch
         {
             "1" when RandomRoles.Count > 0 => 0,

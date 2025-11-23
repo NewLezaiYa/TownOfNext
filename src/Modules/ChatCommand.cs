@@ -246,8 +246,8 @@ public class ChatCommand(List<string> keywords, Func<CommandAccess> access, Func
             }),
             new(["ch"], () => CommandAccess.All, mc =>
             {
-                RoleDraftManager.RoleDraftMsg(mc, out bool spam);
-                return (spam ? MsgRecallMode.Spam : MsgRecallMode.None, null);
+                RoleDraftManager.OnSendMessage(mc, out MsgRecallMode recallMode);
+                return (recallMode, null);
             })
         };
     }
