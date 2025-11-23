@@ -387,7 +387,7 @@ public enum CustomWinner
     BloodKnight = CustomRoles.BloodKnight,
     Succubus = CustomRoles.Succubus,
     PlagueDoctor = CustomRoles.PlagueDoctor,
-    Guesser = CustomRoles.Doomsayer
+    Doomsayer = CustomRoles.Doomsayer
 }
 public enum SuffixModes
 {

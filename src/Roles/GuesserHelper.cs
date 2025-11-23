@@ -37,13 +37,12 @@ public static class GuesserHelper
             spam = true;
             if (!AmongUsClient.Instance.AmHost) return true;
 
-            if (!MsgToPlayerAndRole(msg, out byte targetId, out CustomRoles role, out string error))
+            if (!MsgToPlayerAndRole(msg, out PlayerControl target, out CustomRoles role, out string error))
             {
                 Utils.SendMessage(error, pc.PlayerId);
                 return true;
             }
 
-            var target = Utils.GetPlayerById(targetId);
             if (!Guess(pc, target, role, out var reason))
                 Utils.SendMessage(reason, pc.PlayerId);
         }
@@ -126,17 +125,16 @@ public static class GuesserHelper
     }
     public static TextMeshPro nameText(this PlayerControl p) => p.cosmetics.nameText;
     public static TextMeshPro NameText(this PoolablePlayer p) => p.cosmetics.nameText;
-    private static bool MsgToPlayerAndRole(string msg, out byte id, out CustomRoles role, out string error)
+    private static bool MsgToPlayerAndRole(string msg, out PlayerControl target, out CustomRoles role, out string error)
     {
         error = string.Empty;
-        id = ChatCommand.GetPlayerIdFromMsg(ref msg, ref error, "GuessNull", "GuessMultipleColor");
         role = new();
 
         //判断选择的玩家是否合理
-        PlayerControl target = Utils.GetPlayerById(id);
+        target = Utils.MsgToPlayer(ref msg, out bool multiplePlayers);
         if (target == null || target.Data.IsDead)
         {
-            error = GetString("GuessNull");
+            error = multiplePlayers ? GetString("GuessMultipleColor") : GetString("GuessNull");
             return false;
         }
 

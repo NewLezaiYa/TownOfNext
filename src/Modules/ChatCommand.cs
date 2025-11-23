@@ -385,6 +385,18 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
         }
         return false;
     }
+    public static int GetColorByInputName(ref string msg)
+    {
+        foreach (var (id, color) in Utils.SeparatedColorNames)
+        {
+            if (msg.Contains(color))
+            {
+                msg = msg.Replace(color, string.Empty);
+                return id;
+            }
+        }
+        return -1;
+    }
     public static string GetFormatString(bool withRole = false, bool containDeadPlayers = false)
     {
         string text = GetString("PlayerIdList");
@@ -417,44 +429,6 @@ public class ChatCommand(List<string> keywords, CommandAccess access, Func<Messa
             }
         }
         return false;
-    }
-    public static int GetColorByInputName(ref string msg)
-    {
-        foreach (var (id, color) in Utils.SeparatedColorNames)
-        {
-            if (msg.Contains(color))
-            {
-                msg = msg.Replace(color, string.Empty);
-                return id;
-            }
-        }
-        return -1;
-    }
-    public static byte GetPlayerIdFromMsg(ref string msg, ref string error, string NullMsg, string MultipleMsg)
-    {
-        byte id = byte.MaxValue;
-
-        if (msg.StartsWith("/")) msg = msg.Replace("/", string.Empty);
-
-        Regex r = new("\\d+");
-        MatchCollection mc = r.Matches(msg);
-        string result = string.Empty;
-        mc.Do(m => result += m);
-
-        if (int.TryParse(result, out int num))
-        {
-            id = Convert.ToByte(num);
-        }
-        else
-        {
-            //并不是玩家编号，判断是否颜色
-            int color = GetColorByInputName(ref msg);
-            List<PlayerControl> list = Main.AllAlivePlayerControls.Where(p => p.cosmetics.ColorId == color).ToList();
-            if (list.Count < 1) error = GetString(NullMsg);
-            else if (list.Count > 1) error = GetString(MultipleMsg);
-            else id = list.FirstOrDefault().PlayerId;
-        }
-        return id;
     }
 }
 

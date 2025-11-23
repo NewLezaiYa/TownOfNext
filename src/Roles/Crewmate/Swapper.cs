@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using AmongUs.GameOptions;
 using Hazel;
 using TONX.Modules;
@@ -114,11 +113,11 @@ public sealed class Swapper : RoleBase, IMeetingButton
         string Name = target.GetRealName();
 
         Targets.Add(target.PlayerId);
+        Logger.Info($"{Player.GetNameWithRole()} => Swap {target.GetNameWithRole()}({Targets.Count})", "Swapper");
         if (Targets.Count == 2)
         {
             SendRpc();
             SwapLimit--;
-            Logger.Info($"{Player.GetNameWithRole()} => Swap {Utils.GetPlayerById(Targets[0])?.Data?.PlayerName} with {Utils.GetPlayerById(Targets[1])?.Data?.PlayerName}", "Swapper");
         }
 
         _ = new LateTask (() =>
@@ -159,28 +158,26 @@ public sealed class Swapper : RoleBase, IMeetingButton
             spam = true;
             if (!AmongUsClient.Instance.AmHost) return true;
 
-            if (!MsgToPlayer(msg, out byte targetId, out string error))
+            if (!MsgToPlayer(msg, out PlayerControl target, out string error))
             {
                 Utils.SendMessage(error, pc.PlayerId);
                 return true;
             }
 
-            var target = Utils.GetPlayerById(targetId);
             if (!Swap(target, out var reason))
                 Utils.SendMessage(reason, pc.PlayerId);
         }
         return true;
     }
-    private static bool MsgToPlayer(string msg, out byte id, out string error)
+    private static bool MsgToPlayer(string msg, out PlayerControl target, out string error)
     {
         error = string.Empty;
-        id = ChatCommand.GetPlayerIdFromMsg(ref msg, ref error, "SwapNull", "SwapMultipleColor");
 
         //判断选择的玩家是否合理
-        PlayerControl target = Utils.GetPlayerById(id);
+        target = Utils.MsgToPlayer(ref msg, out bool multiplePlayers);
         if (target == null || target.Data.IsDead)
         {
-            error = GetString("SwapNull");
+            error = multiplePlayers ? GetString("SwapMultipleColor") : GetString("SwapNull");
             return false;
         }
         return true;

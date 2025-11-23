@@ -210,7 +210,7 @@ public sealed class Doomsayer : RoleBase, IKiller, IMeetingButton, IGuesser
     {
         if (CorrectGuesses >= OptionGuessNumsToWin.GetInt())
         {
-            CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Guesser);
+            CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Doomsayer);
             CustomWinnerHolder.WinnerIds.Add(guesser.PlayerId);
         }
     }

@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using TONX.GameModes;
 using TONX.Modules;
 using TONX.Roles.AddOns.Crewmate;
 using TONX.Roles.AddOns.Impostor;
@@ -845,6 +844,32 @@ public static class Utils
             }
         }
         return !isHost && color == 18 ? byte.MaxValue : color is < 0 or > 18 ? byte.MaxValue : Convert.ToByte(color);
+    }
+    public static PlayerControl MsgToPlayer(ref string msg, out bool multiplePlayers)
+    {
+        multiplePlayers = false;
+        byte id = byte.MaxValue;
+
+        if (msg.StartsWith("/")) msg = msg.Replace("/", string.Empty);
+
+        Regex r = new("\\d+");
+        MatchCollection mc = r.Matches(msg);
+        string result = string.Empty;
+        mc.Do(m => result += m);
+
+        if (int.TryParse(result, out int num))
+        {
+            id = Convert.ToByte(num);
+        }
+        else
+        {
+            //并不是玩家编号，判断是否颜色
+            int color = ChatCommand.GetColorByInputName(ref msg);
+            List<PlayerControl> list = Main.AllPlayerControls.Where(p => p.cosmetics.ColorId == color).ToList();
+            if (list.Count == 1) id = list.FirstOrDefault().PlayerId;
+            else if (list.Count > 1) multiplePlayers = true;
+        }
+        return GetPlayerById(id);
     }
 
     public static void ShowHelpToClient(byte ID)

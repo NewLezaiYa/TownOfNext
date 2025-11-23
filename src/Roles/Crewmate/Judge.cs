@@ -1,5 +1,4 @@
 ﻿using AmongUs.GameOptions;
-using System.Text.RegularExpressions;
 using TONX.Modules;
 using TONX.Roles.Core.Interfaces;
 using UnityEngine;
@@ -152,28 +151,26 @@ public sealed class Judge : RoleBase, IMeetingButton
             spam = true;
             if (!AmongUsClient.Instance.AmHost) return true;
 
-            if (!MsgToPlayer(msg, out byte targetId, out string error))
+            if (!MsgToPlayer(msg, out PlayerControl target, out string error))
             {
                 Utils.SendMessage(error, pc.PlayerId);
                 return true;
             }
 
-            var target = Utils.GetPlayerById(targetId);
             if (!Trial(target, out var reason))
                 Utils.SendMessage(reason, pc.PlayerId);
         }
         return true;
     }
-    private static bool MsgToPlayer(string msg, out byte id, out string error)
+    private static bool MsgToPlayer(string msg, out PlayerControl target, out string error)
     {
         error = string.Empty;
-        id = ChatCommand.GetPlayerIdFromMsg(ref msg, ref error, "TrialNull", "TrialMultipleColor");
 
         //判断选择的玩家是否合理
-        PlayerControl target = Utils.GetPlayerById(id);
+        target = Utils.MsgToPlayer(ref msg, out bool multiplePlayers);
         if (target == null || target.Data.IsDead)
         {
-            error = GetString("TrialNull");
+            error = multiplePlayers ? GetString("TrialMultipleColor") : GetString("TrialNull");
             return false;
         }
         return true;
