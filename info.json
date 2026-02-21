@@ -1,10 +1,10 @@
 {
-  "version": "3.2.1",
+  "version": "4.0.0",
   "minVer": "latest",
   "creation": "1",
   "allowStart": "true",
 
-  "md5": "708d95bc6f6e12a1603b587d4a086534",
+  "md5": "e4d8cc7061156e80f2e8f981b7474994",
 
   "announcement": {
     "SChinese": "由于树懒服务器的更新，刷屏隐藏消息已不再需要。输入指令时请使用 /cmd ，例如 /bt => /cmd bt",
@@ -17,4 +17,5 @@
     "cos": "null"
   }
 }
+
 
