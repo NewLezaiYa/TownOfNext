@@ -1,0 +1,48 @@
+﻿#Number:100052
+#Title:TownOfNext v4.0.0
+#SubTitle:★★★★TO The Next★★★★
+#ShortTitle:★TONX v4.0.0
+#Date:2026-02-28T00:00:00Z
+#-----------------------------
+
+## Base
+- Base on AmongUs v17.1.0
+- Base on TOH v5.1.14
+
+## Warning
+- Due to the update of the server, the function of hiding messages is no longer necessary.
+- Role commands have been changed from starting with / to starting with /cmd.
+- For example: /bt => /cmd bt
+
+## What You Need to Know
+- We have refactored the code related to game modes.
+- Upcoming versions of TONX may contain numerous bugs. Please report any bugs you encounter promptly and include logs if possible.
+
+## Fix
+- Fixed incorrect cooldown for the Surveyor's ability
+- Fixed pets disappearing after a player is revived
+- Fixed the inability to select players via color input for certain role commands
+- Fixed duplicate display of mod usage count
+- Fixed incorrect language for some game setting options
+- Fixed the `/color` command failing under certain conditions
+- Fixed missing version mismatch warnings
+- Fixed RPC errors when players send messages as Gambler, Pelican, Seducer, or Challenger
+
+## Changing
+- The client now uses the in-game Admin Map to switch map styles instead of a separate button
+- Role Draft now is an independent game mode
+- Role commands start with /cmd
+
+## New Feature
+- Option: Enable vanilla Impostor team player count limit
+- Option: Roles using commands do not notify others after using skills
+- Option: Number of Options
+- Option：Drafting Time
+- Option: Neutral Roles Amount Limit Mode
+
+## New Role
+- Impostor: Evil Grenadier
+- Crewmate: Swapper
+- Crewmate: Criminologist
+- Crewmate: Justice
+- Neutral: Doomsayer
