@@ -610,6 +610,7 @@ public enum CustomRoles
     Messenger,
     Insider,
     EvilGrenadier,
+    Thief,
     //Crewmate(Vanilla)
     Scientist,
     GuardianAngel,
