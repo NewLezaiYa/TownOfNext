@@ -31,7 +31,6 @@ public sealed class Thief : RoleBase, IImpostor, IMeetingButton
         HasStolenAbility = false;
         StolenRole = CustomRoles.Crewmate;
         TrialLimit = 0;
-        ExcludeImpostors = OptionExcludeImpostors.GetBool();
         DarkenDuration = OptionDarkenDuration.GetFloat();
         DarkenTimer = DarkenDuration;
         DarkenedPlayers = null;
@@ -40,7 +39,6 @@ public sealed class Thief : RoleBase, IImpostor, IMeetingButton
 
     static OptionItem OptionKillCooldown;
     static OptionItem OptionCanVent;
-    static OptionItem OptionExcludeImpostors;
     static OptionItem OptionDarkenDuration;
     static OptionItem OptionTrialLimit;
 
@@ -48,10 +46,8 @@ public sealed class Thief : RoleBase, IImpostor, IMeetingButton
     {
         KillCooldown,
         CanVent,
-        ExcludeImpostors,
         DarkenDuration,
-        TrialLimit,
-        VoteStealCount
+        ThiefTrialLimit,
     }
 
     // 盗贼状态
@@ -59,7 +55,6 @@ public sealed class Thief : RoleBase, IImpostor, IMeetingButton
     private CustomRoles StolenRole;
 
     private int TrialLimit;
-    private bool ExcludeImpostors;
     private float DarkenDuration;
     private float DarkenTimer;
     private PlayerControl[] DarkenedPlayers;
@@ -70,10 +65,9 @@ public sealed class Thief : RoleBase, IImpostor, IMeetingButton
         OptionKillCooldown = FloatOptionItem.Create(RoleInfo, 10, OptionName.KillCooldown, new(0f, 60f, 1f), 15f, false)
             .SetValueFormat(OptionFormat.Seconds);
         OptionCanVent = BooleanOptionItem.Create(RoleInfo, 11, OptionName.CanVent, false, false);
-        OptionExcludeImpostors = BooleanOptionItem.Create(RoleInfo, 12, OptionName.ExcludeImpostors, true, false);
         OptionDarkenDuration = FloatOptionItem.Create(RoleInfo, 13, OptionName.DarkenDuration, new(0.5f, 10f, 0.5f), 3f, false)
             .SetValueFormat(OptionFormat.Seconds);
-        OptionTrialLimit = IntegerOptionItem.Create(RoleInfo, 14, OptionName.TrialLimit, new(1, 10, 1), 1, false)
+        OptionTrialLimit = IntegerOptionItem.Create(RoleInfo, 14, OptionName.ThiefTrialLimit, new(1, 10, 1), 1, false)
             .SetValueFormat(OptionFormat.Times);
     }
 

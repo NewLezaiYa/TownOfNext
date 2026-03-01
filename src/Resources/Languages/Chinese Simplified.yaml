@@ -175,6 +175,7 @@ Reach: "持枪"
 Charmed: "魅魔随从"
 Bait: "诱饵"
 Beartrap: "陷阱师"
+Thief: "盗贼"
 
 ## 附加职业作为前缀时 / Prefixes for Add-ons
 Prefix.Neptune: "海王"
@@ -342,6 +343,7 @@ PlagueDoctorInfo: "你看着病得不轻啊"
 SunnyboyInfo: "这个角色的建立究竟有什么意义"
 ShifterInfo: "职业没喽，职业回来喽"
 DoomsayerInfo: "猜测其他玩家的职业"
+ThiefInfo: "你的能力就是我的了！"
 
 ## 附加职业 / Add-ons Blurbs
 LoversInfo: "最重要的是，记得照顾好您的另一半"
@@ -484,6 +486,7 @@ PlagueDoctorInfoLong: "疫医的目标是感染所有活着的玩家。疫医首
 SunnyboyInfoLong: "阳光开朗大男孩可以通过生命面板查看他人的生命状态。阳光开朗大男孩在场时游戏不会因人数优势结束（例如内鬼人数大于船员或没有存活内鬼），游戏结束时若阳光开朗大男孩死亡，则阳光开朗大男孩跟随胜利阵营一起胜利。"
 ShifterInfoLong: "交换师可以通过对玩家点击击杀按钮进行职业交换，交换技能在下一轮会议结束后生效。请注意：交换师无法获胜。"
 DoomsayerInfoLong: "末日预言家可以通过对玩家点击击杀按钮获取提示，末日预言家需要正确猜测指定个数玩家的职业才能获胜。根据房主设置，猜测错误可能会自杀。\n猜测指令为：/cmd bt [玩家编号] [职业名]\n您可以在玩家名字前看到该玩家的编号，或者使用/cmd id指令查看所有玩家的编号。"
+ThiefInfoLong: "盗贼的第一次击杀会窃取受害者的职业能力。根据受害者的不同职业，盗贼可以获得不同的能力：\n★击杀法官：获得有限次数的审判能力（房主设置）\n★击杀隐匿者：获得房间致盲能力\n★击杀普通内鬼：变成变形者或幻影师\n盗贼的击杀冷却时间和是否能使用通风管取决于窃取的能力。"
 
 ## 附加职业 / Add-ons Descriptions
 LastImpostorInfoLong: "这个效果在内鬼仅剩一人时赋予该内鬼。使其击杀冷却缩短。"
@@ -1025,6 +1028,7 @@ EvilGrenadierSkillDuration: "闪光弹状态持续时间"
 EvilGrenadierSkillRange: "受闪光弹影响的范围"
 JusticeCanUseTimes: "使用次数限制"
 JusticeMeetingVotingTime: "大神官会议投票时间"
+ThiefTrialLimit: "窃取法官后的审判次数上限"
 
 # 随机出生点 / Random Spawn Locations
 Junction: "三岔路"
@@ -1305,6 +1309,11 @@ JusticeMeetingStart: "审判开始！所有玩家只能在【{0}】和【{1}】�
 JusticeMeetingInvalidVote: "特殊会议期间只能投票给被选中的玩家"
 JusticeMeetingForceExile: "玩家【{0}】已死亡，别无选择了，决定驱逐【{1}】"
 JusticeMeetingBanAbility: "正在进行特殊会议，只能对会议上被选中的玩家发动技能"
+ThiefStoleAbility: "您窃取了 {0} 的能力！"
+ThiefGotTrial: "获得了 {0} 次审判机会"
+ThiefGotDarken: "获得了房间致盲能力"
+ThiefGotShapeshift: "基础职业变为 {0}"
+ThiefNoAbility: "尚未窃取任何能力"
 
 # 信息 / Messages
 Message.SetToSeconds: "信息发送冷却时间为【{0}】秒"
