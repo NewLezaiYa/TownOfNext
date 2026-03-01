@@ -1029,6 +1029,7 @@ EvilGrenadierSkillRange: "受闪光弹影响的范围"
 JusticeCanUseTimes: "使用次数限制"
 JusticeMeetingVotingTime: "大神官会议投票时间"
 ThiefTrialLimit: "窃取法官后的审判次数上限"
+ThiefDarkenDuration: "窃取暗杀者后的致盲持续时间"
 
 # 随机出生点 / Random Spawn Locations
 Junction: "三岔路"

@@ -32,8 +32,8 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
     {
         HasStolenAbility = false;
         TrialLimit = 0;
-        DarkenDuration = OptionDarkenDuration.GetFloat();
-        DarkenTimer = DarkenDuration;
+        ThiefDarkenDuration = OptionDarkenDuration.GetFloat();
+        DarkenTimer = ThiefDarkenDuration;
         DarkenedPlayers = null;
 
         KillCooldown = OptionKillCooldown.GetFloat();
@@ -48,7 +48,7 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
 
     enum OptionName
     {
-        DarkenDuration,
+        ThiefDarkenDuration,
         ThiefTrialLimit,
     }
 
@@ -59,7 +59,7 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
     private static float KillCooldown;
     public static bool CanVent;
     private int TrialLimit;
-    private float DarkenDuration;
+    private float ThiefDarkenDuration;
     private float DarkenTimer;
     private PlayerControl[] DarkenedPlayers;
     private SystemTypes? DarkenedRoom = null;
@@ -70,7 +70,7 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
             .SetValueFormat(OptionFormat.Seconds);
         OptionCanVent = BooleanOptionItem.Create(RoleInfo, 11, GeneralOption.CanVent, false, false);
         OptionHasImpostorVision = BooleanOptionItem.Create(RoleInfo, 12, GeneralOption.ImpostorVision, false, false);
-        OptionDarkenDuration = FloatOptionItem.Create(RoleInfo, 13, OptionName.DarkenDuration, new(0.5f, 10f, 0.5f), 1f, false)
+        OptionDarkenDuration = FloatOptionItem.Create(RoleInfo, 13, OptionName.ThiefDarkenDuration, new(0.5f, 10f, 0.5f), 1f, false)
             .SetValueFormat(OptionFormat.Seconds);
         OptionTrialLimit = IntegerOptionItem.Create(RoleInfo, 14, OptionName.ThiefTrialLimit, new(1, 10, 1), 1, false)
             .SetValueFormat(OptionFormat.Times);
@@ -80,7 +80,7 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
     {
         HasStolenAbility = false;
         TrialLimit = OptionTrialLimit.GetInt();
-        DarkenTimer = DarkenDuration;
+        DarkenTimer = ThiefDarkenDuration;
         DarkenedPlayers = null;
     }
 
@@ -150,7 +150,7 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
                 break;
 
             case CustomRoles.Stealth:
-                // 窃取隐匿者的房间致盲能力
+                // 窃取暗杀者的房间致盲能力
                 Player.Notify(GetString("ThiefGotDarken"));
                 break;
 
@@ -159,10 +159,7 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
                 if (targetRole.IsImpostor() &&
                     targetRole.GetRoleInfo()?.BaseRoleType.Invoke() is RoleTypes.Impostor)
                 {
-                    var newBaseRole = IRandom.Instance.Next(0, 2) == 0 ? RoleTypes.Shapeshifter : RoleTypes.Phantom;
-                    // 这里只是记录，实际的基础职业变更需要在其他地方处理
-                    Player.Notify(string.Format(GetString("ThiefGotShapeshift"),
-                        newBaseRole == RoleTypes.Shapeshifter ? GetString("Shapeshifter") : GetString("Phantom")));
+                    _ = IRandom.Instance.Next(0, 2) == 0 ? RoleTypes.Shapeshifter : RoleTypes.Phantom;
                 }
                 break;
         }
@@ -280,7 +277,7 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
     {
         // 修复：添加网络状态检查
         if (!AmongUsClient.Instance.AmHost) return;
-        
+
         DarkenedRoom = roomType;
         using var sender = CreateSender();
         sender.Writer.Write((byte?)roomType ?? byte.MaxValue);
@@ -305,7 +302,7 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
     {
         // 修复：添加安全检查，避免在不适当的时候重置
         if (!GameStates.IsInGame) return;
-        
+
         if (DarkenedPlayers != null)
         {
             foreach (var player in DarkenedPlayers)
@@ -322,9 +319,9 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
             }
             DarkenedPlayers = null;
         }
-        DarkenTimer = DarkenDuration;
+        DarkenTimer = ThiefDarkenDuration;
         RpcDarken(null);
-        
+
         // 修复：只在玩家是盗贼时通知角色
         if (Player != null && Player.IsAlive())
         {
@@ -332,11 +329,11 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
         }
     }
 
-    public override void OnFixedUpdate(PlayerControl player) 
-    { 
+    public override void OnFixedUpdate(PlayerControl player)
+    {
         // 修复：添加安全检查，避免空引用
         if (!GameStates.IsInGame || Player == null || !Player.IsAlive()) return;
-        
+
         // 修复：优化黑暗效果逻辑，减少不必要的计算
         if (HasStolenAbility && StolenRole == CustomRoles.Stealth && DarkenedRoom.HasValue)
         {
@@ -351,15 +348,15 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
     {
         // 修复：添加安全检查
         if (!GameStates.IsMeeting) return;
-        
+
         // 会议开始时重置隐匿者能力
         if (DarkenedPlayers != null)
         {
             ResetDarkenState();
         }
-        
+
         // 修复：确保所有状态正确重置
-        DarkenTimer = DarkenDuration;
+        DarkenTimer = ThiefDarkenDuration;
         DarkenedRoom = null;
     }
 
@@ -384,7 +381,7 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
         var suffix = "";
         if (HasStolenAbility)
         {
-            // 如果是隐匿者能力且正在致盲
+            // 如果是暗杀者能力且正在致盲
             if (StolenRole == CustomRoles.Stealth && DarkenedRoom.HasValue)
             {
                 suffix += string.Format(GetString("StealthDarkened"),
