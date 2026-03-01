@@ -610,7 +610,6 @@ public enum CustomRoles
     Messenger,
     Insider,
     EvilGrenadier,
-    Thief,
     //Crewmate(Vanilla)
     Scientist,
     GuardianAngel,
@@ -681,6 +680,7 @@ public enum CustomRoles
     SchrodingerCat,
     Shifter,
     Doomsayer,
+    Thief,
 
     //SoloKombat
     KB_Normal = 400,

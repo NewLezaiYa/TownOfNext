@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace TONX.Roles.Neutral;
 
-public sealed class Thief : RoleBase, IImpostor, IMeetingButton
+public sealed class Thief : RoleBase, IKiller, IMeetingButton
 {
     public static readonly SimpleRoleInfo RoleInfo =
         SimpleRoleInfo.Create(
@@ -15,37 +15,39 @@ public sealed class Thief : RoleBase, IImpostor, IMeetingButton
             CustomRoles.Thief,
             () => RoleTypes.Impostor,
             CustomRoleTypes.Neutral,
-            5600,
+            50800,
             SetupOptionItem,
             "th|盗贼|小偷",
             "#8b0000",
-            introSound: () => GetIntroSound(RoleTypes.Shapeshifter)
+            true,
+            countType: CountTypes.Thief
         );
 
     public Thief(PlayerControl player)
-        : base(
-            RoleInfo,
-            player
-        )
+    : base(
+        RoleInfo,
+        player,
+        () => HasTask.False
+    )
     {
         HasStolenAbility = false;
-        StolenRole = CustomRoles.Crewmate;
         TrialLimit = 0;
         DarkenDuration = OptionDarkenDuration.GetFloat();
         DarkenTimer = DarkenDuration;
         DarkenedPlayers = null;
-        CustomRoleManager.OnFixedUpdateOthers.Add(OnFixedUpdateOthers);
+
+        KillCooldown = OptionKillCooldown.GetFloat();
+        CanVent = OptionCanVent.GetBool();
     }
 
     static OptionItem OptionKillCooldown;
     static OptionItem OptionCanVent;
+    static OptionItem OptionHasImpostorVision;
     static OptionItem OptionDarkenDuration;
     static OptionItem OptionTrialLimit;
 
     enum OptionName
     {
-        KillCooldown,
-        CanVent,
         DarkenDuration,
         ThiefTrialLimit,
     }
@@ -54,6 +56,8 @@ public sealed class Thief : RoleBase, IImpostor, IMeetingButton
     private bool HasStolenAbility;
     private CustomRoles StolenRole;
 
+    private static float KillCooldown;
+    public static bool CanVent;
     private int TrialLimit;
     private float DarkenDuration;
     private float DarkenTimer;
@@ -62,10 +66,11 @@ public sealed class Thief : RoleBase, IImpostor, IMeetingButton
 
     private static void SetupOptionItem()
     {
-        OptionKillCooldown = FloatOptionItem.Create(RoleInfo, 10, OptionName.KillCooldown, new(0f, 60f, 1f), 15f, false)
+        OptionKillCooldown = FloatOptionItem.Create(RoleInfo, 10, GeneralOption.KillCooldown, new(0f, 60f, 1f), 25f, false)
             .SetValueFormat(OptionFormat.Seconds);
-        OptionCanVent = BooleanOptionItem.Create(RoleInfo, 11, OptionName.CanVent, false, false);
-        OptionDarkenDuration = FloatOptionItem.Create(RoleInfo, 13, OptionName.DarkenDuration, new(0.5f, 10f, 0.5f), 3f, false)
+        OptionCanVent = BooleanOptionItem.Create(RoleInfo, 11, GeneralOption.CanVent, false, false);
+        OptionHasImpostorVision = BooleanOptionItem.Create(RoleInfo, 12, GeneralOption.ImpostorVision, false, false);
+        OptionDarkenDuration = FloatOptionItem.Create(RoleInfo, 13, OptionName.DarkenDuration, new(0.5f, 10f, 0.5f), 1f, false)
             .SetValueFormat(OptionFormat.Seconds);
         OptionTrialLimit = IntegerOptionItem.Create(RoleInfo, 14, OptionName.ThiefTrialLimit, new(1, 10, 1), 1, false)
             .SetValueFormat(OptionFormat.Times);
@@ -74,13 +79,13 @@ public sealed class Thief : RoleBase, IImpostor, IMeetingButton
     public override void Add()
     {
         HasStolenAbility = false;
-        StolenRole = CustomRoles.Crewmate;
         TrialLimit = OptionTrialLimit.GetInt();
         DarkenTimer = DarkenDuration;
         DarkenedPlayers = null;
     }
 
-    public float CalculateKillCooldown() => OptionKillCooldown.GetFloat();
+    public float CalculateKillCooldown() => KillCooldown;
+    public override void ApplyGameOptions(IGameOptions opt) => opt.SetVision(OptionHasImpostorVision.GetBool());
     public bool CanUseSabotageButton() => true;
     public bool CanUseImpostorVentButton() => HasStolenAbility && OptionCanVent.GetBool() &&
         (StolenRole.GetRoleInfo()?.BaseRoleType.Invoke() is RoleTypes.Engineer or RoleTypes.Phantom or RoleTypes.Shapeshifter or RoleTypes.Viper);
@@ -222,22 +227,31 @@ public sealed class Thief : RoleBase, IImpostor, IMeetingButton
         string Name = target.GetRealName();
         TrialLimit--;
 
+        // 修复：简化LateTask嵌套，避免黑屏
+        var state = PlayerState.GetByPlayerId(target.PlayerId);
+        state.DeathReason = CustomDeathReason.Trialed;
+        target.SetRealKiller(Player);
+
+        // 使用更安全的方式处理死亡
         _ = new LateTask(() =>
         {
-            var state = PlayerState.GetByPlayerId(target.PlayerId);
-            state.DeathReason = CustomDeathReason.Trialed;
-            target.SetRealKiller(Player);
-            target.RpcSuicideWithAnime();
-
-            Utils.NotifyRoles(isForMeeting: true, NoCache: true);
-
-            _ = new LateTask(() =>
+            if (GameStates.IsInGame && target != null && !target.Data.IsDead)
             {
-                Utils.SendMessage(string.Format(GetString("TrialKill"), Name), 255,
-                    Utils.ColorString(Utils.GetRoleColor(CustomRoles.Judge), GetString("TrialKillTitle")), false, true, Name);
-            }, 0.6f, "Trial Kill");
+                target.RpcExileV2();
+                target.Data.IsDead = true;
+                target.Data.MarkDirty();
 
-        }, 0.2f, "Trial Kill");
+                // 延迟发送消息避免同步问题
+                _ = new LateTask(() =>
+                {
+                    if (GameStates.IsInGame)
+                    {
+                        Utils.SendMessage(string.Format(GetString("TrialKill"), Name), 255,
+                            Utils.ColorString(Utils.GetRoleColor(CustomRoles.Judge), GetString("TrialKillTitle")), false, true, Name);
+                    }
+                }, 0.3f, "Trial Message");
+            }
+        }, 0.1f, "Trial Execution");
 
         return true;
     }
@@ -264,6 +278,9 @@ public sealed class Thief : RoleBase, IImpostor, IMeetingButton
 
     private void RpcDarken(SystemTypes? roomType)
     {
+        // 修复：添加网络状态检查
+        if (!AmongUsClient.Instance.AmHost) return;
+        
         DarkenedRoom = roomType;
         using var sender = CreateSender();
         sender.Writer.Write((byte?)roomType ?? byte.MaxValue);
@@ -271,53 +288,79 @@ public sealed class Thief : RoleBase, IImpostor, IMeetingButton
 
     public override void ReceiveRPC(MessageReader reader)
     {
-        var roomId = reader.ReadByte();
-        DarkenedRoom = roomId == byte.MaxValue ? null : (SystemTypes)roomId;
+        // 修复：添加异常处理
+        try
+        {
+            var roomId = reader.ReadByte();
+            DarkenedRoom = roomId == byte.MaxValue ? null : (SystemTypes)roomId;
+        }
+        catch (Exception ex)
+        {
+            Logger.Warn($"Thief.ReceiveRPC error: {ex.Message}", "Thief");
+            DarkenedRoom = null;
+        }
     }
 
     private void ResetDarkenState()
     {
+        // 修复：添加安全检查，避免在不适当的时候重置
+        if (!GameStates.IsInGame) return;
+        
         if (DarkenedPlayers != null)
         {
             foreach (var player in DarkenedPlayers)
             {
-                PlayerState.GetByPlayerId(player.PlayerId).IsBlackOut = false;
-                player.MarkDirtySettings();
+                if (player != null && !player.Data.IsDead)
+                {
+                    var state = PlayerState.GetByPlayerId(player.PlayerId);
+                    if (state != null)
+                    {
+                        state.IsBlackOut = false;
+                    }
+                    player.MarkDirtySettings();
+                }
             }
             DarkenedPlayers = null;
         }
         DarkenTimer = DarkenDuration;
         RpcDarken(null);
-        Utils.NotifyRoles(SpecifySeer: Player);
-    }
-
-    // 固定更新处理各种能力
-    public static void OnFixedUpdateOthers(PlayerControl player)
-    {
-        if (player == null || !player.Is(CustomRoles.Thief)) return;
-
-        var thief = player.GetRoleClass() as Thief;
-        if (thief == null) return;
-
-        // 处理隐匿者能力的定时器
-        if (thief.DarkenedPlayers != null)
+        
+        // 修复：只在玩家是盗贼时通知角色
+        if (Player != null && Player.IsAlive())
         {
-            thief.DarkenTimer -= Time.fixedDeltaTime;
-            if (thief.DarkenTimer <= 0)
-            {
-                thief.ResetDarkenState();
-            }
+            Utils.NotifyRoles(SpecifySeer: Player);
         }
     }
 
-    public override void OnFixedUpdate(PlayerControl player) { }
+    public override void OnFixedUpdate(PlayerControl player) 
+    { 
+        // 修复：添加安全检查，避免空引用
+        if (!GameStates.IsInGame || Player == null || !Player.IsAlive()) return;
+        
+        // 修复：优化黑暗效果逻辑，减少不必要的计算
+        if (HasStolenAbility && StolenRole == CustomRoles.Stealth && DarkenedRoom.HasValue)
+        {
+            DarkenTimer -= Time.fixedDeltaTime;
+            if (DarkenTimer <= 0f)
+            {
+                ResetDarkenState();
+            }
+        }
+    }
     public override void OnStartMeeting()
     {
+        // 修复：添加安全检查
+        if (!GameStates.IsMeeting) return;
+        
         // 会议开始时重置隐匿者能力
         if (DarkenedPlayers != null)
         {
             ResetDarkenState();
         }
+        
+        // 修复：确保所有状态正确重置
+        DarkenTimer = DarkenDuration;
+        DarkenedRoom = null;
     }
 
     // 显示剩余能力次数
@@ -341,8 +384,6 @@ public sealed class Thief : RoleBase, IImpostor, IMeetingButton
         var suffix = "";
         if (HasStolenAbility)
         {
-            suffix = string.Format(GetString("ThiefAbilityStatus"), Utils.GetRoleName(StolenRole));
-
             // 如果是隐匿者能力且正在致盲
             if (StolenRole == CustomRoles.Stealth && DarkenedRoom.HasValue)
             {
@@ -369,7 +410,7 @@ public sealed class Thief : RoleBase, IImpostor, IMeetingButton
     // 会议按钮
     public string ButtonName { get; private set; } = "Judge";
     public bool ShouldShowButton() => HasStolenAbility && StolenRole == CustomRoles.Judge && Player.IsAlive();
-    public  bool ShouldShowButtonFor(PlayerControl target) => target.IsAlive();
+    public bool ShouldShowButtonFor(PlayerControl target) => target.IsAlive();
 
     public void OnClickButton(PlayerControl target)
     {
