@@ -32,9 +32,7 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
     {
         HasStolenAbility = false;
         TrialLimit = 0;
-        ThiefDarkenDuration = OptionDarkenDuration.GetFloat();
-        DarkenTimer = ThiefDarkenDuration;
-        DarkenedPlayers = null;
+        HasUsedStealThisRound = false;
 
         KillCooldown = OptionKillCooldown.GetFloat();
         CanVent = OptionCanVent.GetBool();
@@ -43,7 +41,6 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
     static OptionItem OptionKillCooldown;
     static OptionItem OptionCanVent;
     static OptionItem OptionHasImpostorVision;
-    static OptionItem OptionDarkenDuration;
     static OptionItem OptionTrialLimit;
 
     enum OptionName
@@ -55,23 +52,18 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
     // 盗贼状态
     private bool HasStolenAbility;
     private CustomRoles StolenRole;
+    private bool HasUsedStealThisRound;
 
     private static float KillCooldown;
     public static bool CanVent;
     private int TrialLimit;
-    private float ThiefDarkenDuration;
-    private float DarkenTimer;
-    private PlayerControl[] DarkenedPlayers;
-    private SystemTypes? DarkenedRoom = null;
 
     private static void SetupOptionItem()
     {
-        OptionKillCooldown = FloatOptionItem.Create(RoleInfo, 10, GeneralOption.KillCooldown, new(0f, 60f, 1f), 25f, false)
+        OptionKillCooldown = FloatOptionItem.Create(RoleInfo, 10, GeneralOption.KillCooldown, new(0f, 60f, 1f), 15f, false)
             .SetValueFormat(OptionFormat.Seconds);
         OptionCanVent = BooleanOptionItem.Create(RoleInfo, 11, GeneralOption.CanVent, false, false);
         OptionHasImpostorVision = BooleanOptionItem.Create(RoleInfo, 12, GeneralOption.ImpostorVision, false, false);
-        OptionDarkenDuration = FloatOptionItem.Create(RoleInfo, 13, OptionName.ThiefDarkenDuration, new(0.5f, 10f, 0.5f), 1f, false)
-            .SetValueFormat(OptionFormat.Seconds);
         OptionTrialLimit = IntegerOptionItem.Create(RoleInfo, 14, OptionName.ThiefTrialLimit, new(1, 10, 1), 1, false)
             .SetValueFormat(OptionFormat.Times);
     }
@@ -79,9 +71,7 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
     public override void Add()
     {
         HasStolenAbility = false;
-        TrialLimit = OptionTrialLimit.GetInt();
-        DarkenTimer = ThiefDarkenDuration;
-        DarkenedPlayers = null;
+        HasUsedStealThisRound = false;
     }
 
     public float CalculateKillCooldown() => KillCooldown;
@@ -92,8 +82,7 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
 
     public bool OnCheckMurderAsKiller(MurderInfo info)
     {
-        // 如果已经窃取过能力或者不是第一次击杀，则正常击杀
-        if (HasStolenAbility || !info.DoKill || info.IsSuicide || info.IsAccident)
+        if (!info.DoKill || info.IsSuicide || info.IsAccident)
         {
             return true;
         }
@@ -101,10 +90,19 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
         var target = info.AttemptTarget;
         var targetRole = target.GetCustomRole();
 
+        // 检查本轮是否已经盗取过职业
+        if (HasUsedStealThisRound)
+        {
+            Logger.Info($"盗贼 {Player.GetRealName()} 本轮已盗取过职业，直接击杀 {target.GetRealName()}", "Thief");
+            return true;
+        }
+
         // 检查目标是否是可以窃取能力的角色
         if (IsStealableRole(targetRole))
         {
+            // 窃取能力
             StealAbility(targetRole);
+            HasUsedStealThisRound = true;
             Logger.Info($"盗贼 {Player.GetRealName()} 窃取了 {target.GetRealName()} ({targetRole}) 的能力", "Thief");
 
             // 显示提示信息
@@ -118,14 +116,11 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
             return false;
         }
 
-        // 如果目标不可窃取能力，则正常击杀
         return true;
     }
 
-    // 判断是否可以窃取该角色的能力
     private bool IsStealableRole(CustomRoles role)
     {
-        // 不可窃取能力的角色列表
         var unstealableRoles = new HashSet<CustomRoles>
         {
             CustomRoles.Jester,
@@ -136,7 +131,6 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
         return !unstealableRoles.Contains(role);
     }
 
-    // 窃取能力的实现
     private void StealAbility(CustomRoles targetRole)
     {
         HasStolenAbility = true;
@@ -145,21 +139,14 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
         switch (targetRole)
         {
             case CustomRoles.Judge:
-                // 窃取法官的审判能力
                 Player.Notify(string.Format(GetString("ThiefGotTrial"), TrialLimit));
                 break;
 
-            case CustomRoles.Stealth:
-                // 窃取暗杀者的房间致盲能力
-                Player.Notify(GetString("ThiefGotDarken"));
-                break;
-
             default:
-                // 对于基础内鬼职业，变成变形者或幻影师
                 if (targetRole.IsImpostor() &&
                     targetRole.GetRoleInfo()?.BaseRoleType.Invoke() is RoleTypes.Impostor)
                 {
-                    _ = IRandom.Instance.Next(0, 2) == 0 ? RoleTypes.Shapeshifter : RoleTypes.Phantom;
+                    Player.Notify(string.Format(GetString("ThiefGotShapeshift"), Utils.GetRoleName(targetRole)));
                 }
                 break;
         }
@@ -224,31 +211,22 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
         string Name = target.GetRealName();
         TrialLimit--;
 
-        // 修复：简化LateTask嵌套，避免黑屏
-        var state = PlayerState.GetByPlayerId(target.PlayerId);
-        state.DeathReason = CustomDeathReason.Trialed;
-        target.SetRealKiller(Player);
-
-        // 使用更安全的方式处理死亡
         _ = new LateTask(() =>
         {
-            if (GameStates.IsInGame && target != null && !target.Data.IsDead)
-            {
-                target.RpcExileV2();
-                target.Data.IsDead = true;
-                target.Data.MarkDirty();
+            var state = PlayerState.GetByPlayerId(target.PlayerId);
+            state.DeathReason = CustomDeathReason.Trialed;
+            target.SetRealKiller(Player);
+            target.RpcSuicideWithAnime();
 
-                // 延迟发送消息避免同步问题
-                _ = new LateTask(() =>
-                {
-                    if (GameStates.IsInGame)
-                    {
-                        Utils.SendMessage(string.Format(GetString("TrialKill"), Name), 255,
-                            Utils.ColorString(Utils.GetRoleColor(CustomRoles.Judge), GetString("TrialKillTitle")), false, true, Name);
-                    }
-                }, 0.3f, "Trial Message");
-            }
-        }, 0.1f, "Trial Execution");
+            Utils.NotifyRoles(isForMeeting: true, NoCache: true);
+
+            _ = new LateTask(() =>
+            {
+                Utils.SendMessage(string.Format(GetString("TrialKill"), Name), 255,
+                    Utils.ColorString(Utils.GetRoleColor(CustomRoles.Judge), GetString("TrialKillTitle")), false, true, Name);
+            }, 0.6f, "Trial Kill");
+
+        }, 0.2f, "Trial Kill");
 
         return true;
     }
@@ -273,94 +251,13 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
         return true;
     }
 
-    private void RpcDarken(SystemTypes? roomType)
-    {
-        // 修复：添加网络状态检查
-        if (!AmongUsClient.Instance.AmHost) return;
-
-        DarkenedRoom = roomType;
-        using var sender = CreateSender();
-        sender.Writer.Write((byte?)roomType ?? byte.MaxValue);
-    }
-
-    public override void ReceiveRPC(MessageReader reader)
-    {
-        // 修复：添加异常处理
-        try
-        {
-            var roomId = reader.ReadByte();
-            DarkenedRoom = roomId == byte.MaxValue ? null : (SystemTypes)roomId;
-        }
-        catch (Exception ex)
-        {
-            Logger.Warn($"Thief.ReceiveRPC error: {ex.Message}", "Thief");
-            DarkenedRoom = null;
-        }
-    }
-
-    private void ResetDarkenState()
-    {
-        // 修复：添加安全检查，避免在不适当的时候重置
-        if (!GameStates.IsInGame) return;
-
-        if (DarkenedPlayers != null)
-        {
-            foreach (var player in DarkenedPlayers)
-            {
-                if (player != null && !player.Data.IsDead)
-                {
-                    var state = PlayerState.GetByPlayerId(player.PlayerId);
-                    if (state != null)
-                    {
-                        state.IsBlackOut = false;
-                    }
-                    player.MarkDirtySettings();
-                }
-            }
-            DarkenedPlayers = null;
-        }
-        DarkenTimer = ThiefDarkenDuration;
-        RpcDarken(null);
-
-        // 修复：只在玩家是盗贼时通知角色
-        if (Player != null && Player.IsAlive())
-        {
-            Utils.NotifyRoles(SpecifySeer: Player);
-        }
-    }
-
-    public override void OnFixedUpdate(PlayerControl player)
-    {
-        // 修复：添加安全检查，避免空引用
-        if (!GameStates.IsInGame || Player == null || !Player.IsAlive()) return;
-
-        // 修复：优化黑暗效果逻辑，减少不必要的计算
-        if (HasStolenAbility && StolenRole == CustomRoles.Stealth && DarkenedRoom.HasValue)
-        {
-            DarkenTimer -= Time.fixedDeltaTime;
-            if (DarkenTimer <= 0f)
-            {
-                ResetDarkenState();
-            }
-        }
-    }
     public override void OnStartMeeting()
     {
-        // 修复：添加安全检查
-        if (!GameStates.IsMeeting) return;
-
-        // 会议开始时重置隐匿者能力
-        if (DarkenedPlayers != null)
-        {
-            ResetDarkenState();
-        }
-
-        // 修复：确保所有状态正确重置
-        DarkenTimer = ThiefDarkenDuration;
-        DarkenedRoom = null;
+        HasStolenAbility = false;
+        TrialLimit = OptionTrialLimit.GetInt();
+        HasUsedStealThisRound = false;
     }
 
-    // 显示剩余能力次数
     public override string GetProgressText(bool comms = false)
     {
         if (!HasStolenAbility) return "";
@@ -372,21 +269,15 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
         };
     }
 
-    // 显示能力状态
     public override string GetSuffix(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false)
     {
         seen ??= seer;
         if (isForMeeting || seer != Player || seen != Player) return "";
 
-        var suffix = "";
+        string suffix;
         if (HasStolenAbility)
         {
-            // 如果是暗杀者能力且正在致盲
-            if (StolenRole == CustomRoles.Stealth && DarkenedRoom.HasValue)
-            {
-                suffix += string.Format(GetString("StealthDarkened"),
-                    DestroyableSingleton<TranslationController>.Instance.GetString(DarkenedRoom.Value));
-            }
+            suffix = string.Format(GetString("ThiefAbilityStatus"), Utils.GetRoleName(StolenRole));
         }
         else
         {
@@ -396,7 +287,6 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
         return suffix;
     }
 
-    // 处理聊天命令
     public override bool OnSendMessage(string msg, out MsgRecallMode recallMode)
     {
         bool isCommand = TrialMsg(Player, msg, out bool spam);
@@ -404,7 +294,6 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
         return isCommand;
     }
 
-    // 会议按钮
     public string ButtonName { get; private set; } = "Judge";
     public bool ShouldShowButton() => HasStolenAbility && StolenRole == CustomRoles.Judge && Player.IsAlive();
     public bool ShouldShowButtonFor(PlayerControl target) => target.IsAlive();
