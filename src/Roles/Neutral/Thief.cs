@@ -30,9 +30,10 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
         () => HasTask.False
     )
     {
-        HasStolenAbility = false;
         TrialLimit = 0;
+        HasStolenAbility = false;
         HasUsedStealThisRound = false;
+        StolenRole = CustomRoles.Crewmate;
 
         KillCooldown = OptionKillCooldown.GetFloat();
         CanVent = OptionCanVent.GetBool();
@@ -45,7 +46,6 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
 
     enum OptionName
     {
-        ThiefDarkenDuration,
         ThiefTrialLimit,
     }
 
@@ -72,6 +72,8 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
     {
         HasStolenAbility = false;
         HasUsedStealThisRound = false;
+        StolenRole = CustomRoles.Crewmate;
+        TrialLimit = OptionTrialLimit.GetInt();
     }
 
     public float CalculateKillCooldown() => KillCooldown;
@@ -105,12 +107,9 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
             HasUsedStealThisRound = true;
             Logger.Info($"盗贼 {Player.GetRealName()} 窃取了 {target.GetRealName()} ({targetRole}) 的能力", "Thief");
 
-            // 显示提示信息
             Player.Notify(string.Format(GetString("ThiefStoleAbility"), Utils.GetRoleName(targetRole)));
 
-            // 阻止击杀
             info.DoKill = false;
-            // 重置击杀冷却时间
             Player.ResetKillCooldown();
             Player.SetKillCooldownV2();
             return false;
@@ -121,14 +120,7 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
 
     private bool IsStealableRole(CustomRoles role)
     {
-        var unstealableRoles = new HashSet<CustomRoles>
-        {
-            CustomRoles.Jester,
-            CustomRoles.Innocent,
-            CustomRoles.Gangster,
-        };
-
-        return !unstealableRoles.Contains(role);
+        return role == CustomRoles.Judge;
     }
 
     private void StealAbility(CustomRoles targetRole)
@@ -139,6 +131,7 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
         switch (targetRole)
         {
             case CustomRoles.Judge:
+                TrialLimit = OptionTrialLimit.GetInt();
                 Player.Notify(string.Format(GetString("ThiefGotTrial"), TrialLimit));
                 break;
 
@@ -254,7 +247,6 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
     public override void OnStartMeeting()
     {
         HasStolenAbility = false;
-        TrialLimit = OptionTrialLimit.GetInt();
         HasUsedStealThisRound = false;
     }
 
