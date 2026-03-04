@@ -33,7 +33,7 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
         TrialLimit = 0;
         HasStolenAbility = false;
         HasUsedStealThisRound = false;
-        StolenRole = CustomRoles.Crewmate;
+        StolenRole = CustomRoles.NotAssigned;
 
         KillCooldown = OptionKillCooldown.GetFloat();
         CanVent = OptionCanVent.GetBool();
@@ -72,7 +72,7 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
     {
         HasStolenAbility = false;
         HasUsedStealThisRound = false;
-        StolenRole = CustomRoles.Crewmate;
+        StolenRole = CustomRoles.NotAssigned;
         TrialLimit = OptionTrialLimit.GetInt();
     }
 
