@@ -246,7 +246,6 @@ public sealed class Thief : RoleBase, IKiller, IMeetingButton
 
     public override void OnStartMeeting()
     {
-        HasStolenAbility = false;
         HasUsedStealThisRound = false;
     }
 
