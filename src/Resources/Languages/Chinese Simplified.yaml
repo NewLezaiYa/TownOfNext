@@ -1314,8 +1314,11 @@ JusticeMeetingBanAbility: "正在进行特殊会议，只能对会议上被选�
 ThiefStoleAbility: "您窃取了 {0} 的能力！"
 ThiefGotTrial: "获得了 {0} 次审判机会"
 ThiefGotShapeshift: "基础职业变为 {0}"
+ThiefGotGuesser: "获得了 {0} 的能力！剩余猜测次数：{1}"
 ThiefNoAbility: "尚未窃取任何能力"
-ThiefAbilityStatus: "当前能力: {0}"
+ThiefAbilityStatus: "当前能力：{0}"
+ThiefAlreadyStolen: "该目标已被窃取过，直接击杀！"
+ThiefCannotSteal: "{0} 无法被窃取，尝试再次使用技能将直接击杀！"
 
 # 信息 / Messages
 Message.SetToSeconds: "信息发送冷却时间为【{0}】秒"
