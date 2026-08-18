@@ -125,7 +125,7 @@ public class Criminologist : RoleBase, IMeetingButton
 
             if (HasExecutedThisMeeting || CurrentUsesThisMeeting <= 0)
                 btn.GetComponent<SpriteRenderer>().color = Color.gray;
-            else if (DeadPlayerChosen == pva.TargetPlayerId)
+            else if (DeadPlayerChosen == pva.PlayerId)
                 btn.GetComponent<SpriteRenderer>().color = Color.green;
             else
                 btn.GetComponent<SpriteRenderer>().color = Color.red;

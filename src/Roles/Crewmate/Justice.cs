@@ -155,7 +155,7 @@ public class Justice : RoleBase, IMeetingButton, IMeetingTimeAlterable
             var btn = pva?.transform?.FindChild("Custom Meeting Button")?.gameObject;
             if (!btn) continue;
 
-            if (SelectedPlayers.Contains(pva.TargetPlayerId))
+            if (SelectedPlayers.Contains(pva.PlayerId))
                 btn.GetComponent<SpriteRenderer>().color = Color.yellow;
             else
                 btn.GetComponent<SpriteRenderer>().color = Color.white;

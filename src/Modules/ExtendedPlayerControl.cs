@@ -587,7 +587,7 @@ static class ExtendedPlayerControl
             meetingHud.SetForegroundForDead();
         }
         PlayerVoteArea voteArea = MeetingHud.Instance.playerStates.First(
-            x => x.TargetPlayerId == pc.PlayerId
+            x => x.PlayerId == pc.PlayerId
         );
         if (voteArea == null) return;
         if (voteArea.DidVote) voteArea.UnsetVote();
@@ -598,9 +598,9 @@ static class ExtendedPlayerControl
         voteArea.XMark.transform.localScale = Vector3.one;
         foreach (var playerVoteArea in meetingHud.playerStates)
         {
-            if (playerVoteArea.VotedFor != pc.PlayerId) continue;
+            if (playerVoteArea.VotedForId != pc.PlayerId) continue;
             playerVoteArea.UnsetVote();
-            var voteAreaPlayer = Utils.GetPlayerById(playerVoteArea.TargetPlayerId);
+            var voteAreaPlayer = Utils.GetPlayerById(playerVoteArea.PlayerId);
             if (!voteAreaPlayer.AmOwner) continue;
             meetingHud.ClearVote();
         }

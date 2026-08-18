@@ -90,7 +90,7 @@ public sealed class Swapper : RoleBase, IMeetingButton
         {
             var btn = pva?.transform?.FindChild("Custom Meeting Button")?.gameObject;
             if (!btn) continue;
-            if (Targets.Contains(pva.TargetPlayerId)) btn.GetComponent<SpriteRenderer>().color = Color.green;
+            if (Targets.Contains(pva.PlayerId)) btn.GetComponent<SpriteRenderer>().color = Color.green;
             else btn.GetComponent<SpriteRenderer>().color = Targets.Count == 2 ? Color.gray : Color.red;
         }
     }

@@ -13,9 +13,9 @@ public class MeetingButtonManager
     {
         __instance.playerStates.ToList().ForEach(x => 
             {
-                var pc = Utils.GetPlayerById(x.TargetPlayerId);
+                var pc = Utils.GetPlayerById(x.PlayerId);
                 if ((forceAll
-                    || (!PlayerState.AllPlayerStates.TryGetValue(x.TargetPlayerId, out var ps))
+                    || (!PlayerState.AllPlayerStates.TryGetValue(x.PlayerId, out var ps))
                     || (pc != null && !meetingButton.ShouldShowButtonFor(pc)))
                     && x.transform.FindChild("Custom Meeting Button") != null)
                     UnityEngine.Object.Destroy(x.transform.FindChild("Custom Meeting Button").gameObject);
@@ -47,7 +47,7 @@ public class MeetingButtonManager
         if (Count == 0)
         {
             //若某玩家死亡则修复会议该玩家状态
-            __instance.playerStates.Where(x => (!PlayerState.AllPlayerStates.TryGetValue(x.TargetPlayerId, out var ps) || ps.IsDead) && !x.AmDead).Do(x => x.SetDead(x.DidReport, true));
+            __instance.playerStates.Where(x => (!PlayerState.AllPlayerStates.TryGetValue(x.PlayerId, out var ps) || ps.IsDead) && !x.AmDead).Do(x => x.SetDead(x.DidReport, true));
         }
 
         //本地玩家并没有会议技能按钮
@@ -86,7 +86,7 @@ public class MeetingButtonManager
         foreach (var pva in __instance.playerStates)
         {
             if (pva?.transform?.FindChild("Custom Meeting Button")?.gameObject != null || !pva.gameObject.active) continue;
-            var pc = Utils.GetPlayerById(pva.TargetPlayerId);
+            var pc = Utils.GetPlayerById(pva.PlayerId);
             if (pc == null || !meetingButton.ShouldShowButtonFor(pc)) continue;
             GameObject template = pva.Buttons.transform.Find("CancelButton").gameObject;
             GameObject targetBox = UnityEngine.Object.Instantiate(template, pva.transform);

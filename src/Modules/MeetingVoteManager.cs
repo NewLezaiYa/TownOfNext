@@ -33,7 +33,7 @@ public class MeetingVoteManager
     {
         foreach (var voteArea in meetingHud.playerStates)
         {
-            allVotes[voteArea.TargetPlayerId] = new(voteArea.TargetPlayerId);
+            allVotes[voteArea.PlayerId] = new(voteArea.PlayerId);
         }
     }
     /// <summary>
@@ -164,17 +164,17 @@ public class MeetingVoteManager
         var states = new List<MeetingHud.VoterState>();
         foreach (var voteArea in meetingHud.playerStates)
         {
-            var voteData = AllVotes.TryGetValue(voteArea.TargetPlayerId, out var value) ? value : null;
+            var voteData = AllVotes.TryGetValue(voteArea.PlayerId, out var value) ? value : null;
             if (voteData == null)
             {
-                logger.Warn($"{Utils.GetPlayerById(voteArea.TargetPlayerId).GetNameWithRole()} 没有投票数据");
+                logger.Warn($"{Utils.GetPlayerById(voteArea.PlayerId).GetNameWithRole()} 没有投票数据");
                 continue;
             }
             for (var i = 0; i < voteData.NumVotes; i++)
             {
                 states.Add(new()
                 {
-                    VoterId = voteArea.TargetPlayerId,
+                    VoterId = voteArea.PlayerId,
                     VotedForId = voteData.VotedFor,
                 });
             }
@@ -222,7 +222,7 @@ public class MeetingVoteManager
         Dictionary<byte, int> votes = new();
         foreach (var voteArea in meetingHud.playerStates)
         {
-            votes[voteArea.TargetPlayerId] = 0;
+            votes[voteArea.PlayerId] = 0;
         }
         votes[Skip] = 0;
         foreach (var vote in AllVotes.Values)

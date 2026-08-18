@@ -43,8 +43,8 @@ public static class MeetingHudPatch
             if (!data.ShouldAnimate) continue;
             if ((Utils.GetPlayerById(data.Target1)?.Data?.IsDead ?? true) || (Utils.GetPlayerById(data.Target2)?.Data?.IsDead ?? true)) continue;
 
-            var pva1 = __instance.playerStates.FirstOrDefault(p => p.TargetPlayerId == data.Target1);
-            var pva2 = __instance.playerStates.FirstOrDefault(p => p.TargetPlayerId == data.Target2);
+            var pva1 = __instance.playerStates.FirstOrDefault(p => p.PlayerId == data.Target1);
+            var pva2 = __instance.playerStates.FirstOrDefault(p => p.PlayerId == data.Target2);
             if (pva1 == null || pva2 == null) continue;
 
             var time = 1.5f / swappedPlayers.Select(p => p.ShouldAnimate).Count();
@@ -129,7 +129,7 @@ public static class MeetingHudPatch
             var myRole = PlayerControl.LocalPlayer.GetRoleClass();
             foreach (var pva in __instance.playerStates)
             {
-                var pc = Utils.GetPlayerById(pva.TargetPlayerId);
+                var pc = Utils.GetPlayerById(pva.PlayerId);
                 if (pc == null) continue;
                 var roleTextMeeting = Object.Instantiate(pva.NameText);
                 roleTextMeeting.transform.SetParent(pva.NameText.transform);
@@ -205,7 +205,7 @@ public static class MeetingHudPatch
                 var seer = PlayerControl.LocalPlayer;
                 var seerRole = seer.GetRoleClass();
 
-                var target = Utils.GetPlayerById(pva.TargetPlayerId);
+                var target = Utils.GetPlayerById(pva.PlayerId);
                 if (target == null) continue;
 
                 var sb = new StringBuilder();
@@ -269,7 +269,7 @@ public static class MeetingHudPatch
             {
                 __instance.playerStates.DoIf(x => x.HighlightedFX.enabled, x =>
                 {
-                    var player = Utils.GetPlayerById(x.TargetPlayerId);
+                    var player = Utils.GetPlayerById(x.PlayerId);
                     player.RpcExile();
                     var state = PlayerState.GetByPlayerId(player.PlayerId);
                     state.DeathReason = CustomDeathReason.Execution;
@@ -344,7 +344,7 @@ class JusticeMeetingHudPopulateButtonsPatch
         var num = -1;
         foreach (var pva in __instance.playerStates)
         {
-            if (!targets.Contains(pva.TargetPlayerId))
+            if (!targets.Contains(pva.PlayerId))
             {
                 pva.gameObject.SetActive(false);
                 continue;

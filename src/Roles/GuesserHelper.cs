@@ -385,7 +385,7 @@ public static class GuesserHelper
                     }
                     else
                     {
-                        if (!(__instance.state == MeetingHud.VoteStates.Voted || __instance.state == MeetingHud.VoteStates.NotVoted) || !PlayerControl.LocalPlayer.IsAlive()) return;
+                        if (!(__instance.state == MeetingHud.MeetingStates.Voted || __instance.state == MeetingHud.MeetingStates.NotVoted) || !PlayerControl.LocalPlayer.IsAlive()) return;
 
                         Logger.Msg($"Click: {pc.GetNameWithRole()} => {role}", "Guesser UI");
 
